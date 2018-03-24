@@ -5,16 +5,20 @@
  **/
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
-import { Button, Icon, Popover,message } from 'antd';
+import { Button, Icon, Popover,message,Breadcrumb  } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
+import TBomDetail from './TBomDetail';
 let seft
 let creatKeyWord;
 
 export default class TBomList extends Component {
     constructor( props ) {
         super( props )
-        this.state = {}
+        this.state = {
+            showDetal:false,
+            detailID:0
+        }
         this.url='/api/TProduct/product_model'
     }
 
@@ -41,13 +45,9 @@ export default class TBomList extends Component {
         )
 
         const Config = {
-            // type: "tableFeature",
-            // uProductUUID: 0,
-            // strKeyWord: "",
-            // WorkTypeList: [],
+
             url: '/api/TBom/bom',
-            // url: "http://demo.mes.top-link.me/service/Handler_Bom_V1.ashx",
-            // url:"http://localhost:52215/tmes.sc201.www/service/Handler_Bom_V1.ashx",
+
             columns: [
                 {
                     title: '序号',
@@ -117,19 +117,12 @@ export default class TBomList extends Component {
                         {
                             //详情页进行的跳转.
                             render: ( text, item ) => {
-                                var path = {
-                                    pathname: '/TBomDetail',
-                                    state: {
-                                        UUID: item.UUID,
-                                    },
-                                    query: {
-                                        UUID: item.UUID
-                                    },
-                                    // prePathname: '/Feature1-1-3',
-                                }
-                                return ( <span>
-                                    <Link to={path}><Icon type="profile" /></Link>
-                                </span> )
+                                return (
+                                    <a href="javascript:void 0;" onClick={this.toggleRender.bind(this,item)}>
+                                        {/* <Link to={path}><Icon type="profile" /></Link> */}
+                                        <Icon type="profile" />
+                                    </a>
+                                )
                             }
                         }
                     ]
@@ -341,23 +334,36 @@ export default class TBomList extends Component {
         this.feature = FeatureSetConfig( Config );
     }
 
+    toggleRender(record){
+        console.log("toggleRender",record);
+        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
+    }
+
+
     render() {
+        const {showDetal,detailID}=this.state;
         const {detail}=this.props;
         let Feature = this.feature;
-        if(detail){
-            return (
+        const BomDetail=(
+            <div>
                 <div>
-                    {detail}
+                    <Breadcrumb style={{display:"inline-block"}}>
+                        <Breadcrumb.Item>
+                            <a onClick={this.toggleRender.bind(this)} href="#">BOM管理</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>BOM单详情</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <span onClick={this.toggleRender.bind(this)} className="backup-button">
+                        <Icon type="rollback" />
+                    </span>
                 </div>
-            )
-        }
-        else{
-            return (
-                <div>
-                    <Feature/>
-                    {/* {detail} */}
-                </div>
-            )
-        }
+                <TBomDetail UUID={detailID}/>
+            </div>
+        );
+        return showDetal?BomDetail:<Feature/>;
+
+        // return(
+        //
+        // )
     }
 }

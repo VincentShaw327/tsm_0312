@@ -79,7 +79,6 @@ let UForm = React.createClass({
         this.props.form.resetFields()
         // this.props.resetIsplace();
     },
-
     hideModal: function() {
         this.props.hideForm()
         this.handleReset()

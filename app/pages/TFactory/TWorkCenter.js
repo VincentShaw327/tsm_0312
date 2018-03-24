@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
-import { Button, Icon,message } from 'antd';
+import { Button, Icon,message,Breadcrumb } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
-// import FeatureSetConfig from '../topBCommon/FeatureSetConfig';
-// import { CpTime } from '../topBCommon/utils/compareTime';
+import TWorkCenterDetail from './TWorkCenterDetail';
 
 //作用域
 let seft
@@ -16,7 +15,9 @@ export default class TWorkCenter extends Component {
         this.state = {
             server: props.server,
             siderInfo: props.siderInfo,
-            loading: false
+            loading: false,
+            showDetal:false,
+            detailID:0
         }
         this.url='/api/TFactory/workshop';
         seft = this;
@@ -96,15 +97,11 @@ export default class TWorkCenter extends Component {
                     title: '备注',
                     dataIndex: 'Note',
                     type: 'string'
-                },{
+                },/*{
                     title: '修改时间',
                     dataIndex: 'UpdateDateTime',
                     type: 'string',
-                    /*type: 'sort',
-                    sorter: ( a, b ) => {
-                        return CpTime( a, b )
-                    }*/
-                }, {
+                },*/ {
                     title: '操作',
                     dataIndex: 'Status',
                     width: '10%',
@@ -129,9 +126,12 @@ export default class TWorkCenter extends Component {
                                         UUID: item.UUID
                                     }
                                 }
-                                return ( <span>
-									<Link to={path}><Icon type="profile" /></Link>
-								</span> )
+                                return (
+                                    <a href="javascript:void 0;" onClick={this.toggleRender.bind(this,item)}>
+                                        {/* <Link to={path}><Icon type="profile" /></Link> */}
+                                        <Icon type="profile" />
+                                    </a>
+                                )
                             }
 						}
 					]
@@ -372,24 +372,31 @@ export default class TWorkCenter extends Component {
         this.feature = FeatureSetConfig( config );
     }
 
+    toggleRender(record){
+        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
+    }
+
     render() {
+        const {showDetal,detailID}=this.state;
         let Feature=this.feature;
         const {detail}=this.props;
-        // console.log('TWorkCenter children2',detail);
-        if(detail){
-            return (
+        const WorkCenterDetail=(
+            <div>
                 <div>
-                    {detail}
+                    <Breadcrumb style={{display:"inline-block"}}>
+                        <Breadcrumb.Item>
+                            <a onClick={this.toggleRender.bind(this)} href="#">BOM管理</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>BOM单详情</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <span onClick={this.toggleRender.bind(this)} className="backup-button">
+                        <Icon type="rollback" />
+                    </span>
                 </div>
-            )
-        }
-        else{
-            return (
-                <div>
-                    <Feature/>
-                    {/* {detail} */}
-                </div>
-            )
-        }
+                <TWorkCenterDetail workcenterUUID={detailID}/>
+            </div>
+        );
+        return showDetal?WorkCenterDetail:<Feature/>;
+
     }
 }

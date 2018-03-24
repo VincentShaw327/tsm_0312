@@ -17,10 +17,11 @@ export default class TUserAuthDetail extends Component {
 
     constructor( props ) {
         super( props )
-        const {location}=this.props
+        const {location,UUID}=this.props
         //组件外的指针.
         this.state = {
-            AuthorityGroupUUID: location.state.UUID,
+            // AuthorityGroupUUID: location.state.UUID,
+            AuthorityGroupUUID:UUID,
             // UserUUID:location.state.UUID,
             Name: '',
             ID: '',

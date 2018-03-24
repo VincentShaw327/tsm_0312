@@ -16,7 +16,7 @@ export default class TWorkCenterDetail extends Component {
     constructor( props ) {
         super( props )
         this.state = {
-            UUID: props.queryUUID,
+            UUID: props.workcenterUUID,
             title: props.title,
             bindedTablesize: 'small', //table尺寸大小
             selDevList: []

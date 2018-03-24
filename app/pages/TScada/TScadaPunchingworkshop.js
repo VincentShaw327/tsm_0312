@@ -5,14 +5,7 @@
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
-// import EquipThunk from '../topBCommon/EquipThunk/EquipThunk';  暂时设备组件列表不做分离， 影响效率
-/******引入自定义的依赖文件*******************/
-// import { DoPost } from '../topBCommon/utils/request/server';
-//样式文件
-// import "./style/Feature1-5.less";
-// import FeatureSetConfig from '../shawCommon/tableConfig';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-// import FeatureSetConfig from '../TCommon/topBCommon/FeatureSetConfig';
 import { TPostData } from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM3.jpg';
 var mqtt = require( 'mqtt' );
@@ -20,9 +13,7 @@ const { Header, Footer, Sider, Content } = Layout;
 
 /**   控制this作用域指针   **/
 let self
-
 // let _storage = window.localStorage;  //暂时不启用缓存加载方式， 后端未推送离线状态，不易监控
-
 var client //注塑车间消息订阅初始化变量
 
 export default class TScadaWorkShop_Auto2 extends Component {
@@ -251,9 +242,10 @@ export default class TScadaWorkShop_Auto2 extends Component {
         };
 
         /**
-        	从服务端获取工作中心记录数据,
-        	确定机台数量, 以及默认机台状态
+        从服务端获取工作中心记录数据,
+        确定机台数量, 以及默认机台状态
         **/
+
         TPostData( '/api/TProcess/workcenter', "ListActive", dat,  ( res )=> {
             var Ui_list = res.obj.objectlist || [];
             var totalcount = res.obj.objectlist.length;
@@ -531,23 +523,6 @@ export default class TScadaWorkShop_Auto2 extends Component {
     render() {
         const Dailychart = this.dailychart1;
         const Barchart = this.barChart;
-        const data = [
-            {
-                title: '普通一体式 1#',
-          },
-            {
-                title: '普通一体式 2#',
-          },
-            {
-                title: '普通一体式 3#',
-          },
-            {
-                title: '普通一体式 4#',
-          },
-        ];
-        function onChange( e ) {
-            console.log( `checked = ${e.target.checked}` );
-        }
         console.log( '工作中心列表:', this.state.aEquipList );
         const ListHeader = (
             <Row gutter={16} style={{fontSize:16}}>
@@ -582,88 +557,98 @@ export default class TScadaWorkShop_Auto2 extends Component {
                         <List
                             // style={{width:'75%'}}
                             header={ListHeader}
-                            footer={<div>Footer</div>}
+                            // footer={<div>Footer</div>}
+                            loading={this.state.loading}
                             bordered
                             dataSource={this.state.aEquipList}
-                            renderItem={item => (
-                                <List.Item>
-                                    <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
-                                        {/* <Col className="gutter-row" span={1}>
-                                        <div className="gutter-box">
-                                        <Checkbox onChange={onChange}/>
-                                    </div>
-                                        </Col> */}
-                                        <Col className="gutter-row" span={3}>
-                                            <div className="gutter-box">
-                                                {/* <List.Item.Meta
-                                                    avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
-                                                    title={<a href="https://ant.design">{item.title}</a>}
-                                                    description="这是松成自动装配设备"
-                                                /> */}
-                                                <img src={devicePic} width="85" />
-                                            </div>
-                                        </Col>
-                                        <Col className="gutter-row" span={5}>
-                                            <div className="gutter-box">
-                                                <p>{item.Name}</p>
-                                                <p>{item.ID}</p>
-                                            </div>
-                                        </Col>
-                                        <Col className="gutter-row" span={4}>
-                                            <div className="gutter-box">
-                                                <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div>
-                                                <div>产品:{item.task_name?item.task_name:'-'}</div>
-                                            </div>
-                                        </Col>
-                                        <Col className="gutter-row" span={3}>
-                                            <div className="gutter-box">
-                                                <span>{item.prod_count?item.prod_count:'-'}</span>
-                                            </div>
-                                        </Col>
-                                        {/* <Col className="gutter-row" span={3}>
-                                            <div className="gutter-box">产量:
+                            renderItem={item => {
+                                let stateObj={};
+                                if(item.task_progress &&item.task_progress >= 100)
+                                stateObj={text:"已完成",color:'blue'};
+                                    // stateObj.text="已完成";
+                                    // stateObj.text="已完成";
+                                else if(item.Status &&item.Status== 1)
+                                stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
+                                else if(item.Status &&item.Status== 2)
+                                stateObj={text:"报警",color:'#ffc069'};
+                                else
+                                stateObj={text:"待机",color:'#bfbfbf'};
+
+                                return(
+                                        <List.Item>
+                                            <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
+                                                <Col className="gutter-row" span={3}>
+                                                    <div className="gutter-box">
+                                                        <img src={devicePic} style={{width:"100%"}} />
+                                                    </div>
+                                                </Col>
+                                                <Col className="gutter-row" span={5}>
+                                                    <div className="gutter-box">
+                                                        <p>{item.Name}</p>
+                                                        <p>{item.ID}</p>
+                                                    </div>
+                                                </Col>
+                                                <Col className="gutter-row" span={4}>
+                                                    <div className="gutter-box">
+                                                        <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div>
+                                                        <div>产品:{item.task_name?item.task_name:'-'}</div>
+                                                    </div>
+                                                </Col>
+                                                <Col className="gutter-row" span={3}>
+                                                    <div className="gutter-box">
+                                                            <span>{item.prod_count?item.prod_count:'-'}</span>
+                                                    </div>
+                                                </Col>
+                                                {/* <Col className="gutter-row" span={3}>
+                                                <div className="gutter-box">产量:
                                                 <span>{item.task_no?item.task_no:'-'}</span>
-                                            </div>
-                                        </Col> */}
-                                        <Col className="gutter-row" span={3}>
-                                            <div className="gutter-box">
-                                                <span>{item.prod_rate?item.prod_rate:'-'}</span>
-                                            </div>
-                                        </Col>
-                                        <Col className="gutter-row" span={4}>
-                                            <div className="gutter-box">
-                                                <Progress
-                                                    // type="dashboard"
-                                                    // width={25}
-                                                    percent={parseInt(item.task_progress || 15)}
-                                                    strokeWidth={15}/>
-                                            </div>
-                                        </Col>
-                                        <Col className="gutter-row" span={2}>
-                                            <div className="gutter-box">
-                                                {
-                                                    parseInt(item.task_progress || 0) >= 100
-                                                    ? '已完成'
-                                                    : item.Status == '1'
-                                                        ? <Tag color="rgba(82, 196, 26, 0.84)" style={{marginRight: '0', fontSize: 'larger'}}>生产中</Tag>
-                                                        : item.Status == '2' ? <Tag color="#ffc069" style={{marginRight: '0', fontSize: 'larger'}}>告警</Tag>
-                                                        : <Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>
-                                                }
-                                                &nbsp;&nbsp;
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </List.Item>
-                                )}
+                                                </div>
+                                                </Col> */}
+                                                <Col className="gutter-row" span={3}>
+                                                    <div className="gutter-box">
+                                                        <span>{item.prod_rate?item.prod_rate:'-'}</span>
+                                                    </div>
+                                                </Col>
+                                                <Col className="gutter-row" span={4}>
+                                                    <div className="gutter-box">
+                                                        <Progress
+                                                            // type="dashboard"
+                                                            // width={25}
+                                                            percent={parseInt(item.task_progress || 15)}
+                                                            strokeWidth={15}/>
+                                                    </div>
+                                                </Col>
+                                                <Col className="gutter-row" span={2}>
+                                                    <Tag
+                                                        color={`${stateObj.color}`}
+                                                        style={{marginTop:30, fontSize: 'larger'}}>{stateObj.text}</Tag>
+                                                    {
+                                                        // let stateObj={};
+                                                        // parseInt(item.task_progress || 0) >= 100
+                                                        // ? stateObj={text："已完成",color:'blue'}
+                                                        // : item.Status == '1'
+                                                        // ? <Tag color="rgba(82, 196, 26, 0.84)" style={{marginRight: '0', fontSize: 'larger'}}>生产中</Tag>
+                                                        // : item.Status == '2' ? <Tag color="#ffc069" style={{marginRight: '0', fontSize: 'larger'}}>告警</Tag>
+                                                        //     : <Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>
+
+                                                        // (<Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>)
+                                                    }
+                                                    &nbsp;&nbsp;
+                                                </Col>
+                                            </Row>
+                                        </List.Item>
+                                    )
+                                }
+                            }
                             />
                     </div>
                   </Col>
                   <Col className="gutter-row" span={6}>
                     <div className="gutter-box">
-                        <Card title="状态统计" extra={<a href="#">More</a>} >
+                        <Card title="状态统计">
                             <Dailychart />
                         </Card>
-                        <Card title="时间统计" extra={<a href="#">More</a>} style={{marginTop:20}} >
+                        <Card title="时间统计"  style={{marginTop:20}}>
                             <Barchart />
                         </Card>
                     </div>

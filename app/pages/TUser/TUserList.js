@@ -4,26 +4,28 @@
  *添加人:shaw
  **/
 import React, { Component } from 'react'
-import { hashHistory, Link } from 'react-router'
-import { Button, Icon,Popover,message} from 'antd';
+import { hashHistory, Link } from 'react-router';
+import { Button, Icon,Popover,message,Breadcrumb} from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
 import MD5 from '../../components/TCommon/shawCommon/md5';
 import { TPostData,urlBase } from '../../utils/TAjax';
+import TUserDetails from './TUserDetails';
 
 let seft;
 let creatKeyWord;
-
 
 export default class TUserList extends Component {
 
     constructor( props ) {
         super( props )
-        this.state = {}
+        this.state = {
+            showDetal:false,
+            detailID:0
+        }
         seft = this;
     }
 
     componentWillMount(){
-
         const config = {
 
             type: 'tableFeature',
@@ -96,18 +98,14 @@ export default class TUserList extends Component {
                             havePopconfirm: true,
                             popText: '确定要删除此记录吗?'
                         }, {
-                                render: ( text, item ) => ( <span>
-                                	<Link to={{
-                                			// pathname: '/Feature8-30',
-                                			pathname: `/TUserDetails`,
-                                			// pathname: `/TUserDetails:${item.UUID}`,
-                                			state: {
-                                				UUID: item.UUID
-                                			}
-                                		}}>
-                                		<Icon type="profile" />
-                                	</Link>
-                                </span> )
+                                render: ( text, item ) =>{
+                                    return (
+                                        <a href="javascript:void 0;" onClick={this.toggleRender.bind(this,item)}>
+                                            {/* <Link to={path}><Icon type="profile" /></Link> */}
+                                            <Icon type="profile" />
+                                        </a>
+                                    )
+                                }
                             }
                     ]
                 }
@@ -325,21 +323,34 @@ export default class TUserList extends Component {
 
         };
         this.feature = FeatureSetConfig( config );
+    }
 
+    toggleRender(record){
+        console.log("toggleRender",record);
+        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
     }
 
     render() {
+        const {showDetal,detailID}=this.state;
         const {detail}=this.props;
-        let Feature=this.feature;
-        if(detail){
-            return (
-                <div>{detail}</div>
-            )
-        }
-        else{
-            return (
-                <div><Feature/></div>
-            )
-        }
+        let Feature = this.feature;
+        const UserDetail=(
+            <div>
+                <div>
+                    <Breadcrumb style={{display:"inline-block"}}>
+                        <Breadcrumb.Item>
+                            <a onClick={this.toggleRender.bind(this)} href="#">BOM管理</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>用户详情</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <span onClick={this.toggleRender.bind(this)} className="backup-button">
+                        <Icon type="rollback" />
+                    </span>
+                </div>
+                <TUserDetails UUID={detailID}/>
+            </div>
+        );
+
+        return  showDetal?UserDetail:<Feature/>
     }
 }

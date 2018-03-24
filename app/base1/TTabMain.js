@@ -35,6 +35,7 @@ import {
     TParameterScada,
     TParameterAnalysis,
     TLossTimeReport,
+    TStateTimeOverview,
     TOEEReport,
     TTechnicalSupport,
     TProductionReport,
@@ -52,6 +53,7 @@ export default class TTabMain extends React.Component {
             { title: '首页', key: 'THome', data: 'TMain' },
         ];
         this.state = {
+            // activeKey: '',
             activeKey: panes[ 0 ].key,
             panes,
         };
@@ -128,6 +130,9 @@ export default class TTabMain extends React.Component {
                   activeKey={this.state.activeKey}
                   type="editable-card"
                   onEdit={this.onEdit}
+                  tabBarExtraContent={
+                      (<Button  icon="delete">清除</Button>)
+                  }
                   >
                   {/* {this.state.panes.map(pane => <TabPane tab={pane.title} key={pane.key}>{pane.content}</TabPane>)} */}
                     {
@@ -214,6 +219,8 @@ export default class TTabMain extends React.Component {
                                 return <TabPane tab='参数分析' key={pane.key}><TParameterAnalysis/></TabPane>; break;
                           case "TLossTimeReport":
                                 return <TabPane tab='损失时间报表' key={pane.key}><TLossTimeReport/></TabPane>; break;
+                          case "TTimeStatusReport":
+                                return <TabPane tab='时间状态报表' key={pane.key}><TStateTimeOverview/></TabPane>; break;
                           case "TReportOEE_General":
                                 return <TabPane tab='OEE报表' key={pane.key}><TOEEReport/></TabPane>; break;
                           case "TProductionReport":

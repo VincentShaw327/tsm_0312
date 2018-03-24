@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactEcharts from 'echarts-for-react';
 
-export default class TimeLine extends Component {
+export default class statusOverview extends Component {
 
     constructor( props ) {
         super( props )
@@ -31,22 +31,15 @@ export default class TimeLine extends Component {
             },
             xAxis: {
                 type: 'value',
-                axisLabel: {
+                /*axisLabel: {
                     formatter: function ( value, index ) {
-                        // 格式化成月/日，只在第一个刻度显示年份
-                        /*var date = new Date(value);
-                        var texts = [(date.getMonth() + 1), date.getDate()];
-                        if (index === 0) {
-                            texts.unshift(date.getYear());
-                        }*/
-                        // return texts.join('/');
                         let t = Math.floor( value / 60 );
                         let min = value % 60;
                         if ( min < 10 ) min = '0' + min;
                         if ( t < 10 ) t = '0' + t;
                         return `${t}:${min}`;
                     }
-                }
+                }*/
             },
             yAxis: {
                 type: 'category',
@@ -58,56 +51,71 @@ export default class TimeLine extends Component {
                     name: '离线',
                     type: 'bar',
                     stack: '总量',
-                    label: {
+                    /*label: {
                         normal: {
                             show: true,
                             position: 'insideRight'
                         }
-                    },
-                    data: [ 482, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 482, 482, 482, 482 ],
+                    },*/
+                    data: [ 182, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 282, 122, 182, 212 ],
               },
                 {
                     name: '待机',
                     type: 'bar',
                     stack: '总量',
-                    label: {
+                    /*label: {
                         normal: {
                             show: true,
                             position: 'insideRight'
                         }
-                    },
-                    data: [ 120, 132 ]
+                    },*/
+                    data: [ 120, 132,254,234,34,34,52,24,152 ]
               },
                 {
                     name: '运行中',
                     type: 'bar',
                     stack: '总量',
-                    label: {
+                    /*label: {
                         normal: {
                             show: true,
                             position: 'insideRight'
                         }
-                    },
-                    data: [ 630, 680, 680, 680 ]
+                    },*/
+                    data: [ 630, 680, 680, 680,456,345,345,482 ]
               },
-                {
+              {
                     name: '报警',
                     type: 'bar',
                     stack: '总量',
-                    label: {
+                    /*label: {
                         normal: {
                             show: true,
                             position: 'insideRight'
                         }
-                    },
-                    data: []
-              }
+                    },*/
+                    data: [34,53,13,65,123,24,52,52,14,23]
+              },
+              {
+                  name: '离线',
+                  type: 'bar',
+                  stack: '总量',
+                  /*label: {
+                      normal: {
+                          show: true,
+                          position: 'insideRight'
+                      }
+                  },*/
+                  data: [ 82, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 282, 122, 182, 212 ],
+            },
           ]
         };
 
         return (
             <div>
-              这是时间轴
+              <ReactEcharts
+                  option={option1}
+                  style={{height:550}}
+                  className='react_for_echarts' />
              </div>
         )
     }

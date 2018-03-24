@@ -24,6 +24,8 @@ export default class APP extends Component {
       resultList: [],
       selectedRow: [],
       selectedRowKeys: [],
+      selectedProductID: -1,
+      lotListData:[],
       filteredInfo: null,
       sortedInfo: null,
       loading: false,
@@ -31,7 +33,6 @@ export default class APP extends Component {
       updateSubFromShow: false,
       schedulFormShow: false,
       schedulBSFromShow: false,
-      selectedProductID: -1,
       updateFromItem: {},
       updateSubFromItem: {},
       total: 0,
@@ -243,7 +244,8 @@ export default class APP extends Component {
   //
   dealConfigSubColumns = ( record, lists ) => {
     const self = this;
-    let lotListData = [];
+    // let lotListData = [];
+    let lotListData=this.state.lotListData;
     let columns = [];
     this.config.subcolumns.forEach( ( item ) => {
         let column = {

@@ -40,7 +40,7 @@ export default class MouldModel extends Component {
             //待处理
             uProductUUID: 0,
             //请求url
-            url: '/api/TMould/mould_model',
+            url: '/api/TMold/mold_model',
             // url: this.props.server.url+'Handler_MoldModel_V1.ashx',
             // url: 'http://demo.sc.mes.top-link.me/service/Handler_MoldModel_V1.ashx',
             //table表格是否是可勾选

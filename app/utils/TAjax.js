@@ -4,7 +4,8 @@ import { format } from 'upath';
 import { ENOPROTOOPT, EOPNOTSUPP } from 'constants';
 
 // let urlBase = 'http://localhost:8888';
-export  let urlBase = 'http://localhost:52383';
+export  let urlBase = 'http://localhost:9000';
+// export  let urlBase = 'http://demo.mes.top-link.me';
  // urlBase;
 
 function parseJSON(response) {
@@ -90,7 +91,10 @@ export function TPostData(url,op,obj,cb,err)
 
  .then((json)=>{
    cb(json);
- });
+ })
+ /*.then((err)=>{
+   cb(err);
+ })*/;
 //.catch((err)=>{
 //  err(err);
 //});

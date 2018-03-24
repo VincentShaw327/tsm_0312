@@ -5,9 +5,10 @@
  **/
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
-import { Button, Icon, message } from 'antd';
+import { Button, Icon, message,Breadcrumb } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
+import TUserAuthDetail from './TUserAuthDetail';
 
 let seft
 let creatKeyWord;
@@ -15,7 +16,10 @@ export default class TAuthGroupList extends Component {
 
     constructor( props ) {
         super( props )
-        this.state = {}
+        this.state = {
+            showDetal:false,
+            detailID:0
+        }
         seft = this;
     }
 
@@ -48,11 +52,6 @@ export default class TAuthGroupList extends Component {
                     dataIndex: 'Note',
                     type: 'string'
                 },
-                /* {
-                                    title: '描述',
-                                    dataIndex: 'Desc',
-                                    type: 'string'
-                                }, */
                 {
                     title: '修改时间',
                     dataIndex: 'UpdateDateTime',
@@ -76,16 +75,11 @@ export default class TAuthGroupList extends Component {
                         }, {
                             //详情页进行的跳转.
                             render: ( text, item ) => {
-                                var path = {
-                                    pathname: '/TUserAuthDetail',
-                                    state: {
-                                        UUID: item.UUID
-                                    }
-                                }
                                 return (
-                                    <span>
-                                        <Link to={path}><Icon type="profile" /></Link>
-                                    </span>
+                                    <a href="javascript:void 0;" onClick={this.toggleRender.bind(this,item)}>
+                                        {/* <Link to={path}><Icon type="profile" /></Link> */}
+                                        <Icon type="profile" />
+                                    </a>
                                 )
                             }
                         }
@@ -258,17 +252,32 @@ export default class TAuthGroupList extends Component {
 
     }
 
+    toggleRender(record){
+        // console.log("toggleRender",record);
+        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
+    }
+
     render() {
-        const { detail } = this.props;
+        const {showDetal,detailID}=this.state;
+        const {detail}=this.props;
         let Feature = this.feature;
-        if ( detail ) {
-            return (
-                <div>{detail}</div>
-            )
-        } else {
-            return (
-                <div><Feature/></div>
-            )
-        }
+        const AuthDetail=(
+            <div>
+                <div>
+                    <Breadcrumb style={{display:"inline-block"}}>
+                        <Breadcrumb.Item>
+                            <a onClick={this.toggleRender.bind(this)} href="#">BOM管理</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>权限组详情</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <span onClick={this.toggleRender.bind(this)} className="backup-button">
+                        <Icon type="rollback" />
+                    </span>
+                </div>
+                <TUserAuthDetail UUID={detailID}/>
+            </div>
+        );
+        return  showDetal?AuthDetail:<Feature/>;
+        // return  AuthDetail;
     }
 }

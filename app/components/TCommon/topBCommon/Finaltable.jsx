@@ -41,7 +41,7 @@ import RForm from './RetrieveForm';
 import Sefchsider from '../../components/sider/Sefchsider'
 import ReactSVG from 'react-svg'
 let self
-const client = connect('mqtt://iec.topstarltd.com:9011')
+// const client = connect('mqtt://iec.topstarltd.com:9011')
 // const client = connect('mqtt://ice.top-link.me:9011')
 
 const {Sider} = Layout

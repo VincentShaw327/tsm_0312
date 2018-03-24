@@ -29,7 +29,7 @@ export default class TUserDetails extends Component {
                 strKeyWord: ""
             },
             // UserUUID: this.props.queryUUID,
-            UserUUID:location.state.UUID,
+            UserUUID:this.props.UUID,
             Name: '',
             ID: '',
             Phone: '',

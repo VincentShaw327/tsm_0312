@@ -108,6 +108,7 @@ const TUserAuthDetail = ( location, cb ) => {
 }
 
 // console.log('TWorkCenterDetail',TWorkCenterDetail);
+// onEnter={isLogin}
 const routes = (
     <Router history={hashHistory}>
       <Route path="/" component={App1} >

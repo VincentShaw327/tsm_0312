@@ -7,7 +7,7 @@
  import { hashHistory, Link } from 'react-router'
  import { Button, Icon, Popover,message } from 'antd';
  import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
- import { TPostData } from '../../utils/TAjax';
+ import { TPostData,urlBase } from '../../utils/TAjax';
 let seft
 export default class ProductModel extends Component {
 
@@ -49,18 +49,17 @@ export default class ProductModel extends Component {
                     title: '图片',
                     dataIndex: 'Image',
                     render:(e,record)=>{
-                        // console.log('图片地址',e);
                         const content = (
                             <div>
-                              <img width="300"  src={"http://demo.sc.mes.top-link.me"+e}/>
+                              <img width="300"  src={urlBase+e}/>
                             </div>
-                          );
+                        );
                         return (
                             <Popover placement="right"  content={content} trigger="hover">
                               {/* <Button>Right</Button> */}
-                              <img height='50' src={"http://demo.sc.mes.top-link.me"+e}/>
+                              <img height='50' src={urlBase+e}/>
                             </Popover>
-                          )
+                        )
                     }
                 },
                 {
@@ -155,6 +154,7 @@ export default class ProductModel extends Component {
                      name: 'uploadImg',
                      label: '图片',
                      type: 'antUpload',
+                     url: '/api/tupload/do',
                      // url:this.props.server.url+'Handler_FileTrans_V1.ashx',
                 }
             ],

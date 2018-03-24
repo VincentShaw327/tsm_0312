@@ -24,6 +24,7 @@ export default class TBomDetail extends Component {
     constructor( props ) {
         super( props )
         this.state = {
+            UUID: props.UUID,
             bom: {},
             loading: false
         }

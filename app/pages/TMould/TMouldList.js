@@ -7,7 +7,7 @@ import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
 import { Button, Icon, Popover,message } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
+import { TPostData ,urlBase} from '../../utils/TAjax';
 let seft
 
 export default class DeviceList extends Component {
@@ -15,7 +15,7 @@ export default class DeviceList extends Component {
     constructor( props ) {
         super( props )
         this.state = {}
-        this.url = '/api/TMould/mould_model';
+        this.url = '/api/TMold/mold_model';
         seft = this;
     }
 
@@ -49,7 +49,7 @@ export default class DeviceList extends Component {
             //table类型
             type: 'tableFeature',
             //请求url
-            url: '/api/TMould/mould',
+            url: '/api/TMold/mold',
             // url: this.props.server.url + 'Handler_Mold_V1.ashx',
             //table表格是否是可勾选
             isSelection: false,
@@ -67,13 +67,13 @@ export default class DeviceList extends Component {
                         // console.log('图片地址',e);
                         const content = (
                             <div>
-                              <img width="300"  src={"http://demo.sc.mes.top-link.me"+e}/>
+                              <img width="300"  src={urlBase+e}/>
                             </div>
                         );
                         return (
                             <Popover placement="right"  content={content} trigger="hover">
                               {/* <Button>Right</Button> */}
-                              <img height='50' src={"http://demo.sc.mes.top-link.me"+e}/>
+                              <img height='50' src={urlBase+e}/>
                             </Popover>
                         )
                     }

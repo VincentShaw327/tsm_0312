@@ -12,7 +12,7 @@ import Immutable from 'immutable';
 import UForm from './UpdateForm';
 import CForm from './CreateForm';
 import RForm from './RetrieveForm';
-const client = connect( 'mqtt://iec.topstarltd.com:9011' );
+// const client = connect( 'mqtt://iec.topstarltd.com:9011' );
 // const client = connect('mqtt://ice.top-link.me:9011');
 
 let self
@@ -67,7 +67,7 @@ export default class APP extends Component {
 	}
 
 	componentWillUnmount() {
-		client.end() //关闭mqtt连接, 释放服务器资源
+		// client.end() //关闭mqtt连接, 释放服务器资源
 	}
 
 	renderFunc = {

@@ -5,7 +5,6 @@
  **/
 import { Upload, Icon, message } from 'antd';
 import React, { Component } from 'react';
-import { TPostData,urlBase } from '../../../utils/TAjax';
 // import { DoPost} from '../../server';
 
 
@@ -90,7 +89,7 @@ export default class Uploader extends Component{
                 listType="picture-card"
                 className="avatar-uploader"
                 showUploadList={false}
-                action={urlBase+Url}
+                action={"http://localhost:52383"+Url}
                 beforeUpload={beforeUpload}
                 onChange={this.handleChange}
             >

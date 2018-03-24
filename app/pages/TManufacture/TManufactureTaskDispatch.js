@@ -1,718 +1,458 @@
-/**
- *这是模具型号页
- *添加日期:2017.12
- *添加人:shaw
- **/
-/******引入ant或其他第三方依赖文件*******************/
-import React, { Component } from 'react'
-import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
-// import EquipThunk from '../topBCommon/EquipThunk/EquipThunk';  暂时设备组件列表不做分离， 影响效率
-/******引入自定义的依赖文件*******************/
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-// import PageTitle from '../TCommon/shawCommon/components/PageTitle';
-import StateBotton from '../../components/TCommon/shawCommon/components/stateBottom';
-import { TPostData } from '../../utils/TAjax';
-// const confirm = Modal.confirm
+import React, { Component } from 'react';
+import {Table, Button,Radio, Row, Col, Divider,Select,
+     List, Card, DatePicker,Input,message,Form,Switch } from 'antd';
+const Option = Select.Option;
+const FormItem = Form.Item;
 
-let seft
-// table配置对象
+import { TPostData, urlBase } from '../../utils/TAjax';
+import { CModal } from '../../components/TModal';
 
-export default class App extends Component {
+export default class TstateTimeOverview extends Component {
 
     constructor( props ) {
-        super( props );
+        super( props )
         this.state = {
-            server:this.props.server
-
+            title: props.title,
+            dispatchLotList:[],
+            lotListData:[],
+            ProModelList: [],
+            ProModelSList:[],
+            WorkCenterList:[],
+            updateFromItem:{},
+            dispatchLotState:'-1',
+            keyWord:'',
+            loading:true,
+            DModalShow:false,
+            bordered:false,
+            size:"small",
+            subTableSize:"default",
+            scroll:undefined
         }
-        seft = this;
+        this.url='/api/tmanufacture/manufacture';
     }
-    componentWillMount(){
-        const tableConfig = {
-            /**
-             *基础配置参数
-            *1.type:表格类型
-            *2.isSelection:table是否带勾选
-            *3.url:查询的url
-            *4.columns:table的表头参数
-            *5.CType:create创建modal的数据项
-            *6.UType:update更新modal的数据项
-            *7.RType:查询的数据项
-            * **/
-            //table类型
-            type: 'OrderExpandTable',
-            isSelection: false,
-            isExpand: false,
-            showBorder:false,
-            pageTitle:'生产派工',
-            uProductUUID: 0,
-            url: '/api/TManufacture/manufacture',
-            // url: this.props.server.url+'Handler_ProductCtrl_V1.ashx',
-            // url: 'http://dev.top-link.me/dev/Handler_Plproject_V1.ashx',
-            // url: 'http://demo.sc.mes.top-link.me/service/Handler_ProductCtrl_V1.ashx',
-            //
-            isSelection: false,
-            //table表格表头配置参数
-            columns: [
-                {
-                    title: '派工单号',
-                    dataIndex: 'lotJobID',
-                    key: 'lotJobID'
-                },{
-                    title: '产品名称',
-                    dataIndex: 'ProductModelName',
-                    key: 'BNum',
-                },/*{
-                    title: '产品编码',
-                    dataIndex: 'ProductModelID',
-                    key: 'ProductModelIDe',
-                },{
-                    title: '产品序列号',
-                    dataIndex: 'ProductModelSN',
-                    key: 'ProductModelSN'
-                },*/  {
-                    title: '工作中心',
-                    dataIndex: 'WorkstationName',
-                    key: 'WorkstationName',
-                },/* {
-                    title: '工作中心编码',
-                    dataIndex: 'WorkstationID',
-                    key: 'WorkstationName',
-                },*/{
-                  title: '计划产量',
-                  dataIndex: 'PlanNumber',
-                  type: 'sort'
-                },{
-                  title: '实际产量',
-                  dataIndex: 'FinishNumber',
-                  type: 'sort'
-                },{
-                  title: '次品数量',
-                  dataIndex: 'RejectNumber',
-                  type: 'sort'
-                },/*{
-                  title: '计划交期',
-                  dataIndex: 'PlanDeliverDateTime',
-                  type: 'string'
-                },
-                {
-                  title: '实际交期',
-                  dataIndex: 'DeliverDateTime',
-                  type: 'string'
-                },*/
-                {
-                  title: '计划开始',
-                  dataIndex: 'PlanStartDateTime',
-                  type: 'string'
-                },{
-                  title: '实际开始',
-                  dataIndex: 'StartDateTime',
-                  type: 'string'
-                },{
-                  title: '计划完成',
-                  dataIndex: 'PlanFinishDateTime',
-                  type: 'string'
-                },{
-                  title: '实际完成',
-                  dataIndex: 'FinishDateTime',
-                  type: 'string'
-                },/* {
-                    title: '更新时间',
-                    dataIndex: 'UpdateDateTime',
-                    key: 'UpdateDateTime',
-                },*/ {
-                    title: '工单状态',
-                    dataIndex: 'Status',
-                    key: 'Status',
-                    render: (e1, record) => {
-                        // console.log('工单状态',record);
-                        return <StateBotton stateType='workOrder' state = { record.Status }/>
-                    }
-                }, {
-                    title: '操作',
-                    dataIndex: 'uMachineUUID',
-                    type: 'operate', // 操作的类型必须为 operate
-                    multipleType: "dispatch",
-              }
-            ],
-            //嵌套table表格表头配置参数
-            subcolumns: [
-              {
-                  title: '批次名称....',
-                  dataIndex: 'BName',
-                  key: 'BName',
-              }, {
-                  title: 'BOM类型',
-                  dataIndex: 'materielType',
-                  key: 'materielType',
-              }, {
-                  title: 'BOM编号',
-                  dataIndex: 'BNum',
-                  key: 'BNum',
-              }, {
-                  title: '色粉档案',
-                  dataIndex: 'toner',
-                  key: 'toner',
-              }, {
-                  title: '用料信息',
-                  dataIndex: 'materiel',
-                  key: 'materiel',
-              }, {
-                  title: '计划数量',
-                  dataIndex: 'planQuantity',
-                  key: 'planQuantity',
-              }, {
-                  title: '所需人员',
-                  dataIndex: 'peopleNum',
-                  key: 'peopleNum',
-              }, {
-                  title: '任务总数',
-                  dataIndex: 'taskNum',
-                  key: 'taskNum',
-              }, {
-                  title: '操作',
-                  dataIndex: 'operation',
-                  type: 'operate',
-                  btns: [
-                      {
-                          text: '编辑',
-                          type: 'update'
-                  }, {
-                          text: '拆分',
-                          type: 'split'
-                  }, {
-                          text: '删除',
-                          type: 'delete',
-                          havePopconfirm: true,
-                          popText: '您确定要删除此订单吗?'
-                  }
-                ], // 可选
-                  /*render: () =>(
-                    <span className = "table-operation" >
-                      <a href = "#" > 编辑 </a>
-                      <span className = "ant-divider" ></span>
-                      <a href = "#" > 拆分 </a>
-                      <span className = "ant-divider" ></span>
-                      <a href = "#" >详情</a>
-                    </span>
-                    )*/
-              }
-            ],
-            /****配置创建和修改的modal弹框数据项	*/
-            //更新弹框数据项
-            UType: [
-              {
-                name: 'PlanDeliverDateTime',
-                label: '启动时间',
-                type: 'date',
-                placeholder: '请选择启动时间'
-              }
-            ],
 
-            USubType: [
-                {
-                    name: 'Number',
-                    label: '派工产量',
-                    type: 'string',
-                    placeholder: '请输入派工产量',
-                    rules: [{required: true,message: '请输入派工产量'}]
-                }, {
-                    name: 'WorkstationUUID',
-                    label: '工作中心',
-                    type: 'select',
-                    postJson: {
-                        postUrl: '/api/TManufacture/manufacture',
-                        method: 'ListActive',
-                        dat: {
-                            PageIndex: 0,
-                            PageSize: -1,
-                            TypeUUID: -1,
-                            KeyWord: ""
-                        }
-                    },
-                    options: [
-                        {
-                            text: "型号1",
-                            value: '1'
-                        },
-                        {
-                            text: "型号2",
-                            value: '2'
-                        },
-                        {
-                            text: "型号3",
-                            value: '3'
-                        }
-                    ],
-                    rules: [{required: true,message: '请选择工作中心'}]
-                }, {
-                    name: 'Date',
-                    label: '日期',
-                    type: 'RangePicker',
-                    placeholder: '请输入计划产量'
-                }
-            ],
-            //排程弹框数据项
-            SType: [
-              {
-                  name: 'Number',
-                  label: '排程产量',
-                  type: 'string',
-                  placeholder: '请输入订单编号',
-                  rules: [{
-                      required: true,
-                      min: 2,
-                      message: '用户名至少为 5 个字符'
-                    }]
-              }, {
-                  name: 'WorkstationUUID',
-                  label: '工作中心',
-                  type: 'select',
-                  postJson: {
-                      postUrl: '/api/TProcess/workcenter',
-                      method: 'ListActive',
-                      dat: {
-                          PageIndex: 0,
-                          PageSize: -1,
-                          TypeUUID: -1,
-                          KeyWord: ""
-                      }
-                  },
-                  options: [{
-                          text: "型号1",
-                          value: '1'
-                  },
-                      {
-                          text: "型号2",
-                          value: '2'
-                  },
-                      {
-                          text: "型号3",
-                          value: '3'
-                  }
-                ],
-                  rules: [{
-                      required: true,
-                      message: '请选择工作中心'
-                    }]
-              }, {
-                  name: 'MoldModelUUID',
-                  label: '模具型号',
-                  type: 'select',
-                  postJson: {
-                      // postUrl: this.props.server.url+'Handler_MoldModel_V1.ashx',
-                      postUrl: '/api/TMould/mould_model',
-                      method: 'ListActive',
-                      dat: {
-                          PageIndex: 0,
-                          PageSize: -1,
-                          KeyWord: ""
-                      }
-                  },
-                  options: [{
-                          text: "型号1",
-                          value: '1'
-                  },
-                      {
-                          text: "型号2",
-                          value: '2'
-                  },
-                      {
-                          text: "型号3",
-                          value: '3'
-                  }
-                ],
-                  rules: [{
-                      required: true,
-                      message: '请选择模具型号'
-                    }]
-              }, {
-                  name: 'Date',
-                  label: '日期',
-                  type: 'RangePicker',
-                  placeholder: '请输入计划产量'
-              }
-            ],
-            //批量排程弹框数据项
-            BSType: [
-              {
-                  name: 'WorkstationUUID',
-                  label: '工作中心',
-                  type: 'select',
-                  postJson: {
-                      postUrl: '/api/TProcess/workcenter',
-                      method: 'ListActive',
-                      dat: {
-                          PageIndex: 0,
-                          PageSize: -1,
-                          TypeUUID: -1,
-                          KeyWord: ""
-                      }
-                  },
-                  options: [
-                    {
-                        text: "型号1",
-                        value: '1'
-                    }, {
-                        text: "型号2",
-                        value: '2'
-                    }, {
-                        text: "型号3",
-                        value: '3'
-                    }
-                  ],
-                  rules: [{
-                      required: true,
-                      message: '请选择工作中心'
-                    }]
-              }, {
-                  name: 'taskNuber',
-                  label: '任务编号',
-                  type: 'multipleSelect',
-                  postJson: {
-                      postUrl: '/api/TManufacture/manufacture',
-                      method: 'ListLot',
-                      dat: {
-                          PageIndex: 0,
-                          PageSize: -1,
-                          ProductOrderUUID: -1, //生产订单UUID
-                          ProductModelUUID: -1, //产品UUID
-                          KeyWord: ""
-                      }
-                  },
-                  options: [
-                    {
-                        text: "型号1",
-                        value: '1'
-                    }, {
-                        text: "型号2",
-                        value: '2'
-                    }, {
-                        text: "型号3",
-                        value: '3'
-                    }
-                  ],
-                  rules: [
-                      {
-                          required: true,
-                          message: '请选择模具型号'
-                      }
-                  ]
-              }, {
-                  name: 'Number',
-                  label: '数量',
-                  type: 'string',
-                  placeholder: '请输入订单编号',
-                  rules: [
-                      {
-                        required: true,
-                        min: 2,
-                        message: '用户名至少为 5 个字符'
-                      }
-                  ]
-              }, {
-                  name: 'Date',
-                  label: '日期',
-                  type: 'RangePicker',
-                  placeholder: '请输入计划产量'
-              }
-            ],
-            // 可设置的查询字段
-            RType: [
-              {
-                  name: 'keyWord',
-                  label: '关键字',
-                  type: 'string',
-                  placeholder: '请输入点什么...'
-              },{
-                name: 'status',
-                label: '工单状态',
-                type: 'select',
-                defaultValue: '-1',
-                hasAllButtom: true,
-                width: 150,
-                options: [
-                  {
-                    key: 1,
-                    value: '0',
-                    text: '未派工'
-                  },
-                  {
-                    key: 2,
-                    value: '1',
-                    text: '已派工'
-                  },
-                  {
-                    key: 3,
-                    value: '2',
-                    text: '已完成'
-                  }
-                ]
-              }, {
-                  name: 'ProductModel',
-                  label: '产品型号',
-                  type: 'select',
-                  defaultValue: '-1',
-                  hasAllButtom: true,
-                  width: 150,
-                  postJson: {
-                      // postUrl: this.props.server.url+'Handler_ProductModel_V1.ashx',
-                      postUrl: '/api/TProduct/product_model',
-                      method: 'ListActive',
-                      dat: {
-                          PageIndex: 0,
-                          PageSize: -1,
-                          TypeUUID: -1,
-                          KeyWord: ""
-                      }
-                  },
-                  options: [
-                      {
-                          text: "型号1",
-                          value: '1'
-                      }, {
-                          text: "型号2",
-                          value: '2'
-                      }, {
-                          text: "型号3",
-                          value: '3'
-                      }
-                  ]
-              }
-            ],
-          // 初始化页面的数据 回调函数传入 items 列表
-            pageData: function ( num, callback ) {
-                var dat = {
-                    PageIndex: 0,
-                    PageSize: -1,
-                    LotUUID: -1, //生产订单UUID
-                    Status: -1, //生产调度单状态
-                    KeyWord: "" //模糊查询条件
-                }
-                // "ListJobTask"
-                TPostData(this.url, "ListLotJob", dat, function(res) {
-                    console.log("查询到工单列表:", res);
-                    var list = [],
-                        Ui_list = res.obj.objectlist || [],
-                        totalcount = res.obj.totalcount;
-                    Ui_list.forEach(function(item, index) {
-                        list.push({
-                            key: index,
-                            UUID: item.UUID, //加工订单UUID
-                            BomUUID:item.BomUUID,
-                            lotJobID:item.lotJobID?item.lotJobID:`#${index}`,
-                            FinishDateTime:item.FinishDateTime?item.FinishDateTime:'2018-03-12',
-                            FinishNumber:item.FinishNumber,
-                            MoldModelUUID:item.MoldModelUUID,
-                            PlanFinishDateTime:item.PlanFinishDateTime?item.PlanFinishDateTime:'2018-03-18',
-                            PlanNumber:item.PlanNumber,
-                            PlanStartDateTime:item.PlanStartDateTime?item.PlanStartDateTime:'2018-02-14',
-                            ProductModelID:item.ProductModelID,
-                            ProductModelName:item.ProductModelName,
-                            ProductModelSN:item.ProductModelSN,
-                            ProductModelUUID:item.ProductModelUUID,
-                            RejectNumber:item.RejectNumber,
-                            StartDateTime:item.StartDateTime?item.StartDateTime:'2018-02-14',
-                            Status:item.Status,
-                            UUID:item.UUID,
-                            UpdateDateTime:item.UpdateDateTime,
-                            WorkstationID:item.WorkstationID,
-                            WorkstationName:item.WorkstationName,
-                            WorkstationUUID:item.WorkstationUUID
-                        })
-                    });
-                    const pagination = {
-                        ...seft.state.pagination
-                    }
-                    // Read total count from server;
-                    // pagination.total = data.totalCount;
-                    pagination.total = totalcount;
-                    callback(list, {
-                        total: pagination.total,
-                        nPageSize: 10
-                    })
-                }, function(error) {
-                    message.info(error);
-                })
-            },
-            //table展开后的数据显示
-            expandedRowData: function ( record, callback ) {
-                // console.log('kk  record',record);
-                var dat = {
-                  PageIndex: 0, //分页页序
-                  PageSize: -1, //每页数量
-                  LotUUID: record.UUID, //生产订单UUID
-                  Status: -1, //生产调度单状态
-                  StrKeyWord: "" //模糊查询条件
-                }
-                TPostData( this.url, "ListLotJob", dat, function ( res ) {
-                  // console.log( "查询到派工订单列表:", res );
-                  var list = [],
+    componentWillMount() {
+        this.getDispatchLotList();
+        this.getProModelList();
+        this.getWorkCenterList();
+    }
+
+    componentDidMount() {
+        // console.log('查询',this.keyWordInput.value);
+
+    }
+
+    getDispatchLotList() {
+        const {keyWord,dispatchLotState}=this.state;
+        console.log('查询',keyWord,dispatchLotState);
+
+        var dat = {
+            PageIndex: 0,
+            PageSize: -1,
+            LotUUID: -1, //生产订单UUID
+            Status:dispatchLotState, //生产调度单状态
+            KeyWord:keyWord //模糊查询条件
+        }
+        // "ListJobTask"
+        TPostData( this.url, "ListLotJob", dat,
+            ( res )=> {
+                console.log( "查询到派工单列表:", res );
+                var list = [],
                     Ui_list = res.obj.objectlist || [],
                     totalcount = res.obj.totalcount;
-                  Ui_list.forEach( function ( item, index ) {
+                Ui_list.forEach( function ( item, index ) {
                     list.push( {
-                      key: index,
+                        key: index,
+                        UUID: item.UUID, //加工订单UUID
+                        BomUUID: item.BomUUID,
+                        lotJobID: item.lotJobID ? item.lotJobID : `#${index}`,
+                        FinishDateTime: item.FinishDateTime ? item.FinishDateTime : '2018-03-12',
+                        FinishNumber: item.FinishNumber,
+                        MoldModelUUID: item.MoldModelUUID,
+                        PlanFinishDateTime: item.PlanFinishDateTime ? item.PlanFinishDateTime : '2018-03-18',
+                        PlanNumber: item.PlanNumber,
+                        PlanStartDateTime: item.PlanStartDateTime ? item.PlanStartDateTime : '2018-02-14',
+                        ProductModelID: item.ProductModelID,
+                        ProductModelName: item.ProductModelName,
+                        ProductModelSN: item.ProductModelSN,
+                        ProductModelUUID: item.ProductModelUUID,
+                        RejectNumber: item.RejectNumber,
+                        StartDateTime: item.StartDateTime ? item.StartDateTime : '2018-02-14',
+                        Status: item.Status,
+                        UUID: item.UUID,
+                        UpdateDateTime: item.UpdateDateTime,
+                        WorkstationID: item.WorkstationID,
+                        WorkstationName: item.WorkstationName,
+                        WorkstationUUID: item.WorkstationUUID
                     } )
-                  } );
-                  const pagination = {
-                    ...seft.state.pagination
-                  }
-                  // Read total count from server;
-                  // pagination.total = data.totalCount;
-                  pagination.total = totalcount;
-                  callback( list, {
-                    total: pagination.total,
-                    nPageSize: 10
-                  } )
-                }, function ( error ) {
-                  message.info( error );
-                } )
+                } );
+                this.setState({dispatchLotList:list,loading:false});
             },
-            // 模拟添加数据的接口 回调
-            Create: function ( data, callback ) {
-                let dat = {
-                    key: '1000',
-                    uProductUUID: this.uProductUUID,
-                    strMachineSN: data.strMachineSN,
-                    dtMachineBornDatetime: data.dtMachineBornDatetime,
-                    strMachineNote: data.strMachineNote
-                }
-
-                TPostData( this.url, "system_customer_add", dat, function ( res ) {
-                  //这块请求更新数据 成功回调
-                  callback( dat );
-                } )
-            },
-            //客户信息修改
-            Update: function ( data, callback ) {
-                // console.log( 'Info', data );
-                let dat = {
-                  UUID : data.UUID,
-                  StartTime : data['date-picker']
-                }
-                TPostData( this.url, "StartJobTask", dat, function ( res ) {
-                  callback( data )
-                } )
-            },
-
-            SubUpdate: function(data, callback) {
-                console.log('Info', data);
-                let dat = {
-                    UUID: data.UUID, //生产调度单UUID
-                    WorkstationUUID: data.WorkstationUUID, //工作中心UUID
-                    PlanNumber: data.Number, //派工数量
-                    PlanStartTime : data[ 'range-picker' ][ 0 ],         //计划开始时间
-                    PlanFinishTime :data[ 'range-picker' ][ 1 ]      //计划结束时间
-                }
-                TPostData(this.url, "DeliverLotJob", dat, function(res) {
-                    //这块请求更新数据 成功回调
-                    // alert('成功了!');
-                    callback(data)
-                })
-            },
-
-            Schedul: function ( data, callback ) {
-                // console.log( '看看Schedul提交后的内容', data );
-                let dat = {
-                    LotUUID: data.UUID, //加工订单UUID
-                    Number: data.Number, //排程产量
-                    WorkstationUUID: data.WorkstationUUID, //工作中心UUID
-                    MoldModelUUID: data.MoldModelUUID, //模具型号
-                    StartDateTime: data[ 'range-picker' ][ 0 ], //排程开始时间
-                    FinishDateTime: data[ 'range-picker' ][ 1 ] //排程结束时间
-                }
-                TPostData( this.url, "GenLotJob", dat, function ( res ) {
-                    callback( data )
-                } )
-            },
-            // 删除操作
-            Delete: function ( data, callback ) {
-                var dat = {
-                  uMachineUUID: data.uMachineUUID
-                }
-                TPostData( this.url, "system_customer_del", dat, function ( res ) {
-                  //这块请求更新数据 成功回调
-                  callback( data )
-                } )
-            },
-            // 查询操作回调
-            Retrieve: function ( data, callback ) {
-                var dat = {
-                    PageIndex: 0,
-                    PageSize: -1,
-
-                    LotUUID: -1, //生产订单UUID
-                    Status: data.status, //生产调度单状态
-                    KeyWord: data.keyWord //模糊查询条件
-                }
-                // "ListJobTask"
-                TPostData(this.url, "ListLotJob", dat, function(res) {
-                    console.log("查询到工单列表:", res);
-                    var list = [],
-                        Ui_list = res.obj.objectlist || [],
-                        totalcount = res.obj.totalcount;
-                    Ui_list.forEach(function(item, index) {
-                        list.push({
-                            key: index,
-                            UUID: item.UUID, //加工订单UUID
-                            BomUUID:item.BomUUID,
-                            lotJobID:item.lotJobID?item.lotJobID:`#${index}`,
-                            FinishDateTime:item.FinishDateTime?item.FinishDateTime:'2018-03-12',
-                            FinishNumber:item.FinishNumber,
-                            MoldModelUUID:item.MoldModelUUID,
-                            PlanFinishDateTime:item.PlanFinishDateTime?item.PlanFinishDateTime:'2018-03-18',
-                            PlanNumber:item.PlanNumber,
-                            PlanStartDateTime:item.PlanStartDateTime?item.PlanStartDateTime:'2018-02-14',
-                            ProductModelID:item.ProductModelID,
-                            ProductModelName:item.ProductModelName,
-                            ProductModelSN:item.ProductModelSN,
-                            ProductModelUUID:item.ProductModelUUID,
-                            RejectNumber:item.RejectNumber,
-                            StartDateTime:item.StartDateTime?item.StartDateTime:'2018-02-14',
-                            Status:item.Status,
-                            UUID:item.UUID,
-                            UpdateDateTime:item.UpdateDateTime,
-                            WorkstationID:item.WorkstationID,
-                            WorkstationName:item.WorkstationName,
-                            WorkstationUUID:item.WorkstationUUID
-                        })
-                    });
-                    const pagination = {
-                        ...seft.state.pagination
-                    }
-                    // Read total count from server;
-                    // pagination.total = data.totalCount;
-                    pagination.total = totalcount;
-                    callback(list, {
-                        total: pagination.total,
-                        nPageSize: 10
-                    })
-                }, function(error) {
-                    message.info(error);
-                })
-            },
-
-            producing:function (data) {
-              var dat = {
-                uMachineUUID: data.uMachineUUID
-              }
-              TPostData( this.url, "StartJobTask", dat, function ( res ) {
-                //这块请求更新数据 成功回调
-                callback( data )
-              } )
+            ( error )=> {
+                message.info( error );
             }
-        };
-        this.feature = FeatureSetConfig(tableConfig);
+        )
+
     }
+
+    getProModelList() {
+        const dat = {
+            PageIndex: 0,
+            PageSize: -1,
+            TypeUUID: -1,
+            KeyWord: ""
+        }
+        TPostData( '/api/TProduct/product_model', "ListActive", dat,
+            ( res )=>{
+                var list = [],
+                    slist=[];
+                console.log( "查询到产品型号列表", res );
+                var data_list = res.obj.objectlist || [];
+                // var totalcount = res.obj.totalcount;
+                data_list.forEach(( item, index )=> {
+                    list.push( {
+                        key: index,
+                        UUID: item.UUID,
+                        Name: item.Name,
+                        TypeUUID: item.TypeUUID,
+                        Image: item.Image,
+                        Number: item.ID,
+                        SN: item.SN,
+                        Version: item.Version,
+                    } )
+                } )
+                data_list.forEach(( item, index )=> {
+                    slist.push({key: index,value:item.UUID.toString(), text: item.Name} )
+                } )
+                this.setState({ProModelList:list,ProModelSList:slist});
+            },
+            ( error )=> {
+                message.info( error );
+            }
+        )
+    }
+
+    getWorkCenterList() {
+        let dat = {
+            'PageIndex': 0,
+            'PageSize': -1,
+            'TypeUUID': -1
+        }
+
+        TPostData('/api/TProcess/workcenter', "ListActive", dat,
+            ( res )=> {
+                var list = [];
+                var Ui_list = res.obj.objectlist || [];
+                console.log( '查询到工作中心列表', Ui_list );
+                // var totalcount = res.obj.objectlist.length;
+                // creatKeyWord = res.obj.objectlist.length;
+                Ui_list.forEach(( item, index )=> {
+                    list.push(
+                        {
+                            key: index,
+                            value:item.UUID.toString(),
+                            text: item.Name
+                        }
+                    )
+                    /*list.push( {
+                        key: index,
+                        ID: item.ID,
+                        UUID: item.UUID,
+                        Name: item.Name,
+                        TypeUUID: item.TypeUUID.toString(),
+                        WorkshopUUID: item.WorkshopUUID.toString(),
+                        WorkshopName: item.WorkshopName,
+                        TypeName: item.TypeName,
+                        Status: item.Status,
+                        UpdateDateTime: item.UpdateDateTime,
+                        Desc: item.Desc,
+                        Note: item.Note
+                    } )*/
+                } )
+                this.setState({WorkCenterList:list})
+            },
+            ( error )=> {
+                message.info( error );
+            }
+        )
+
+    }
+
+    toggleDModalShow(record){
+        console.log("派工前",record);
+        this.setState({DModalShow:!this.state.DModalShow,updateFromItem:record});
+    }
+
+    handleDispatch(data){
+        const {updateFromItem}=this.state;
+        console.log('data',data,updateFromItem);
+
+        let dat = {
+            UUID: updateFromItem.UUID, //生产调度单UUID
+            WorkstationUUID: data.WorkstationUUID, //工作中心UUID
+            PlanNumber: data.Number, //派工数量
+            PlanStartTime : data[ 'range-picker' ][ 0 ],         //计划开始时间
+            PlanFinishTime :data[ 'range-picker' ][ 1 ]      //计划结束时间
+        }
+        TPostData(this.url, "DeliverLotJob", dat,
+            (res)=> {
+                //这块请求更新数据 成功回调
+                message.success( '更新成功' );
+            }
+        )
+    }
+
+    handleChange(ele) {
+        this.setState({dispatchLotState:ele});
+    }
+
+    handleRetrieve(){
+        // const {keyWord,dispatchLotState}=this.state;
+        // console.log('查询',this.keyWordInput.input.value,dispatchLotState);
+        this.setState({keyWord:this.keyWordInput.input.value});
+        this.getDispatchLotList();
+    }
+
+    handleToggleBorder(value){
+        console.log("ToggleBorder",value);
+        this.setState({bordered:value});
+    }
+
+    handleScollChange(enable){
+        console.log("enable",enable);
+        this.setState({ scroll: enable ? {scroll }: undefined });
+    }
+
+    handleSizeChange(e){
+          this.setState({ size: e.target.value });
+    }
+
     render() {
-        let Feature=this.feature;
-        return (
-          <div>
-              {/* <PageTitle title = { '生产派工' }/> */}
-              <Feature/>
-              {/* <Gantt /> */}
-          </div>
-        );
+
+        const {
+            dispatchLotList,
+            ProModelList,
+            ProModelSList,
+            WorkCenterList,
+            DModalShow,bordered,size,scroll
+        }=this.state;
+
+        const columns = [
+            {
+                title: '派工单号',
+                dataIndex: 'lotJobID',
+                key: 'lotJobID'
+            },
+            {
+                title: '产品名称',
+                dataIndex: 'ProductModelName',
+                key: 'BNum',
+            },
+            /*{
+                title: '产品编码',
+                dataIndex: 'ProductModelID',
+                key: 'ProductModelIDe',
+            },
+            {
+                title: '产品序列号',
+                dataIndex: 'ProductModelSN',
+                key: 'ProductModelSN'
+            },*/
+            {
+                title: '工作中心',
+                dataIndex: 'WorkstationName',
+                key: 'WorkstationName',
+            },
+            /* {
+                title: '工作中心编码',
+                dataIndex: 'WorkstationID',
+                key: 'WorkstationName',
+            },*/
+            /*{
+              title: '计划产量',
+              dataIndex: 'PlanNumber',
+              type: 'sort'
+            },
+            {
+              title: '实际产量',
+              dataIndex: 'FinishNumber',
+              type: 'sort'
+            },
+            {
+              title: '次品数量',
+              dataIndex: 'RejectNumber',
+              type: 'sort'
+            },*/
+            /*{
+              title: '计划交期',
+              dataIndex: 'PlanDeliverDateTime',
+              type: 'string'
+            },
+            {
+              title: '实际交期',
+              dataIndex: 'DeliverDateTime',
+              type: 'string'
+            },*/
+            {
+              title: '计划开始',
+              dataIndex: 'PlanStartDateTime',
+              type: 'string'
+            },
+            /*{
+              title: '实际开始',
+              dataIndex: 'StartDateTime',
+              type: 'string'
+            },*/
+            {
+              title: '计划完成',
+              dataIndex: 'PlanFinishDateTime',
+              type: 'string'
+            },
+            /*{
+              title: '实际完成',
+              dataIndex: 'FinishDateTime',
+              type: 'string'
+            },*/
+            /* {
+                title: '更新时间',
+                dataIndex: 'UpdateDateTime',
+                key: 'UpdateDateTime',
+            },*/
+            {
+                title: '工单状态',
+                dataIndex: 'Status',
+                key: 'Status',
+                render: (e1, record) => {
+                    // console.log('工单状态',record);
+                    return(<span>{e1}</span>)
+                    // return <StateBotton stateType='workOrder' state = { record.Status }/>
+                }
+            },
+            {
+                title: '操作',
+                dataIndex: 'uMachineUUID',
+                type: 'operate', // 操作的类型必须为 operate
+                // multipleType: "dispatch",
+                render:(e1,e2)=>{
+                    return(
+                        <div>
+                            <a href="#" onClick={this.toggleDModalShow.bind(this,e2)}>派工</a>
+                        </div>
+                    )
+                }
+            }
+        ];
+
+        const DFormItem= [
+            {
+                name: 'Number',
+                label: '派工产量',
+                type: 'string',
+                placeholder: '请输入派工产量',
+                rules: [{required: true,message: '请输入派工产量'}]
+            },
+            {
+                name: 'WorkstationUUID',
+                label: '工作中心',
+                type: 'select',
+                options:WorkCenterList,
+                /*postJson: {
+                    postUrl: '/api/TManufacture/manufacture',
+                    method: 'ListActive',
+                    dat: {
+                        PageIndex: 0,
+                        PageSize: -1,
+                        TypeUUID: -1,
+                        KeyWord: ""
+                    }
+                },
+                options: [
+                    {
+                        text: "型号1",
+                        value: '1'
+                    },
+                    {
+                        text: "型号2",
+                        value: '2'
+                    },
+                    {
+                        text: "型号3",
+                        value: '3'
+                    }
+                ],*/
+                rules: [{required: true,message: '请选择工作中心'}]
+            },
+            {
+                name: 'Date',
+                label: '日期',
+                type: 'RangePicker',
+                placeholder: '请输入计划产量'
+            }
+        ];
+
+            return (
+                <div>
+                    <Card style={{marginBottom:20}}>
+                        <Row gutter={16}>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>搜索内容:</span>
+                                    <Input
+                                        // defaultValue={this.state.keyWord}
+                                        ref={(input) => { this.keyWordInput = input; }}
+                                        placeholder="请输入搜索内容" style={{ width: "60%" }}/>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>派工单状态:</span>
+                                <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange.bind(this)}>
+                                    <Option value="-1" key="all">全部</Option>
+                                    <Option value="1" key="1">未派工</Option>
+                                    <Option value="2" key="2">已派工</Option>
+                                </Select>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box">
+                                    <Button  onClick={this.handleRetrieve.bind(this)} type="primary" icon="search">查询</Button>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Card>
+                    <div style={{margin:20}}>
+                        <Form layout="inline">
+                            <FormItem label="边框">
+                                <Switch checked={bordered} onChange={this.handleToggleBorder.bind(this)} />
+                            </FormItem>
+                            <FormItem label="大小">
+                                <Radio.Group size="default" value={size} onChange={this.handleSizeChange.bind(this)}>
+                                    {/* <Radio.Button value="biger">大</Radio.Button> */}
+                                    <Radio.Button value="default">大</Radio.Button>
+                                    <Radio.Button value="middle">中</Radio.Button>
+                                    <Radio.Button value="small">小</Radio.Button>
+                                </Radio.Group>
+                            </FormItem>
+                        </Form>
+                    </div>
+                    <Table
+                      dataSource={dispatchLotList}
+                      columns={columns}
+                      loading={this.state.loading}
+                      bordered={bordered}
+                      size={size}
+                      scroll={scroll}
+                      // expandedRowRender={this.renderSubTable.bind(this)}
+                      // rowSelection={this.state.isSelection?rowSelection:null}
+                      // pagination={pagination}
+                      // hideDefaultSelections={true}
+                      // onExpand={this.handleExpand}
+                      />
+                    <CModal
+                        FormItem={DFormItem}
+                        submit={this.handleDispatch.bind(this)}
+                        isShow={DModalShow}
+                        hideForm={this.toggleDModalShow.bind(this)}
+                        />
+                </div>
+            )
     }
 }

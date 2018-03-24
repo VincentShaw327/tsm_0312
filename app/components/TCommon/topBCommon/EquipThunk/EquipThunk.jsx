@@ -47,7 +47,7 @@ let self
 let _storage = window.localStorage;
 
 //mqtt消息连接建立
-var client  = mqtt.connect('mqtt://47.91.154.238:9011')
+// var client  = mqtt.connect('mqtt://47.91.154.238:9011')
 
 export default class App extends Component {
 

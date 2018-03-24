@@ -10,7 +10,7 @@ import {TMaterialModel,TMaterialType} from './TWms';
 import { TProductModel} from './TProduct';
 import { TBomList} from './TBom';
 import {TParameterList,TModifyRecord,TParameterScada,TParameterAnalysis}from './TProcess';
-import {TLossTimeReport,TOEEReport,TProductionReport,TOEEAnalysis}from './TReport';
+import {TLossTimeReport,TOEEReport,TProductionReport,TOEEAnalysis,TStateTimeOverview}from './TReport';
 export {
     THome,
     TScadaWorkShop_Auto,
@@ -43,6 +43,7 @@ export {
     TParameterScada,
     TParameterAnalysis,
     TLossTimeReport,
+    TStateTimeOverview,
     TOEEReport,
     TProductionReport,
     TOEEAnalysis,
