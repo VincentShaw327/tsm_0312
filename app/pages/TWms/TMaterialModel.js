@@ -160,11 +160,10 @@ export default class TMaterialModel extends Component {
                     type: 'string',
                 },
                 {
-                    name: 'uploadImg',
+                    name: 'Image',
                     label: '图片',
                     type: 'antUpload',
                     url: '/api/tupload/do',
-                    // url: this.props.server.url + 'Handler_FileTrans_V1.ashx',
                 }
             ],
             //添加的弹出框菜单
@@ -189,6 +188,12 @@ export default class TMaterialModel extends Component {
                     rules: [ { required: true, message: '请选择类别' } ],
                     type: 'select',
                     options: MtrlTypeList
+                },
+                {
+                    name: 'Image',
+                    label: '图片',
+                    type: 'antUpload',
+                    url: '/api/tupload/do',
                 }
             ],
             //查询的数据项
@@ -258,7 +263,8 @@ export default class TMaterialModel extends Component {
                     key: '1000',
                     Name: data.Name,
                     ID: data.Number,
-                    TypeUUID: data.TypeUUID
+                    TypeUUID: data.TypeUUID,
+                    Path:data.Image
                 }
                 // console.log('创建后的数据是:', data);
                 TPostData( this.url, "Add", dat, function ( res ) {
@@ -271,6 +277,7 @@ export default class TMaterialModel extends Component {
                     UUID: data.UUID,
                     Name: data.Name,
                     ID: data.Number,
+                    Path:data.Image,
                     TypeUUID: data.TypeUUID,
                     Desc: data.Desc,
                     Note: '-',
@@ -281,7 +288,7 @@ export default class TMaterialModel extends Component {
                 } )
             },
 
-            UpdateImage: function ( data, callback ) {
+            /*UpdateImage: function ( data, callback ) {
                 // console.log("看看MoldModel---UPDATE data",data);
                 let dat = {
                     UUID: data.UUID,
@@ -294,7 +301,7 @@ export default class TMaterialModel extends Component {
                 }, function ( error ) {
                     message.info( error );
                 } )
-            },
+            },*/
             // 删除操作
             Delete: function ( data, callback ) {
                 var dat = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Button } from 'antd';
+import { Tabs, Button,Icon } from 'antd';
 
 import TFooter from '../components/TCommon/TUtils/TFooter';
 import THeader from '../components/TCommon/TUtils/THeader';
@@ -39,7 +39,8 @@ import {
     TOEEReport,
     TTechnicalSupport,
     TProductionReport,
-    TOEEAnalysis
+    TOEEAnalysis,
+    TDA_Terminal
 } from '../pages/index.js'
 
 const TabPane = Tabs.TabPane;
@@ -74,6 +75,7 @@ export default class TTabMain extends React.Component {
         // console.log('panes', panes );
         this.setState( { panes, activeKey } );
     }
+
     remove = ( targetKey ) => {
         let activeKey = this.state.activeKey;
         let lastIndex;
@@ -93,6 +95,14 @@ export default class TTabMain extends React.Component {
             activeKey = panes[ lastIndex ].key;
         }
         this.setState( { panes, activeKey } );
+    }
+
+    clearTab(){
+        const panes = this.state.panes.filter( pane => pane.key == 'THome' );
+        // if ( lastIndex >= 0 && activeKey === targetKey ) {
+        //     activeKey = panes[ lastIndex ].key;
+        // }
+        this.setState( { panes,activeKey: panes[ 0 ].key,} );
     }
 
     TPageOpen = ( key ) => { // 调用子组件方法获取孩子名字
@@ -131,9 +141,9 @@ export default class TTabMain extends React.Component {
                   type="editable-card"
                   onEdit={this.onEdit}
                   tabBarExtraContent={
-                      (<Button  icon="delete">清除</Button>)
+                      (<Icon type="close-circle-o" onClick={this.clearTab.bind(this)} style={{marginRight:23,fontSize:25}} />)
                   }
-                  >
+                >
                   {/* {this.state.panes.map(pane => <TabPane tab={pane.title} key={pane.key}>{pane.content}</TabPane>)} */}
                     {
                       this.state.panes.map(function(pane){
@@ -229,11 +239,12 @@ export default class TTabMain extends React.Component {
                                 return <TabPane tab='OEE分析报表' key={pane.key}><TOEEAnalysis/></TabPane>; break;
                           case "TAboutSupport":
                                 return <TabPane tab='技术支持' key={pane.key}><TTechnicalSupport/></TabPane>; break;
+                          case "TDA_Terminal":
+                                return <TabPane tab='终端管理' key={pane.key}><TDA_Terminal/></TabPane>; break;
                           default:return <TabPane tab='未知' key={pane.key}></TabPane>;
                        }
                      })
                     }
-                    {/* {content} */}
                 </Tabs>
             </div>
         );

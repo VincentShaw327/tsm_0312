@@ -1,7 +1,6 @@
 // 表单独立项 用于对于表单字段的创建
 
 import React from 'react';
-import moment from 'moment';
 import { Form, Select, Input, Button, Icon , DatePicker, TimePicker, Radio, Switch, Cascader, Checkbox,message} from 'antd';
 // import BDUploader from './BDUploader';
 import AntUploader from './AntUploader';
@@ -10,6 +9,9 @@ const RangePicker = DatePicker.RangePicker;
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
+import moment from 'moment';
+import 'moment/locale/zh-cn';
+moment.locale('zh-cn');
 
 // 对于使用默认的时间戳
 const DefaultTime = new Date();
@@ -17,11 +19,30 @@ const DefaultTime = new Date();
 let CFormItem = React.createClass({
     getInitialState: function() {
         return {
-            img_url:''
+            img_url:'',
+            toSavePath:''
         };
+        this.savePath='';
     },
+    componentWillReceiveProps:function(){
+        // console.log("componentWillReceiveProps");
+        this.setState?this.setState({toSavePath:''}):''
+    },
+    /*shouldComponentUpdate:function(){
+        console.log("shouldComponentUpdate",this);
+    },*/
+    componentWillUpdate:function(){
+        // console.log("componentWillUpdate");
+        // this.setState?this.setState({toSavePath:''}):''
 
+    },
+    componentDidUpdate :function(){
+        // console.log("componentDidUpdate");
+        // this.setState?this.setState({toSavePath:''}):''
+
+    },
     render: function() {
+        this.savePath='';
         const getFieldDecorator = this.props.getFieldDecorator;
         const formItemLayout = this.props.formItemLayout || {};
         const item = this.props.item || {};
@@ -55,7 +76,7 @@ let CFormItem = React.createClass({
                             key={item.name}
                             {...formItemLayout}>
                             {getFieldDecorator('date-picker', {rules:item.rules,initialValue: defaultValue})(
-                                <DatePicker showTime format="YYYY/MM/DD" />
+                                <DatePicker  showTime format="YYYY-MM-DD HH:mm:ss" />
                             )}
                         </FormItem>
                 break;
@@ -105,7 +126,7 @@ let CFormItem = React.createClass({
                         key={item.name}
                         {...formItemLayout}>
                         {getFieldDecorator(item.name, {rules:item.rules, initialValue: defaultValue.toString()})(
-                            <Select style={{ width: item.width }} >
+                            <Select style={{ width: item.width }}>
                                 {item.hasAllButtom?<Option key="1000" value="-1" style={{borderBottom:'solid 1px #a4a4a9'}}>全部</Option>:null}
                                 {
                                     item.options.map(function(item, i,arr){
@@ -171,7 +192,6 @@ let CFormItem = React.createClass({
                             label={item.label}
                             key={item.name}
                             {...formItemLayout}>
-
                             {getFieldDecorator(item.name, { initialValue: defaultValue })(
                                 <RadioGroup>
                                     {
@@ -225,13 +245,19 @@ let CFormItem = React.createClass({
                 break;
 
             case 'antUpload':
-                defaultValue = this.state.img_url || defaultValue || '';
+                defaultValue =this.state.toSavePath|| defaultValue|| '';
+                // console.log("defaultPath",defaultValue);
+                // this.setState({img_url:defaultValue})
+                // this.changePathUrl(defaultValue);
                 return <FormItem
                             label={item.label}
                             key={item.name}
                             {...formItemLayout}>
                             {getFieldDecorator(item.name, { initialValue:defaultValue})(
-                                <AntUploader defaultUrl={defaultValue} actionUrl={item.url} onPathChange={this.changePathUrl} />
+                                <AntUploader
+                                    defaultUrl={defaultValue}
+                                    actionUrl={item.url}
+                                    onPathChange={this.changePathUrl} />
                             )}
                             {/* <img className="uploadImg" src={defaultValue}  style={{marginTop:"15px"}}/> */}
                         </FormItem>
@@ -253,8 +279,11 @@ let CFormItem = React.createClass({
         })
     },
     changePathUrl: function(path){
+        console.log("路径是：",path);
+        // this.savePath=path;
         this.setState({
-            img_url: path
+            // img_url: path
+            toSavePath:path
         })
     }
 });

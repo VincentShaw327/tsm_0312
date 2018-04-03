@@ -151,11 +151,10 @@ export default class ProductModel extends Component {
                     type: 'string',
                 },
                 {
-                     name: 'uploadImg',
+                     name: 'Image',
                      label: '图片',
                      type: 'antUpload',
                      url: '/api/tupload/do',
-                     // url:this.props.server.url+'Handler_FileTrans_V1.ashx',
                 }
             ],
             //添加的弹出框菜单
@@ -181,6 +180,12 @@ export default class ProductModel extends Component {
                     placeholder: '请输入序列号',
                     rules: [{ required: true, message: '序列号不能为空' }],
                 },
+                {
+                     name: 'Image',
+                     label: '图片',
+                     type: 'antUpload',
+                     url: '/api/tupload/do',
+                }
             ],
             //查询的数据项
             RType: [
@@ -240,6 +245,7 @@ export default class ProductModel extends Component {
                     key: '1000',
                     Name:data.Name,
                     ID:data.Number,
+                    Path:data.Image,
                     TypeUUID : '0',
                     SN:data.SN
                 }
@@ -248,12 +254,13 @@ export default class ProductModel extends Component {
                   callback( dat );
                 } )
             },
-              //信息修改回调处理
+            //信息修改回调处理
             Update: function ( data, callback ) {
                 let dat = {
                     UUID: data.UUID,
                     Name:data.Name,
                     ID:data.Number,
+                    Path:data.Image,
                     SN:data.SN,
                     Desc : data.Desc,
                     Version:data.Version,
@@ -266,7 +273,7 @@ export default class ProductModel extends Component {
                 } )
             },
 
-            UpdateImage: function(data, callback) {
+            /*UpdateImage: function(data, callback) {
                 // console.log("看看MoldModel---UPDATE data",data);
                 let dat={
                     UUID : data.UUID,
@@ -279,8 +286,9 @@ export default class ProductModel extends Component {
                 }, function(error) {
                     message.info(error);
                 })
-            },
+            },*/
             // 删除操作
+
             Delete: function ( data, callback ) {
                 var dat = {
                   UUID: data.UUID,

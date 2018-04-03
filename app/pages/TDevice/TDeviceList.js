@@ -132,7 +132,6 @@ export default class DeviceList extends Component {
                     ]
                 }
             ],
-
             //更新弹框数据项
             UType: [{
                     name: 'strDeviceName',

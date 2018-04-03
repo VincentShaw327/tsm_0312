@@ -18,7 +18,8 @@ export default class TAuthGroupList extends Component {
         super( props )
         this.state = {
             showDetal:false,
-            detailID:0
+            detailID:0,
+            detailMessage:{}
         }
         seft = this;
     }
@@ -254,11 +255,15 @@ export default class TAuthGroupList extends Component {
 
     toggleRender(record){
         // console.log("toggleRender",record);
-        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
+        this.setState({
+            showDetal:!this.state.showDetal,
+            detailID:record.UUID,
+            detailMessage:record
+        })
     }
 
     render() {
-        const {showDetal,detailID}=this.state;
+        const {showDetal,detailID,detailMessage}=this.state;
         const {detail}=this.props;
         let Feature = this.feature;
         const AuthDetail=(
@@ -274,7 +279,7 @@ export default class TAuthGroupList extends Component {
                         <Icon type="rollback" />
                     </span>
                 </div>
-                <TUserAuthDetail UUID={detailID}/>
+                <TUserAuthDetail detailMessage={detailMessage} UUID={detailID}/>
             </div>
         );
         return  showDetal?AuthDetail:<Feature/>;

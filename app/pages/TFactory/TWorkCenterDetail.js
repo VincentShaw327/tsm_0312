@@ -4,11 +4,11 @@
  *添加人:shaw
  **/
 import React, { Component } from 'react';
+import { Table, Button, Icon, Row, Col, message } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-// import FeatureSetConfig from '../topBCommon/FeatureSetConfig';
 import { TPostData } from '../../utils/TAjax';
 import Immutable from 'immutable';
-import { Table, Button, Icon, Row, Col, messag } from 'antd';
+import workCenterPic from '../../images/assets/AM1.jpg';
 let seft
 
 export default class TWorkCenterDetail extends Component {
@@ -19,14 +19,15 @@ export default class TWorkCenterDetail extends Component {
             UUID: props.workcenterUUID,
             title: props.title,
             bindedTablesize: 'small', //table尺寸大小
-            selDevList: []
+            workCenterDevList: [],
+            deviceList:[]
         }
         this.url1='/api/TProcess/workcenter';
         this.url2='/api/TDevice/device';
         seft = this;
     }
     componentWillMount(){
-        const config = {
+        /*const config = {
             type: 'tableFeature',
             size: 'small', // table每行尺寸
             url: '/api/TDevice/device',
@@ -75,16 +76,17 @@ export default class TWorkCenterDetail extends Component {
             // 初始化页面的数据 回调函数传入 items 列表
             pageData: function ( num, callback ) {
                 var dat = {
-                    'PageIndex': 0,
-                    'PageSize': 10,
-                    'ModelUUID': -1,
-                    'WorkshopUUID': -1
+                    PageIndex: 0,
+                    PageSize: 10,
+                    TypeUUID: -1,
+                    ModelUUID: -1,
+                    WorkshopUUID: -1
                 }
 
                 TPostData( this.url, "ListActive", dat, function ( res ) {
                     var list = []
                     var Ui_list = res.obj.objectlist || []
-
+                    console.log("查询到设备列表",res);
                     var totalcount = res.obj.objectlist.length;
                     Ui_list.forEach( function ( item, index ) {
                         list.push( {
@@ -148,7 +150,7 @@ export default class TWorkCenterDetail extends Component {
                     },
                     // 判断是否存在此设备
                     isExisted = false;
-                seft.state.selDevList.forEach( function ( item ) {
+                seft.state.workCenterDevList.forEach( function ( item ) {
                     if ( item.DeviceUUID == data.UUID ) {
                         isExisted = true
                         callback( false ) //已添加过此机台， 重复添加， 显示添加失败
@@ -160,15 +162,15 @@ export default class TWorkCenterDetail extends Component {
                     TPostData( seft.state.server.resUrl + 'Handler_Workstation_V1.ashx', "AddDevice", dat, function ( res ) {
                         //这块请求更新数据 成功回调
                         var newItem = {
-                            key: seft.state.selDevList.length + 1,
+                            key: seft.state.workCenterDevList.length + 1,
                             DeviceName: data.Name,
                             DeviceUUID: data.UUID,
                             Name: seft.state.Name,
                             Note: data.Note
                         }
 
-                        seft.state.selDevList.unshift( newItem );
-                        let result = Immutable.fromJS( seft.state.selDevList )
+                        seft.state.workCenterDevList.unshift( newItem );
+                        let result = Immutable.fromJS( seft.state.workCenterDevList )
 
                         let resultList = result.map( function ( v, i ) {
                             if ( v.get( 'key' ) == newItem.key ) {
@@ -178,7 +180,7 @@ export default class TWorkCenterDetail extends Component {
                             }
                         } )
 
-                        seft.setState( { selDevList: resultList.toJS() } )
+                        seft.setState( { workCenterDevList: resultList.toJS() } )
                         callback( true )
                     }, function ( error ) {
                         callback( false )
@@ -186,35 +188,21 @@ export default class TWorkCenterDetail extends Component {
                 }
             }
         }
-        this.feature = FeatureSetConfig( config );
+        this.feature = FeatureSetConfig( config );*/
+        this.getDeviceList();
+        this.getDefine();
     }
 
     componentDidMount() {
-        //seft.UUID详情查询
-        var dat = {
+        /*var dat = {
             UUID: seft.state.UUID
         }
-        //获取工作详情
-        TPostData(this.url1, "GetDetail", dat, function ( res ) {
-            var WkItem = res.obj || {}
-            seft.setState( {
-                ID: WkItem.ID,
-                UUID: WkItem.UUID,
-                Name: WkItem.Name,
-                TypeUUID: WkItem.TypeUUID,
-                Status: WkItem.Status,
-                UpdateDateTime: WkItem.UpdateDateTime,
-                Desc: WkItem.Desc,
-                Note: WkItem.Note
-            } )
-        }, function ( error ) {
-            message.info( error );
-        }, false )
         //获取工作中心设备
         TPostData( this.url1, "GetDefine", dat, function ( res ) {
+            console.log("查询到工作中心设备列表",res);
+
             var list = [];
             var Ui_list = res.obj.objectlist || [];
-
             var totalcount = res.obj.objectlist.length;
             Ui_list.forEach( function ( item, index ) {
                 list.push( {
@@ -227,91 +215,206 @@ export default class TWorkCenterDetail extends Component {
                 } )
             } )
 
-            seft.setState( { selDevList: list } )
+            seft.setState( { workCenterDevList: list } )
 
         }, function ( error ) {
             message.info( error );
-        }, false )
+        }, false )*/
     }
 
-    //解除设备UUID绑定
-    Unbind = ( DeviceUUID ) => {
-
+    getDeviceList(){
         var dat = {
-                UUID: seft.state.UUID,
-                DeviceUUID: DeviceUUID
+            PageIndex: 0,
+            PageSize: -1,
+            TypeUUID: -1,
+            ModelUUID: -1,
+            WorkshopUUID: -1
+        }
+        TPostData( this.url2, "ListActive", dat,
+            ( res )=> {
+                console.log("查询到设备列表",res);
+                let list = [],
+                    Ui_list = res.obj.objectlist || [];
+                Ui_list.forEach( function ( item, index ) {
+                    list.push( {
+                        key: index,
+                        ID: item.ID,
+                        deviceUUID: item.UUID,
+                        Name: item.Name,
+                        TypeUUID: item.TypeUUID,
+                        Status: item.Status,
+                        UpdateDateTime: item.UpdateDateTime,
+                        Desc: item.Desc,
+                        Note: item.Note
+                    } )
+                } );
+                this.setState({deviceList:list});
             },
-            deviceList = Immutable.fromJS( seft.state.selDevList ),
-            resultList = [] // 判断是否存在此设备
-
-        resultList = deviceList.filter( function ( v, i ) {
-            if ( v.get( 'DeviceUUID' ) !== DeviceUUID ) {
-                return true;
+            ( error )=> {
+                message.info( error );
             }
-        } )
+        )
 
-        TPostData( seft.state.server.resUrl + 'Handler_Workstation_V1.ashx', "RemoveDevice", dat, function ( res ) {
-            //这块请求更新数据 成功回调
-            seft.setState( { selDevList: resultList.toJS() } )
-            message.success( '解绑成功' );
-        }, function ( error ) {
-            message.error( '解绑失败' );
-        } )
+    }
+
+    getDefine(){
+
+        let dat = {
+            UUID: this.state.UUID
+        }
+
+        TPostData( this.url1, "GetDefine", dat,
+            ( res )=> {
+                console.log("查询到工作中心设备列表",res);
+                var list = [];
+                var Ui_list = res.obj.objectlist || [];
+                Ui_list.forEach( function ( item, index ) {
+                    list.push( {
+                        key: index,
+                        UUID: item.UUID,
+                        DeviceUUID: item.DeviceUUID,
+                        DeviceName: item.DeviceName,
+                        DeviceID: item.DeviceID,
+                        Note: item.Note
+                    } )
+                } );
+                this.setState( { workCenterDevList: list } );
+            },
+            ( error )=> {
+                message.info( error );
+            }
+        )
+    }
+
+    addDevice(DeviceUUID){
+        var dat = {
+            UUID: seft.state.UUID,
+            DeviceUUID: DeviceUUID
+        };
+        TPostData(this.url1, "AddDevice", dat,
+            ( res )=> {
+                //这块请求更新数据 成功回调
+                message.success( '添加设备成功');
+                this.getDefine();
+            },
+            ( error )=> {
+                message.error( '添加设备失败' );
+            }
+        )
+    }
+    //解除设备UUID绑定
+    RemoveDevice ( DeviceUUID ){
+        var dat = {
+            UUID: seft.state.UUID,
+            DeviceUUID: DeviceUUID
+        };
+        TPostData(this.url1, "RemoveDevice", dat,
+            ( res )=> {
+                //这块请求更新数据 成功回调
+                message.success( '解绑设备成功');
+                this.getDefine();
+            },
+            ( error )=> {
+                message.error( '解绑设备失败' );
+            }
+        )
     }
 
     render() {
         let Feature=this.feature;
-        //绑定设备列表列名
+        const {detailMessage}=this.props;
+
         const columns = [
             {
-                title: '设备',
+                title: '名称',
                 dataIndex: 'DeviceName',
                 key: 'DeviceName'
-			}, {
-                title: '工作中心',
-                dataIndex: 'Name',
-                key: 'Name'
-			}, {
-                title: '备注',
-                dataIndex: 'Note',
-                key: 'Note'
-			}, {
+            },
+            {
+                title: '编号',
+                dataIndex: 'DeviceID',
+                key: 'DeviceID'
+            },
+            {
                 title: '解绑操作',
-                dataIndex: 'operation',
-                render: ( text, record ) => {
-                    const { editable } = record;
-                    return (
-                        <div className="editable-row-operations">
-                            <a onClick={() => seft.Unbind(record.DeviceUUID)}>解绑</a>
-                        </div>
-                    )
+                dataIndex: 'DeviceUUID',
+                render: ( DeviceUUID, record ) => {
+                    return <a onClick={this.RemoveDevice.bind(this,DeviceUUID)}>解绑</a>
                 }
             }
-        ]
+        ];
+        const deviceColumns = [
+            {
+                title: '名称',
+                dataIndex: 'Name',
+                key: 'DeviceName'
+            },
+            {
+                title: '编号',
+                dataIndex: 'ID',
+                key: 'Name'
+            },
+            {
+                title: '添加设备',
+                dataIndex: 'deviceUUID',
+                render: ( deviceUUID, record ) => {
+                    return <a onClick={this.addDevice.bind(this,deviceUUID)}>添加</a>
+                }
+            }
+        ];
 
         return (
-            <div style={{display: 'flex',flexFlow: 'column',minHeight: '734px'}}>
-                <Row style={{marginTop: '1%',border: 'solid 1px #80808029',padding: '1%'}}>
-                    <Col span={3} offset={1}>名称: {seft.state.Name}</Col>
-                    <Col span={4}>中心类别:
-                        <span style={{color: '#1fbf1f',fontSize: '15px'}}>
-                            {seft.state.TypeUUID}
-                        </span>
-                    </Col>
-                    <Col span={3}>状态: {seft.state.Status}</Col>
-                    <Col span={5}>描述: {seft.state.Desc}</Col>
-                    <Col span={4}>备注: {seft.state.Note}</Col>
-                </Row>
-                <Row style={{padding: '0%',marginTop: '1%'}}>
-                    <Col span={12} style={{border: 'solid 1px #80808029',padding: '0 1%'}}>
-                        <h4>已添加设备</h4>
-                        <Table size={seft.state.bindedTablesize} dataSource={seft.state.selDevList} columns={columns}/>
-                    </Col>
-                    <Col span={1}></Col>
-                    <Col span={11} style={{border: 'solid 1px #80808029',padding: '0 1%'}}>
-                        <Feature/>
-                    </Col>
-                </Row>
+            <div>
+                <div style={{marginTop:25,height:180}}>
+                    <Row  type="flex" justify="start" align="middle">
+                        <Col span={5}><img width={'85%'} src={workCenterPic}/></Col>
+                        <Col span={6}>
+                            <div style={{
+                                    fontSize:16,
+                                    display:'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-evenly',
+                                    height: 180}}>
+                                <p>名称：<span>{detailMessage.Name}</span></p>
+                                <p>编号：<span>{detailMessage.ID}</span></p>
+                                <p>类型：<span>{detailMessage.TypeName}</span></p>
+                            </div>
+                        </Col>
+                        <Col>
+                            <div style={{
+                                    fontSize:16,
+                                    display:'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-evenly',
+                                    height: 180}}>
+                                <p>所属车间：{detailMessage.WorkshopName}</p>
+                                <p>备注：{detailMessage.Note}</p>
+                            </div>
+                        </Col>
+                    </Row>
+                </div>
+                <div>
+                    <Row>
+                        <Col span={12}>
+                            <h4>已添加设备</h4>
+                            <Table
+                                size={this.state.bindedTablesize}
+                                dataSource={this.state.workCenterDevList}
+                                columns={columns}/>
+                        </Col>
+                        <Col span={1} style={{textAlign:'center'}}>
+                            <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
+                        </Col>
+                        <Col span={11}>
+                            {/* <Feature/> */}
+                            <span style={{padding:6,fontSize:16}}>设备列表</span>
+                            <Table
+                                size={seft.state.bindedTablesize}
+                                dataSource={this.state.deviceList}
+                                columns={deviceColumns}/>
+                        </Col>
+                    </Row>
+                </div>
             </div>
         )
     }

@@ -1,22 +1,12 @@
 import React, {Component} from 'react';
-import {
-    List,
-    Card,
-    message,
-    Tooltip,
-    Icon,
-    Tabs,
-    DatePicker,
-    Row,
-    Col
-} from 'antd';
+import {List,Card,message,Tooltip,Icon,Tabs,
+    DatePicker,Row,Col,Divider} from 'antd';
 import ReactEcharts from 'echarts-for-react';
 import styles from "./THome.less";
 const TabPane = Tabs.TabPane;
 import moment from 'moment';
-import echarts from 'echarts';
+// import echarts from 'echarts';
 import G2 from '@antv/g2';
-// echarts = require('echarts');
 const {MonthPicker, RangePicker} = DatePicker;
 
 // import {NumberCard} from "../components/ChartCards";
@@ -37,6 +27,51 @@ export default class THome extends Component {
     // 组件已经加载到dom中
     componentDidMount() {
 
+        // var plotHeight = (window.innerHeight - 180) / 4;
+        var plotHeight =38,
+            chartWidth=40;
+        var c0Types = [ 'interval','line','area' ];
+        var c0Data = [
+            [
+                16, 17, 18, 19, 20, 21, 21, 22, 23, 22,
+                19, 20, 20, 21
+            ],
+            [
+                 936, 968, 1025, 999, 998, 1014, 1017, 1010, 1010, 1007,
+                 1004, 988, 1005, 958, 953
+            ],
+            [
+                71, 70, 69, 68, 65, 60, 55, 55, 50, 52,
+                73, 72, 72, 71, 68, 63, 57, 58, 53, 55,
+                63, 59, 61, 64, 58, 53, 48, 48, 45, 45,
+                63, 64, 63, 67, 58, 56, 53, 59, 51, 54
+            ]
+        ];
+        c0Data.forEach(function (values, index) {
+            var data = values.map(function (value, i) {
+                return {
+                    x: '' + i,
+                    y: value
+                };
+            });
+            var chart = new G2.Chart({
+                container: 'miniChart' + index,
+                forceFit: true,
+                height: plotHeight,
+                width:chartWidth,
+                padding: 0
+            });
+            chart.source(data);
+            chart.axis(false);
+            chart.legend(false);
+            chart.tooltip({
+                showTitle: false,
+            });
+            chart[c0Types[index]]()
+                .position('x*y');
+            chart.render();
+        });
+        /**************************************/
         const chartOption = {
             xAxis: {
                 type: 'category',
@@ -70,12 +105,7 @@ export default class THome extends Component {
                 }
             ]
         };
-
         this.setState({option: chartOption})
-
-        // 基于准备好的dom，初始化echarts实例
-        // var myChart = echarts.init(document.getElementById('tend-charts'));
-        // 指定图表的配置项和数据
         var option = {
             xAxis: {
                 type: 'category',
@@ -107,11 +137,10 @@ export default class THome extends Component {
                 }
             ]
         };
-
         // 使用刚指定的配置项和数据显示图表。
         // myChart.setOption(option);
         // window.onresize=()=>{console.log('onresize');}
-
+        /**************************************/
         const data = [
             {
                 year: '1951 年',
@@ -174,75 +203,78 @@ export default class THome extends Component {
 
         const data = [
             {
-                title: '总设备数',
-                /*content:()=>{
-                    var options = {
-                        title : {
-                            text: '状态统计分布',
-                            subtext: '纯属虚构',
-                            x:'right'
-                        },
-                        tooltip: {
-                            trigger: 'item',
-                            formatter: "{a} <br/>{b} : {c} ({d}%)"
-                        },
-                        legend: {
-                            orient: 'vertical',
-                            left: 'left',
-                            data: [ '停机中', '运行中', '报警中' ]
-                        },
-                        series: [
-                            {
-                                name: '访问来源',
-                                type: 'pie',
-                                radius: '55%',
-                                center: [ '50%', '60%' ],
-                                data: [
-                                    { value: 3, name: '停机中' },
-                                    { value: 6, name: '运行中' },
-                                    { value: 1, name: '报警中' },
-                                ],
-                                itemStyle: {
-                                    emphasis: {
-                                        shadowBlur: 10,
-                                        shadowOffsetX: 0,
-                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
-                                    }
-                                }
-                            }
-                        ]
-                    };
-
-                    return(<ReactEcharts
-                        option={options}
-                        style={{height:200,width:'90%'}}
-                        className='react_for_echarts' />)
-                }*/
+                title: '总产量',
                 content: () => {
-                    return (<div>
-                        <p>生产订单</p>
-                    </div>)
+                    return (
+                        <div>
+                            <div style={{fontSize:25,color:'#000000'}}>
+                                223433<span style={{marginLeft:8}}>pcs</span>
+                            </div>
+                            <div>周同比<span style={{marginLeft:8}}>12%<Icon style={{color:'#f01212'}} type="caret-up" /></span></div>
+                            <div>日同比<span style={{marginLeft:8}}>11%<Icon type="caret-down" /></span></div>
+                        </div>
+                    )
+                },
+                footer:()=>{
+                    return(
+                        <div>
+                            日均产量<span>234</span><span>pcs</span>
+                        </div>
+                    )
                 }
-            }, {
-                title: 'Title 2',
+            },
+            {
+                title: '出货量',
                 content: () => {
-                    return (<div>
-                        <p>出货量</p>
-                    </div>)
+                    return (
+                        <div>
+                            <div style={{fontSize:25,color:'#000000'}}>3451</div>
+                            <div style={{width:200}} id="miniChart0"></div>
+                        </div>
+                    )
+                },
+                footer:()=>{
+                    return(
+                        <div>
+                            日订单量<span>234</span><span>pcs</span>
+                        </div>
+                    )
                 }
-            }, {
-                title: 'Title 3',
+            },
+            {
+                title: '良品量',
                 content: () => {
-                    return (<div>
-                        <p>返货量</p>
-                    </div>)
+                    return (
+                        <div>
+                            <div style={{fontSize:25,color:'#000000'}}>351</div>
+                            <div style={{width:200}} id="miniChart1"></div>
+                        </div>
+                    )
+                },
+                footer:()=>{
+                    return(
+                        <div>
+                            日均良品率<span>93</span><span>%</span>
+                        </div>
+                    )
                 }
-            }, {
-                title: 'Title 4',
+            },
+            {
+                title: '机器故障率',
                 content: () => {
-                    return (<div>
-                        <p>次品量</p>
-                    </div>)
+                    return (
+                        <div>
+                            <div style={{fontSize:25,color:'#000000'}}>3%</div>
+                            <div id="miniChart2"></div>
+                        </div>
+                    )
+                },
+                footer:()=>{
+                    return(
+                        <div>
+                            故障率<span>3</span><span>%</span>
+                        </div>
+                    )
                 }
             }
         ];
@@ -299,16 +331,23 @@ export default class THome extends Component {
             <List grid={{
                     gutter: 16,
                     xs: 1,
-                    sm: 1,
-                    md: 1,
+                    sm: 2,
+                    md: 2,
                     lg: 4,
                     xl: 4,
                     xxl: 4
                 }} dataSource={data} renderItem={item => (<List.Item>
                     <Card bodyStyle={{
-                            height: 150
+                            // height: 150
                         }}>
-                        {item.content && item.content()}
+                        <p>{item.title}</p>
+                        <div>
+                            {item.content && item.content()}
+                        </div>
+                        <Divider/>
+                        <div>
+                            {item.footer&&item.footer()}
+                        </div>
                     </Card>
                 </List.Item>)}/>
             <Card style={{width: '100%'}}

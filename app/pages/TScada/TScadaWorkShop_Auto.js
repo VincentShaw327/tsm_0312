@@ -6,7 +6,7 @@
 import React, { Component } from 'react'
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,Alert,List,message} from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
+import { TPostData,urlBase } from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM1.jpg';
 var mqtt = require( 'mqtt' );
 const { Header, Footer, Sider, Content } = Layout;
@@ -248,6 +248,7 @@ export default class TScadaWorkShop_Auto extends Component {
         TPostData( '/api/TProcess/workcenter', "ListActive", dat,
             ( res )=> {
                 var Ui_list = res.obj.objectlist || [];
+                console.log("工作中心列表===",res);
                 var totalcount = res.obj.objectlist.length;
                 Ui_list.forEach(( item, index )=> {
                     aEquipList.push( {
@@ -256,6 +257,7 @@ export default class TScadaWorkShop_Auto extends Component {
                         UUID: item.UUID,
                         WorkshopUUID: item.WorkshopUUID,
                         Name: item.Name,
+                        Image:item.Image,
                         style: 'top-equip-light' //默认机台为离线状态
                     } )
                 } );
@@ -505,7 +507,7 @@ export default class TScadaWorkShop_Auto extends Component {
     }
 
     componentWillUnmount() {
-        client.end()
+        // client.end()
     }
 
     render() {
@@ -568,7 +570,7 @@ export default class TScadaWorkShop_Auto extends Component {
                                             <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <img src={devicePic} style={{width:"100%"}} />
+                                                        <img src={urlBase+item.Image} style={{width:"100%"}} />
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={5}>

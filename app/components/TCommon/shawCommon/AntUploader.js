@@ -6,7 +6,6 @@
 import { Upload, Icon, message } from 'antd';
 import React, { Component } from 'react';
 import { TPostData,urlBase } from '../../../utils/TAjax';
-// import { DoPost} from '../../server';
 
 
 function getBase64(img, callback) {
@@ -17,9 +16,9 @@ function getBase64(img, callback) {
 
 function beforeUpload(file) {
     // console.log('文件file',file);
-  const isJPG = file.type === 'image/jpeg';
+  const isJPG = file.type === 'image/jpeg'||file.type === 'image/png';
   if (!isJPG) {
-    message.error('只能上传图片文件!');
+    message.error('只支持jpg、png格式的图片!');
   }
   const isLt2M = file.size / 1024 / 1024 < 1;
   if (!isLt2M) {
@@ -33,48 +32,45 @@ export default class Uploader extends Component{
         super(props)
         this.state = {
             loading: false,
+            imageUrl:'',
+            defaultUrl:this.props.defaultUrl
         }
     }
-/*    setPath(){
-        let dat={
-            UUID : 0,
-            Path : "-"
-        }
-        DoPost(this.url, "UpdateImage", dat, function(res) {
-            console.log('上传成功:',res);
-        }, function(error) {
-            message.info(error);
-        })
-    }*/
+    componentWillReceiveProps(){
+        this.setState?this.setState({imageUrl:''}):''
+    }
+
     handleChange = (info) => {
         console.log('文件info',info);
-        // let str= eval("("+info.file.response+")");
-
-        // let response= eval(`(${info.file.response})`);
-        // console.log('res-result', response);
-
         if (info.file.status === 'uploading') {
           this.setState({ loading: true });
           return;
         }
         if (info.file.status === 'done') {
-          // Get this url from response in real world.
-          getBase64(info.file.originFileObj, imageUrl => this.setState({
-            imageUrl,
-            loading: false,
-          }));
+          getBase64(info.file.originFileObj, imageUrl => {
+              // console.log("imageUrl",imageUrl);
+              this.setState({
+                imageUrl,
+                loading: false,
+              })
+          }
+        );
         }
-        /*if(response.result&&response.result === 'TRUE'){
-            this.props.onPathChange(response.filepathname);
-        }*/
         //修改后台接口后的更改
         let response=info.file.response;
-        if(response.obj&&response.obj.length){
+        // console.log("onPathChange",this.props.onPathChange);
+        if(response.obj&&response.obj.length&&this.props.onPathChange){
             this.props.onPathChange(response.obj[0]);
+        }
+        if(response.obj&&response.obj.length&&this.props.savePath){
+            this.props.savePath(response.obj[0]);
         }
     }
 
     render(){
+        // console.log('defaultUrl',this.props.defaultUrl);
+
+        const defaultUrl=this.props.defaultUrl;
         const uploadButton = (
           <div>
             <Icon type={this.state.loading ? 'loading' : 'plus'} />
@@ -82,8 +78,9 @@ export default class Uploader extends Component{
           </div>
         );
         const imageUrl = this.state.imageUrl;
+        // console.log('defaultUrl',imageUrl=='');
+
         let Url = this.props.actionUrl;
-        // console.log('more tupian',imageUrl)
         return (
             <Upload
                 name="avatar"
@@ -94,7 +91,11 @@ export default class Uploader extends Component{
                 beforeUpload={beforeUpload}
                 onChange={this.handleChange}
             >
-                {imageUrl ? <img height="200" src={imageUrl} alt="" /> : uploadButton}
+                {
+                    imageUrl ? <img height="200" src={imageUrl} alt="" />:
+                    defaultUrl?<img height="200" src={urlBase+defaultUrl} alt="" /> :
+                    uploadButton
+                }
             </Upload>
         );
     }

@@ -2,7 +2,7 @@ import React from 'react';
 import { browserHistory } from 'react-router'
 import { Form, Modal, Button, message } from 'antd';
 import CFormItem from './CreateFormItem';
-import { plInfo, HandleCreate } from '../../server'
+// import { plInfo, HandleCreate } from '../../server'
 
 let MeduleInfo
 let self
@@ -22,15 +22,11 @@ let CForm = React.createClass({
             labelCol: { span: 4 },
             wrapperCol: { span: 18 },
         }
+
         return  CType ?
                 <div className="create create-extra">
                   <Button type="primary" icon="plus-circle-o" onClick={this.showModal}>添加</Button>
-                  <Modal title='添加新对象'
-                         okText="确认"
-                         cancelText="取消"
-                         visible={this.state.visible}
-                         onOk={this.handleCreate}
-                         onCancel={this.hideModal}>
+                  <Modal title='添加新对象' visible={this.state.visible} onOk={this.handleCreate} onCancel={this.hideModal}>
                     <Form layout="horizontal">
                       {
                         CType.map(function(item, index){
@@ -45,12 +41,31 @@ let CForm = React.createClass({
     },
 
     handleCreate: function(){
+      // console.log('收到表单值：', this.props.form.getFieldsValue());
+
       this.props.form.validateFields((errors, values) => {
+          let subValue={};
           if (!!errors) {
+              console.log('Errors in form!!!');
               message.error('添加失败')
               return;
           }else{
-              this.props.submit(values)
+              if(values.hasOwnProperty('range-picker')){
+                  subValue={
+                      ...values,
+                      'range-picker': [values['range-pick'][0].format('YYYY-MM-DD'), values['range-pick'][1].format('YYYY-MM-DD')],
+                  }
+              }else if(values.hasOwnProperty('date-picker')){
+                  subValue={
+                      ...values,
+                      'date-picker': values['date-picker'].format('YYYY-MM-DD'),
+                  }
+              }else{
+                  subValue={
+                      ...values,
+                  }
+              }
+              this.props.submit(subValue);
               this.hideModal();
               message.success('添加成功')
           }
@@ -58,15 +73,15 @@ let CForm = React.createClass({
     },
 
     handleReset: function() {
-        this.props.form.resetFields()
+        this.props.form.resetFields();
     },
 
     showModal: function() {
-        this.setState({ visible: true })
+        this.setState({ visible: true });
     },
 
     hideModal: function() {
-        this.setState({ visible: false })
+        this.setState({ visible: false });
         this.handleReset();
     }
 });

@@ -20,7 +20,8 @@ export default class TUserList extends Component {
         super( props )
         this.state = {
             showDetal:false,
-            detailID:0
+            detailID:0,
+            detailMessage:{},
         }
         seft = this;
     }
@@ -54,35 +55,43 @@ export default class TUserList extends Component {
                     title: '用户名',
                     dataIndex: 'Name',
                     type: 'string'
-                }, {
+                },
+                {
                     name: 'LoginName',
                     label: '登录名',
                     type: 'string',
-        		},{
+        		},
+                {
                     name: 'Email',
                     label: '邮箱',
                     type: 'string',
-        		}, {
+        		},
+                {
                     title: '手机号',
                     dataIndex: 'Mobile',
                     type: 'string'
-                }, {
+                },
+                {
                     title: '电话',
                     dataIndex: 'Phone',
                     type: 'string'
-                },{
+                },
+                {
                     title: '用户启用时间',
                     dataIndex: 'ActiveDateTime',
                     type: 'string'
-                },{
+                },
+                {
                     title: '用户冻结时间',
                     dataIndex: 'InactiveDateTime',
                     type: 'string'
-                },{
+                },
+                {
                     title: '备注',
                     dataIndex: 'Note',
                     type: 'string'
-                },{
+                },
+                {
                     title: '操作',
                     dataIndex: 'uMachineUUID',
                     type: 'operate',
@@ -158,7 +167,7 @@ export default class TUserList extends Component {
                     type: 'string',
                     placeholder: '请输入描述',
         		},*/{
-                    name: 'uploadImg',
+                    name: 'Image',
                     label: '图片',
                     type: 'antUpload',
                     url: '/api/tupload/do',
@@ -185,6 +194,12 @@ export default class TUserList extends Component {
                     placeholder: '请输入用户编号',
                     rules: [{required: true,message: '编号至少为 1 个字符'}]
                 }*/
+                {
+                    name: 'Image',
+                    label: '图片',
+                    type: 'antUpload',
+                    url: '/api/tupload/do',
+                }
             ],
 
             RType: [
@@ -250,7 +265,8 @@ export default class TUserList extends Component {
                     key: keyWord,
                     LoginName: data.LoginName,
                     Password: password,
-                    ID: "-"
+                    ID: "-",
+                    Path:data.Image
                 }
 
                 TPostData( this.url, "Add", dat, function ( res ) {
@@ -267,6 +283,7 @@ export default class TUserList extends Component {
                     Email: data.Email,
                     Mobile: data.Mobile,
                     Phone: data.Phone,
+                    Path:data.Image,
                     Desc: data.Desc,
                     Note: data.Note
                 }
@@ -275,7 +292,7 @@ export default class TUserList extends Component {
                 } )
             },
 
-            UpdateImage: function ( data, callback ) {
+            /*UpdateImage: function ( data, callback ) {
                 let dat = {
                     UUID: data.UUID,
                     Path: data.uploadImg
@@ -286,7 +303,7 @@ export default class TUserList extends Component {
                 }, function ( error ) {
                     message.info( error );
                 } )
-            },
+            },*/
 
             Delete: function ( data, callback ) {
                 var dat = {
@@ -327,11 +344,15 @@ export default class TUserList extends Component {
 
     toggleRender(record){
         console.log("toggleRender",record);
-        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
+        this.setState({
+            showDetal:!this.state.showDetal,
+            detailID:record.UUID,
+            detailMessage:record
+        });
     }
 
     render() {
-        const {showDetal,detailID}=this.state;
+        const {showDetal,detailID,detailMessage}=this.state;
         const {detail}=this.props;
         let Feature = this.feature;
         const UserDetail=(
@@ -347,7 +368,7 @@ export default class TUserList extends Component {
                         <Icon type="rollback" />
                     </span>
                 </div>
-                <TUserDetails UUID={detailID}/>
+                <TUserDetails detailMessage={detailMessage} UUID={detailID}/>
             </div>
         );
 

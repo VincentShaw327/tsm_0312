@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import {Table, Button, Radio, Row, Col, Divider,Select,
     List, Timeline, Menu, Card, DatePicker,Input,Form,message,
-    Switch,Icon,Popconfirm } from 'antd';
+    Switch,Icon,Popconfirm,Upload } from 'antd';
 const Option = Select.Option;
 const ButtonGroup = Button.Group;
 const FormItem = Form.Item;
 import { TPostData, urlBase } from '../../utils/TAjax';
 import { CModal } from '../../components/TModal';
+import styles from './common.less';
+import TableExport from 'tableexport';
 
-export default class TstateTimeOverview extends Component {
+export default class TstateTimeOverview extends React.Component {
 
     constructor( props ) {
         super( props )
@@ -31,9 +33,12 @@ export default class TstateTimeOverview extends Component {
             bordered:false,
             size:"small",
             subTableSize:"default",
-            scroll:undefined
+            scroll:undefined,
+            exportMenu:'',
+            hasAddBtn:false
         }
         this.url='/api/tmanufacture/manufacture';
+        // this.DataTable = React.createRef();
     }
 
     componentWillMount() {
@@ -43,18 +48,30 @@ export default class TstateTimeOverview extends Component {
     }
 
     componentDidMount() {
-
+        /*let csvDom=document.getElementsByClassName("ant-table-body")[0];
+        let btnWrap=document.getElementById("exportOrderMenu");
+        const btn=TableExport(csvDom.children[0]);
+        let children= btn.selectors[0].children[0];
+        let childNodes=children.getElementsByTagName('button');
+        childNodes[0].innerHTML="xlsx";
+        childNodes[1].innerHTML="csv";
+        childNodes[2].innerHTML="txt";
+        console.log("btn",children);
+        console.log("childNodes",childNodes);
+        btnWrap.appendChild(children);*/
     }
 
     getProductOrder() {
         const {ProModelID,keyWord,orderState}=this.state;
+        // console.log("查询条件：",ProModelID,keyWord,orderState);
+        // this.setState({keyWord:this.keyWordInput.input.value});
 
         var dat = {
             PageIndex: 0,
             PageSize: -1,
             ProductModelUUID:ProModelID, //产品型号UUID
             Status: orderState, //生产订单状态
-            KeyWord: keyWord
+            KeyWord: this.keyWordInput?this.keyWordInput.input.value:''
         }
         TPostData( '/api/tmanufacture/manufacture', "ListProductOrder", dat,
             ( res ) => {
@@ -65,7 +82,6 @@ export default class TstateTimeOverview extends Component {
                 Ui_list.forEach( ( item, index ) => {
                     list.push( {
                         key: index,
-                        /*********/
                         UUID: item.UUID,
                         ID: item.ID,
                         Name: item.Name,
@@ -77,22 +93,34 @@ export default class TstateTimeOverview extends Component {
                         PlanNumber: item.PlanNumber, //计划产量
                         FinishNumber: item.FinishNumber, //实际产量
                         RejectNumber: item.RejectNumber, //不合格数量
-                        IssuedDateTime: item.IssuedDateTime, //下单日期
-                        IssuedDateTime: '2018-02-12', //下单日期
-                        // PlanDeliverDateTime: item.PlanDeliverDateTime, //计划交期
-                        PlanDeliverDateTime: '2017-03-24', //计划交期
-                        // DeliverDateTime: item.DeliverDateTime, //实际交期
-                        DeliverDateTime: '2017-03-28', //实际交期
-                        PlanStartDateTime: '2017-03-28', //计划开始时间
-                        StartDateTime: '2017-03-28', //实际开始时间
-                        PlanFinishDateTime: '2017-03-28', //计划完成时间
-                        FinishDateTime: '2017-03-28', //实际完成时间
+                        IssuedDate: item.IssuedDate, //下单日期
+                        PlanDeliverDate: item.PlanDeliverDate, //计划交期
+                        DeliverDateTime: item.DeliverDateTime, //实际交期
+                        PlanStartDateTime: item.PlanStartDateTime, //计划开始时间
+                        StartDateTime: item.StartDateTime, //实际开始时间
+                        PlanFinishDateTime: item.PlanFinishDateTime.slice(0,10), //计划完成时间
+                        FinishDateTime: item.FinishDateTime, //实际完成时间
                         UpdateDateTime: item.UpdateDateTime, //更新时间
                         Status: item.Status
                         //状态：0 - 冻结，1-活跃，拆分 2 - 已拆分，未排程 2 - 已排程，未投产  3 - 投产，生产中   4 - 完成生产  5 - 取消/变更
                     } )
                 } )
                 this.setState({productOrderList:list,loading:false});
+                if(this.state.hasAddBtn==false){
+                    let csvDom=document.getElementById("orderTableWrap")
+                    .getElementsByClassName("ant-table-body")[0];
+                    let btnWrap=document.getElementById("exportOrderMenu");
+                    const btn=TableExport(csvDom.children[0]);
+                    let children= btn.selectors[0].children[0];
+                    let childNodes=children.getElementsByTagName('button');
+                    childNodes[0].innerHTML="xlsx";
+                    childNodes[1].innerHTML="csv";
+                    childNodes[2].innerHTML="txt";
+                    console.log("btn",children);
+                    console.log("childNodes",childNodes);
+                    btnWrap.appendChild(children);
+                }
+                this.setState({hasAddBtn:true});
             },
             ( error ) => {
                 message.info( error );
@@ -137,90 +165,6 @@ export default class TstateTimeOverview extends Component {
         )
     }
 
-    renderSubTable(record,e2,e3){
-        // this.setState({loading:true});
-        // console.log("record",record);
-        let list=[];
-        const {lotListData}=this.state;
-        const subcolumns=[
-                {
-                    title: '子订单号',
-                    dataIndex: 'strID',
-                    type: 'string'
-                },
-                {
-                    title: 'BOM单',
-                    dataIndex: 'strBomName',
-                    type: 'string'
-                },
-                /*{
-                  title: '订单号',
-                  dataIndex: 'strProductOrderID',
-                  type: 'string'
-                },
-                {
-                  title: '订单名称',
-                  dataIndex: 'strProductOrderName',
-                  type: 'string'
-                },*/
-                {
-                    title: '计划产量',
-                    dataIndex: 'strPlanNumber',
-                    type: 'string'
-                },
-                {
-                    title: '已完成',
-                    dataIndex: 'strFinishNumber',
-                    type: 'string'
-                },
-                /*{
-                  title: '计划开始',
-                  dataIndex: 'strPlanStartDateTime',
-                  type: 'string'
-                },*/
-                {
-                    title: '计划交货日期',
-                    dataIndex: 'strPlanDeliverDateTime',
-                    type: 'string'
-                },
-                {
-                    title: '订单状态',
-                    dataIndex: 'strStatus',
-                    type: 'string',
-                    render: ( e1, record ) => {
-                        // console.log('record',record);
-                        // return <StateBotton stateType='task' state = { record.strStatus }/>
-                        return(<span>{record.status}</span>)
-                    }
-                },
-                {
-                    title: '操作',
-                    dataIndex: 'uMachineUUID',
-                    type: 'operate', // 操作的类型必须为 operate
-                    render:(e1,e2,e3)=>{
-                        // console.log("行数据",e1,e2,e3);
-                        return(<a href="#" onClick={this.toggleSubUModalShow.bind(this,e2)}>编辑</a>)
-                    }
-                }
-        ];
-        lotListData.forEach((item,index)=>{
-            if(item.ProductOrderUUID==record.UUID){
-                list.push(item);
-            }
-        })
-
-        return (
-            <Table
-                columns = { subcolumns }
-                dataSource = {list }
-                bordered={false}
-                pagination = { false }
-                // loading={this.state.loading}
-                size={this.state.size}
-            />
-        );
-    }
-
     getSubTableData (){
 
         var dat = {
@@ -235,7 +179,7 @@ export default class TstateTimeOverview extends Component {
 
         TPostData( this.url, "ListLot", dat,
             ( res) => {
-                console.log( '查询到加工订单列表', res );
+                console.log( '查询到子订单列表', res );
                 let Ui_list = res.obj.objectlist || [],
                     list = [],
                     totalCount = res.obj.totalcount;
@@ -251,9 +195,11 @@ export default class TstateTimeOverview extends Component {
                         MoldModelUUID: item.MoldModelUUID, //模具型号UUID
                         ProductModelUUID: item.ProductModelUUID, //产品型号UUID
                         strPlanNumber: item.PlanNumber, //计划产量
+                        ScheduleNumber:item.ScheduleNumber,
                         strFinishNumber: item.FinishNumber, //完成产量
                         strRejectNumber: item.RejectNumber, //不良产量
                         strPlanStartDateTime: item.PlanStartDateTime, //计划开始时间
+                        PlanFinishDateTime: item.PlanFinishDateTime, //计划开始时间
                         strStartDateTime: item.StartDateTime, //实际开始时间
                         strPlanDeliverDateTime: item.PlanDeliverDateTime, //计划交付时间
                         strDeliverDateTime: item.DeliverDateTime, //实际交付时间
@@ -270,6 +216,95 @@ export default class TstateTimeOverview extends Component {
             ( error ) => {
                 message.info( error );
             }, false
+        );
+    }
+
+    renderSubTable(record,e2,e3){
+        // this.setState({loading:true});
+        // console.log("record",record);
+        let list=[];
+        const {lotListData}=this.state;
+        const subcolumns=[
+                {
+                    title: '任务单号',
+                    dataIndex: 'strID',
+                    type: 'string'
+                },
+                {
+                    title: '计划产量',
+                    dataIndex: 'strPlanNumber',
+                    type: 'string'
+                },
+                {
+                    title: '已排产量',
+                    dataIndex: 'ScheduleNumber',
+                    type: 'string'
+                },
+                {
+                    title: '工作中心',
+                    dataIndex: 'strWorkCenter',
+                    type: 'string'
+                },
+                /*{
+                    title: '已完成',
+                    dataIndex: 'strFinishNumber',
+                    type: 'string'
+                },*/
+                /*{
+                  title: '计划开始',
+                  dataIndex: 'strPlanStartDateTime',
+                  type: 'string'
+                },*/
+                {
+                    title: '计划完成日期',
+                    dataIndex: 'PlanFinishDateTime',
+                    type: 'string'
+                },
+                {
+                    title: '订单状态',
+                    dataIndex: 'strStatus',
+                    type: 'string',
+                    render: ( e1, record ) => {
+                        let status='';
+                        status=e1==0?(<span>已取消(0)</span>):
+                            e1==1?(<span>未排产(1)</span>):
+                            e1==2?(<span>排产中(2)</span>):
+                            e1==3?(<span>已排产(3)</span>):
+                            e1==4?(<span>暂停中(4)</span>):
+                            e1==5?(<span>已完成(5)</span>):
+                            e1==6?(<span>生产中(6)</span>):
+                            e1==9?(<span>生产挂起(9)</span>):
+                            e1==10?(<span>已完成(10)</span>):
+                            e1==11?(<span>暂停中(11)</span>):
+                            <span>{e1}</span>
+                        return  status;
+                    }
+                },
+                /*{
+                    title: '操作',
+                    dataIndex: 'uMachineUUID',
+                    type: 'operate', // 操作的类型必须为 operate
+                    render:(e1,e2,e3)=>{
+                        // console.log("行数据",e1,e2,e3);
+                        return(<a href="#" onClick={this.toggleSubUModalShow.bind(this,e2)}>编辑</a>)
+                    }
+                }*/
+        ];
+        lotListData.forEach((item,index)=>{
+            if(item.ProductOrderUUID==record.UUID){
+                list.push(item);
+            }
+        });
+
+        return (
+            <Table
+                columns = { subcolumns }
+                dataSource = {list }
+                bordered={false}
+                pagination = { false }
+                // loading={this.state.loading}
+                size={this.state.size}
+            />
         );
     }
 
@@ -296,7 +331,7 @@ export default class TstateTimeOverview extends Component {
             Name: '--', //订单名称
             ProductModelUUID: data.ProductModelUUID, //产品型号UUID
             PlanNumber: data.Number, //计划产量
-            PlanDeliverTime: data[ 'date-picker' ] //计划交期
+            PlanDeliverDate: data.PlanDeliverDate.format( 'YYYY-MM-DD' ) //计划交期
         }
         TPostData('/api/tmanufacture/manufacture', "AddProductOrder", dat,
             ( res )=> {
@@ -419,6 +454,16 @@ export default class TstateTimeOverview extends Component {
         this.getProductOrder();
     }
 
+    handleExport(){
+        let csvDom=document.getElementsByClassName("ant-table-body")[0];
+        let btnWrap=document.getElementById("exportOrderMenu");
+        console.log('csvDom',csvDom.children);
+        // console.log('csvDom',csvDom.getElementsByTagName("table"));
+        const btn=TableExport(csvDom.children[0]);
+        console.log("btn",btn.selectors[0].children[0]);
+        btnWrap.appendChild(btn.selectors[0].children[0]);
+    }
+
     handleToggleBorder(value){
         console.log("ToggleBorder",value);
         this.setState({bordered:value});
@@ -497,12 +542,12 @@ export default class TstateTimeOverview extends Component {
                 },*/
                 {
                     title: '下单日期',
-                    dataIndex: 'IssuedDateTime',
+                    dataIndex: 'IssuedDate',
                     type: 'string'
                 },
                 {
                     title: '计划交期',
-                    dataIndex: 'PlanDeliverDateTime',
+                    dataIndex: 'PlanDeliverDate',
                     type: 'string'
                 },
               /*{
@@ -536,13 +581,18 @@ export default class TstateTimeOverview extends Component {
                     type: 'string',
                     width: 120,
                     render: ( e1, record ) => {
-                        let status='';
-                        status=e1==1?(<span>未拆分(1)</span>):
-                            e1==2?status=(<span>已拆分(2)</span>):<span>{e1}</span>
-
-                        return  status;
-                        // console.log('record',record);
-                        // return <StateBotton stateType='order' state = { record.Status }/>
+                        let statusText='';
+                        statusText=e1==0?'已取消':
+                            e1==1?'未就绪':
+                            e1==2?'未执行':
+                            e1==3?'暂停中':
+                            e1==4?'执行中':
+                            e1==5?'已完成':
+                            e1==6?'生产中':
+                            e1==9?'生产挂起':
+                            e1==10?'已完成':
+                            e1==11?'11':e1;
+                        return  <span className="stateBotton">{statusText}</span>
                     }
                 },
                 {
@@ -575,7 +625,7 @@ export default class TstateTimeOverview extends Component {
                                 </span>
                             );
                         }
-                        else if(record.Status&&record.Status==11){
+                        else if(record.Status&&record.Status==3){
                             operate=(
                                 <span>
                                     <Popconfirm
@@ -596,19 +646,13 @@ export default class TstateTimeOverview extends Component {
                                 </span>
                             );
                         }
+                        else operate=(<span>无</span>)
                         return operate;
                     }
                 }
         ];
 
         const CFormItem=[
-            /*{
-                name: 'Name',
-                label: '订单名称',
-                type: 'string',
-                placeholder: '请输入订单名称',
-                rules: [{required: true,message: '请输入生产订单名称'}]
-            },*/
             {
                 name: 'ID',
                 label: '订单号',
@@ -629,30 +673,6 @@ export default class TstateTimeOverview extends Component {
                 defaultValue: '1',
                 rules: [ { required: true, message: '请选择产品型号' } ],
                 options:ProModelSList
-                /*postJson: {
-                    postUrl: '/api/tmanufacture/product_model',
-                    method: 'ListActive',
-                    dat: {
-                        PageIndex: 0,
-                        PageSize: -1,
-                        TypeUUID: -1,
-                        KeyWord: ""
-                    }
-                },
-                options: [
-                    {
-                        text: "型号1",
-                        value: '1'
-                    },
-                    {
-                        text: "型号2",
-                        value: '2'
-                    },
-                    {
-                        text: "型号3",
-                        value: '3'
-                    }
-                ]*/
             },
             {
                 name: 'Number',
@@ -663,7 +683,7 @@ export default class TstateTimeOverview extends Component {
                 rules: [{ required: true, message: '请输入计划产量' },]
             },
             {
-                name: 'PlanDeliverDateTime',
+                name: 'PlanDeliverDate',
                 label: '计划交期',
                 type: 'date',
                 placeholder: '请输入计划交期',
@@ -735,9 +755,27 @@ export default class TstateTimeOverview extends Component {
             }
         ];
 
+        const props = {
+          name: 'file',
+          action: '//jsonplaceholder.typicode.com/posts/',
+          headers: {
+            authorization: 'authorization-text',
+          },
+          onChange(info) {
+            if (info.file.status !== 'uploading') {
+              console.log(info.file, info.fileList);
+            }
+            if (info.file.status === 'done') {
+              message.success(`${info.file.name} file uploaded successfully`);
+            } else if (info.file.status === 'error') {
+              message.error(`${info.file.name} file upload failed.`);
+            }
+          },
+        };
+
             return (
                 <div>
-                    <Card style={{marginBottom:20}}>
+                    <Card >
                         <Row gutter={16}>
                             <Col className="gutter-row" span={6}>
                                 <div className="gutter-box"><span style={{ width: "40%" }}>搜索内容:</span>
@@ -760,72 +798,70 @@ export default class TstateTimeOverview extends Component {
                             </Col>
                             <Col className="gutter-row" span={6}>
                                 <div className="gutter-box"><span style={{ width: "40%" }}>订单状态:</span>
-                                <Select defaultValue="-1" style={{ width: "60%" }} handleStatusChange={this.handleChange}>
-                                    <Option value="-1" key="all">全部</Option>
-                                    <Option value="1" key="1">已拆分</Option>
-                                    <Option value="2" key="2">已排产</Option>
-                                    <Option value="3" key="3">已取消</Option>
-                                </Select>
+                                    <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleStatusChange.bind(this)}>
+                                        <Option value="-1" key="all">全部</Option>
+                                        <Option value="0" key="0">已取消</Option>
+                                        <Option value="1" key="1">未就绪</Option>
+                                        <Option value="2" key="2">未执行</Option>
+                                        <Option value="3" key="3">暂停中</Option>
+                                        <Option value="4" key="4">执行中</Option>
+                                        <Option value="5" key="5">已完成</Option>
+                                    </Select>
                                 </div>
                             </Col>
                             <Col className="gutter-row" span={6}>
                                 <div className="gutter-box">
-                                    <Button onClick={this.handleRetrieve.bind(this)} type="primary" icon="search">查询</Button>
+                                    <Button onClick={this.getProductOrder.bind(this)} type="primary" icon="search">查询</Button>
                                 </div>
                             </Col>
                         </Row>
                     </Card>
-
-                    <div style={{marginBottom:20}}>
-                        <Row>
-                            <Col span={8}>
-                                {/* <Button type="primary" icon="plus"
-                                    onClick={this.toggleCModalShow.bind(this)}>
-                                    添加
-                                </Button> */}
-                                <ButtonGroup>
-                                    <Button
-                                        onClick={this.toggleCModalShow.bind(this)}
-                                        icon="plus" type="primary">添加</Button>
-                                    <Button icon="file-excel" type="primary">导入</Button>
-                                    <Button icon="file-excel" type="primary">导出</Button>
-                                </ButtonGroup>
-                            </Col>
-                            <Col span={16}>
-                                <Form layout="inline">
-                                    <FormItem label="边框">
-                                        <Switch checked={bordered} onChange={this.handleToggleBorder.bind(this)} />
-                                    </FormItem>
-                                    {/* <FormItem label="Fixed Header">
-                                        <Switch checked={!!scroll} onChange={this.handleScollChange.bind(this)} />
-                                    </FormItem> */}
-                                    <FormItem label="大小">
-                                        <Radio.Group size="default" value={size} onChange={this.handleSizeChange.bind(this)}>
-                                            <Radio.Button value="default">大</Radio.Button>
+                    <div style={{marginTop:20}}>
+                            <ButtonGroup style={{verticalAlign:'bottom'}}>
+                                <Button
+                                    onClick={this.toggleCModalShow.bind(this)}
+                                    icon="plus" type="primary">添加</Button>
+                                {/* <Button onClick={this.handleExport.bind(this)}  icon="file-excel" type="primary">导出</Button> */}
+                                <Upload {...props}><Button icon="file-excel" type="primary">导入</Button></Upload>
+                            </ButtonGroup>
+                        <div style={{float:'right'}}>
+                            <Form layout="inline">
+                                <FormItem label="导出">
+                                    <div className="exportMenuWrap" id="exportOrderMenu" style={{display:'flex'}}></div>
+                                </FormItem>
+                                <FormItem label="边框">
+                                    <Switch checked={bordered} onChange={this.handleToggleBorder.bind(this)} />
+                                </FormItem>
+                                <FormItem label="大小">
+                                    <Radio.Group size="default" value={size} onChange={this.handleSizeChange.bind(this)}>
+                                        <Radio.Button value="default">大</Radio.Button>
                                         <Radio.Button value="middle">中</Radio.Button>
-                                    <Radio.Button value="small">小</Radio.Button>
-                                        </Radio.Group>
-                                    </FormItem>
-                                </Form>
-                            </Col>
-                        </Row>
+                                        <Radio.Button value="small">小</Radio.Button>
+                                    </Radio.Group>
+                                </FormItem>
+                            </Form>
+                        </div>
                     </div>
-
-                    <Table
-                      // rowSelection={this.state.isSelection?rowSelection:null}
-                      expandedRowRender={this.renderSubTable.bind(this)}
-                      dataSource={this.state.productOrderList}
-                      columns={columns}
-                      loading={this.state.loading}
-                      bordered={bordered}
-                      size={size}
-                      scroll={scroll}
-                      // {...tableStatus}
-                      // pagination={pagination}
-                      // hideDefaultSelections={true}
-                      // scroll={{ x:1500 }}
-                      // onExpand={this.handleExpand}
-                      />
+                    <div id="orderTableWrap">
+                        <Table
+                          // rowSelection={this.state.isSelection?rowSelection:null}
+                          expandedRowRender={this.renderSubTable.bind(this)}
+                          dataSource={this.state.productOrderList}
+                          columns={columns}
+                          loading={this.state.loading}
+                          bordered={bordered}
+                          size={size}
+                          scroll={scroll}
+                          ref="dataTable"
+                          className="dataTable"
+                          // title={()=><span>订单列表</span>}
+                          // {...tableStatus}
+                          // pagination={pagination}
+                          // hideDefaultSelections={true}
+                          // scroll={{ x:1500 }}
+                          // onExpand={this.handleExpand}
+                          />
+                    </div>
                     <CModal
                         FormItem={CFormItem}
                         submit={this.handleCreat.bind(this)}

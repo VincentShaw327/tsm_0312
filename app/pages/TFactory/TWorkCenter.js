@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
-import { Button, Icon,message,Breadcrumb } from 'antd';
+import { Button, Icon,message,Breadcrumb,Popover } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
+import { TPostData,urlBase } from '../../utils/TAjax';
 import TWorkCenterDetail from './TWorkCenterDetail';
 
 //作用域
@@ -17,7 +17,8 @@ export default class TWorkCenter extends Component {
             siderInfo: props.siderInfo,
             loading: false,
             showDetal:false,
-            detailID:0
+            detailID:0,
+            detailMessage:{}
         }
         this.url='/api/TFactory/workshop';
         seft = this;
@@ -70,6 +71,24 @@ export default class TWorkCenter extends Component {
                     title: '序号',
                     dataIndex: 'key',
                     type: 'string'
+                },
+                {
+                    title: '图片',
+                    dataIndex: 'Image',
+                    render: ( e, record ) => {
+                        // console.log('图片地址',e);
+                        const content = (
+                            <div>
+                              <img width="300"  src={urlBase+e} alt="这是工作中心图片"/>
+                            </div>
+                        );
+                        return (
+                            <Popover placement="right"  content={content} trigger="hover">
+                              {/* <Button>Right</Button> */}
+                              <img height='50' src={urlBase+e}/>
+                            </Popover>
+                        )
+                    }
                 },
                 {
                     title: '名称',
@@ -144,26 +163,14 @@ export default class TWorkCenter extends Component {
                     label: '名称',
                     type: 'string',
                     placeholder: '修改名称时必填',
-                    rules: [
-                        {
-                            required: true,
-                            min: 1,
-                            message: '名称不能为空'
-                        }
-                    ]
+                    rules: [{required: true,message: '名称不能为空'}]
                 },
                 {
                     name: 'ID',
                     label: '编号',
                     type: 'string',
                     placeholder: '修改编号时必填',
-                    rules: [
-                        {
-                            required: true,
-                            min: 1,
-                            message: '编号不能为空'
-                        }
-                    ]
+                    rules: [{required: true,min: 1,message: '编号不能为空'}]
                 },
                 {
                     name: 'TypeUUID',
@@ -190,6 +197,12 @@ export default class TWorkCenter extends Component {
                     label: '备注',
                     type: 'string',
                     placeholder: '其它',
+                },
+                {
+                    name: 'Image',
+                    label: '图片',
+                    type: 'antUpload',
+                    url: '/api/tupload/do',
                 }
             ],
 
@@ -220,7 +233,13 @@ export default class TWorkCenter extends Component {
                     defaultValue: '1',
                     rules: [{required: true,message: '请选择所属车间'}],
                     options: workshopList
-				}
+				},
+                {
+                    name: 'Image',
+                    label: '图片',
+                    type: 'antUpload',
+                    url: '/api/tupload/do',
+                }
 			],
 
             RType: [
@@ -264,17 +283,18 @@ export default class TWorkCenter extends Component {
                     Ui_list.forEach( function ( item, index ) {
                         list.push( {
                             key: index,
-                            ID: item.ID,
                             UUID: item.UUID,
-                            Name: item.Name,
                             TypeUUID:item.TypeUUID.toString(),
                             WorkshopUUID: item.WorkshopUUID.toString(),
-                            WorkshopName: item.WorkshopName,
+                            Name: item.Name,
+                            ID: item.ID,
                             TypeName: item.TypeName,
-                            Status: item.Status,
-                            UpdateDateTime: item.UpdateDateTime,
+                            WorkshopName: item.WorkshopName,
+                            Image:item.Image,
+                            Note: item.Note,
                             Desc: item.Desc,
-                            Note: item.Note
+                            UpdateDateTime: item.UpdateDateTime,
+                            Status: item.Status
                         } )
                     } )
 
@@ -296,15 +316,14 @@ export default class TWorkCenter extends Component {
             Create: function ( data, callback ) {
                 creatKeyWord++;
                 let keyWord = creatKeyWord;
-
                 let dat = {
                     key: keyWord,
                     ID: data.ID,
                     Name: data.Name,
+                    Path:data.Image,
                     TypeUUID: data.TypeUUID,
                     WorkshopUUID: data.WorkshopUUID //所属这几ID
                 }
-
                 TPostData( this.url, "Add", dat, function ( res ) {
                     //这块请求更新数据 成功回调
                     callback( dat );
@@ -317,6 +336,7 @@ export default class TWorkCenter extends Component {
                     TypeUUID: data.TypeUUID,
                     WorkshopUUID: data.WorkshopUUID,
                     Name: data.Name,
+                    Path:data.Image,
                     ID: data.ID,
                     Desc: data.Desc,
                     Note: data.Note
@@ -324,14 +344,28 @@ export default class TWorkCenter extends Component {
                 TPostData( this.url, 'Update', dat, function ( res ) {
                     //这块请求更新数据 成功回调
                     /****       修改成功后，更改回显数据到页面      ****/
-                    workCenterType.forEach( function ( item, index ) {
+                    /*workCenterType.forEach( function ( item, index ) {
                         if ( item.value == data.TypeUUID ) {
                             data.TypeName = item.text
                         }
-                    } )
+                    } )*/
                     callback( data );
                 } )
             },
+
+            /*UpdateImage: function ( data, callback ) {
+                console.log("UpdateImage",data);
+                let dat = {
+                    UUID: data.UUID,
+                    Path: data.Image
+                }
+                TPostData('/api/TProcess/workcenter', "UpdateImage", dat, function ( res ) {
+                    console.log( '路径设置成功', res );
+                    callback( data );
+                }, function ( error ) {
+                    message.info( error );
+                } )
+            },*/
             // 删除操作
             Delete: function ( data, callback ) {
                 var dat = {
@@ -372,12 +406,20 @@ export default class TWorkCenter extends Component {
         this.feature = FeatureSetConfig( config );
     }
 
+    getWorkCenterType(){
+
+    }
+
     toggleRender(record){
-        this.setState({showDetal:!this.state.showDetal,detailID:record.UUID})
+        this.setState({
+            showDetal:!this.state.showDetal,
+            detailID:record.UUID,
+            detailMessage:record
+        })
     }
 
     render() {
-        const {showDetal,detailID}=this.state;
+        const {showDetal,detailID,detailMessage}=this.state;
         let Feature=this.feature;
         const {detail}=this.props;
         const WorkCenterDetail=(
@@ -385,15 +427,15 @@ export default class TWorkCenter extends Component {
                 <div>
                     <Breadcrumb style={{display:"inline-block"}}>
                         <Breadcrumb.Item>
-                            <a onClick={this.toggleRender.bind(this)} href="#">BOM管理</a>
+                            <a onClick={this.toggleRender.bind(this)} href="#">工作中心</a>
                         </Breadcrumb.Item>
-                        <Breadcrumb.Item>BOM单详情</Breadcrumb.Item>
+                        <Breadcrumb.Item>工作中心详情</Breadcrumb.Item>
                     </Breadcrumb>
                     <span onClick={this.toggleRender.bind(this)} className="backup-button">
                         <Icon type="rollback" />
                     </span>
                 </div>
-                <TWorkCenterDetail workcenterUUID={detailID}/>
+                <TWorkCenterDetail detailMessage={detailMessage} workcenterUUID={detailID}/>
             </div>
         );
         return showDetal?WorkCenterDetail:<Feature/>;

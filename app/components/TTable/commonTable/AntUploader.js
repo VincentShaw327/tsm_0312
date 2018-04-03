@@ -5,7 +5,7 @@
  **/
 import { Upload, Icon, message } from 'antd';
 import React, { Component } from 'react';
-import { DoPost} from '../../../server';
+// import { DoPost} from '../../server';
 
 
 function getBase64(img, callback) {
@@ -32,33 +32,25 @@ export default class Uploader extends Component{
         super(props)
         this.state = {
             loading: false,
-            // imageUrl:this.props.defaultUrl
-            // filepathname:'//'
         }
     }
-    setPath(){
+/*    setPath(){
         let dat={
             UUID : 0,
             Path : "-"
         }
         DoPost(this.url, "UpdateImage", dat, function(res) {
-            /*var list = [];
-            // console.log( "查询到工作学习类别", res );
-            var workstation_list = res.obj.objectlist || [];
-            var totalCount = res.obj.totalcount;
-            callback(list, {
-                total: totalCount,
-                nPageSize: 10
-            })*/
+            console.log('上传成功:',res);
         }, function(error) {
             message.info(error);
         })
-    }
+    }*/
     handleChange = (info) => {
         console.log('文件info',info);
         // let str= eval("("+info.file.response+")");
-        let response= eval(`(${info.file.response})`);
-        console.log('res-result', response);
+
+        // let response= eval(`(${info.file.response})`);
+        // console.log('res-result', response);
 
         if (info.file.status === 'uploading') {
           this.setState({ loading: true });
@@ -71,23 +63,16 @@ export default class Uploader extends Component{
             loading: false,
           }));
         }
-        // response:"{result:'TRUE',filepathname:'/images/636506818748799700_20151111090240_46206.jpg'}"
-        if(response.result === 'TRUE'){
-            // message.success( '更新成功!' );
+        /*if(response.result&&response.result === 'TRUE'){
             this.props.onPathChange(response.filepathname);
-            /*let dat={
-                UUID : 0,
-                Path : response.filepathname
-            }
-            DoPost('http://demo.sc.mes.top-link.me/service/Handler_MoldModel_V1.ashx', "UpdateImage", dat, function(res) {
-                console.log('路径设置成功',res);
-            }, function(error) {
-                message.info(error);
-            })*/
+        }*/
+        //修改后台接口后的更改
+        let response=info.file.response;
+        if(response.obj&&response.obj.length){
+            this.props.onPathChange(response.obj[0]);
         }
-
-
     }
+
     render(){
         const uploadButton = (
           <div>
@@ -104,7 +89,7 @@ export default class Uploader extends Component{
                 listType="picture-card"
                 className="avatar-uploader"
                 showUploadList={false}
-                action={Url}
+                action={"http://localhost:52383"+Url}
                 beforeUpload={beforeUpload}
                 onChange={this.handleChange}
             >

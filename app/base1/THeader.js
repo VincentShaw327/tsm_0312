@@ -24,6 +24,50 @@ const userMenu = (
     </Menu>
 )
 
+const setMenu = (
+    <Menu>
+        <Menu.Item >
+            <Icon type="arrows-alt" />
+            <span onClick={fullScreen}>全屏</span>
+        </Menu.Item>
+        <Menu.Item>
+            <Icon type="setting" />
+            <span>设置</span>
+        </Menu.Item>
+        <Menu.Item>
+            <Icon type="setting" />
+            <span>退出登录</span>
+        </Menu.Item>
+    </Menu>
+)
+
+function fullScreen() {
+
+  var el = document.documentElement;
+
+  var rfs = el.requestFullScreen || el.webkitRequestFullScreen ||
+
+      el.mozRequestFullScreen || el.msRequestFullScreen;
+
+  if(typeof rfs != "undefined" && rfs) {
+
+    rfs.call(el);
+
+  } else if(typeof window.ActiveXObject != "undefined") {
+
+    //for IE，这里其实就是模拟了按下键盘的F11，使浏览器全屏
+
+    var wscript = new ActiveXObject("WScript.Shell");
+
+    if(wscript != null) {
+
+        wscript.SendKeys("{F11}");
+
+    }
+
+  }
+}
+
 const THeader = () => {
 
     return (
@@ -68,7 +112,7 @@ const THeader = () => {
               </Col> */}
               <Col span={1}>
                 <span className='menu-item'>
-                    <Dropdown overlay={userMenu}>
+                    <Dropdown overlay={setMenu}>
                       <Icon type="appstore" className="header-menu-icon"/>
                     </Dropdown>
                 </span>

@@ -5,7 +5,8 @@
  **/
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react';
-import { Button, Radio, Row, Col, Divider, List, Timeline, Menu, Card, DatePicker } from 'antd';
+import { Button, Radio, Row, Col, Divider, List, Timeline, Menu, Card,
+    DatePicker,Select } from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
 import { TPostData, urlBase } from '../../utils/TAjax';
 import StatusOverview from './components/statusOverview';
@@ -13,10 +14,7 @@ import TimeLine from './components/timeLine';
 import Mock from 'mockjs';
 import ReactEcharts from 'echarts-for-react';
 
-let seft
 let Feature
-let creatKeyWord;
-let MtrlTpList = []
 
 
 export default class App extends Component {
@@ -31,7 +29,6 @@ export default class App extends Component {
             Dailychart: {},
             cardContent: 'timeLine'
         }
-        seft = this;
     }
 
     componentWillMount() {
@@ -85,15 +82,15 @@ export default class App extends Component {
                 var Ui_list = res.obj.objectlist || [];
                 console.log( '查询到工作中心列表', Ui_list );
                 Ui_list.forEach( ( item, index ) => {
-                    /*list.push( {
+                    list.push( {
                         key: index,
                         ID: item.ID,
-                        UUID: item.UUID,
+                        value: item.UUID,
                         Name: item.Name,
-                    } )*/
-                    list.push( item.Name );
+                    } )
+                    // list.push( item.Name );
                 } )
-                this.setState( { workCenterList: list } )
+                this.setState( { workCenterList: list, } )
             },
             ( error ) => {
                 message.info( error );
@@ -115,6 +112,19 @@ export default class App extends Component {
 
     render() {
         // console.log( "工作中心列表是:",this.state.workCenterList );
+        const defaultSelectedWS=(()=>{
+            let wsList=this.state.workshopList,
+                defaultValue='';
+            if(wsList.length){
+                defaultValue=wsList[0].hasOwnProperty('UUID')?wsList[0].UUID:'-1'
+            }
+            else{
+                defaultValue='-1';
+
+            }
+            return defaultValue;
+        })();
+
         let option1 = {
             tooltip: {
                 trigger: 'axis',
@@ -271,7 +281,6 @@ export default class App extends Component {
                         <Radio.Group value={toggleView}  onChange={this.handleToggle}>
                             <Radio.Button value="timeLine">时间轴</Radio.Button>
                             <Radio.Button value="overView">状态统计</Radio.Button>
-                            {/* <Radio.Button value="small">Small</Radio.Button> */}
                         </Radio.Group>
                     </Col>
                     <Col span={18}>日期:
@@ -284,8 +293,56 @@ export default class App extends Component {
 
         return (
             <div>
-                {/* <Divider>状态统计</Divider> */}
-                <Row gutter={16}>
+                <Card>
+                    <Row gutter={16}>
+                        <Col className="gutter-row" span={6}>
+                            <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
+                                <Select defaultValue={defaultSelectedWS} style={{ width: "60%" }} onChange={this.handleChange}>
+                                    <Option value="-1" key="all">全部</Option>
+                                    {
+                                        this.state.workshopList.map((item,index)=>{
+                                                return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                        })
+                                    }
+                                </Select>
+                            </div>
+                        </Col>
+                        <Col className="gutter-row" span={6}>
+                            <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
+                                <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
+                                    <Option value="-1" key="all">全部</Option>
+                                    {
+                                        this.state.workCenterList.map((item,index)=>{
+                                                return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                        })
+                                    }
+                                </Select>
+                            </div>
+                        </Col>
+                        <Col className="gutter-row" span={6}>
+                            <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
+                                <DatePicker style={{ width: "60%" }} />
+                            </div>
+                        </Col>
+                        <Col className="gutter-row" span={6}>
+                            <div className="gutter-box">
+                                <Button type="primary" icon="search">查询</Button>
+                            </div>
+                        </Col>
+                    </Row>
+                </Card>
+                <div style={{margin:'20px 0'}}>
+                    <Radio.Group value={toggleView}  onChange={this.handleToggle}>
+                        <Radio.Button value="timeLine">时间轴</Radio.Button>
+                        <Radio.Button value="overView">状态统计</Radio.Button>
+                    </Radio.Group>
+                </div>
+                {
+                    this.state.cardContent=="timeLine"?
+                    <TimeLine lineLabelList={this.state.workCenterList} />:
+                    <StatusOverview workCenterList={this.state.workCenterList} />
+                }
+                {/* <Row gutter={16}>
                   <Col span={4}>
                       <Menu
                           onClick={this.handleMenuClick.bind(this)}
@@ -304,43 +361,15 @@ export default class App extends Component {
                   <Col className="gutter-row" span={19}>
                     <div className="gutter-box">
                         <Card title={titleContent}>
-                            {/* <ReactEcharts
-                                option={option1}
-                                style={{height:550}}
-                                className='react_for_echarts' /> */}
                             {
                                 this.state.cardContent=="timeLine"?
-                                <StatusOverview workCenterList={this.state.workCenterList} />:
-                                <TimeLine workCenterList={this.state.workCenterList} />
+                                <TimeLine workCenterList={this.state.workCenterList} />:
+                                <StatusOverview workCenterList={this.state.workCenterList} />
                             }
                         </Card>
                     </div>
                   </Col>
-                  <Col className="gutter-row" span={1}>
-                    <div className="gutter-box">
-                        {/* <Timeline>
-                            {
-                                data.map((item,index)=>{
-                                    let circleColor='';
-                                    if(item.status==1)circleColor="green"
-                                    else if(item.status==0)circleColor="red"
-                                    else if(item.status==2)circleColor="blue"
-                                    return(
-                                        <Timeline.Item  color={circleColor}><span>{item.title}</span><span>{item.time}</span></Timeline.Item>);
-                                })
-                            }
-                        </Timeline> */}
-                    </div>
-                  </Col>
-                </Row>
-                {/* <Divider>设备状态日志</Divider>
-                <div style={{height: '240px',overflowX: 'auto',}}>
-                    <Feature/>
-                </div> */}
-                {/* <Collapse bordered={false} defaultActiveKey={['1']} >
-                    <Panel key="1" header="OEE统计图表" style={{borderRadius: '4px',border: '0',overflow: 'hidden',fontSize: '12px'}}>
-                    </Panel>
-                </Collapse> */}
+                </Row> */}
             </div>
         )
     }

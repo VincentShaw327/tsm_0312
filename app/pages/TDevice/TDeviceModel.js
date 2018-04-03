@@ -159,7 +159,7 @@ export default class DeviceList extends Component {
                     type: 'string',
                 },
                 {
-                    name: 'uploadImg',
+                    name: 'Image',
                     label: '图片',
                     type: 'antUpload',
                     url: '/api/tupload/do',
@@ -187,6 +187,12 @@ export default class DeviceList extends Component {
                     rules: [ { required: true, message: '请选择类别' } ],
                     type: 'select',
                     options: DeviceTypeList,
+                },
+                {
+                    name: 'Image',
+                    label: '图片',
+                    type: 'antUpload',
+                    url: '/api/tupload/do',
                 }
             ],
             //查询的数据项
@@ -256,6 +262,7 @@ export default class DeviceList extends Component {
             },
             //创建表单的回调处理函数
             Create: function ( data, callback ) {
+                console.log("设备型号创建的data",data);
                 let dat = {
                     key: '1000',
                     Name: data.Name,
@@ -263,6 +270,7 @@ export default class DeviceList extends Component {
                     TypeUUID: data.TypeUUID,
                     CategoryUUID: -1,
                     VendorUUID: -1,
+                    Path :data.Image
                 }
                 TPostData( this.url, "Add", dat, function ( res ) {
                     callback( dat );
@@ -270,6 +278,8 @@ export default class DeviceList extends Component {
             },
             //信息修改回调处理
             Update: function ( data, callback ) {
+                console.log("设备型号编辑的data",data);
+
                 let dat = {
                     UUID: data.UUID,
                     Name: data.Name,
@@ -279,6 +289,7 @@ export default class DeviceList extends Component {
                     Note: '-',
                     CategoryUUID: -1,
                     VendorUUID: -1,
+                    Path :data.Image
                 }
                 TPostData( this.url, "Update", dat, function ( res ) {
                     //这块请求更新数据 成功回调
@@ -286,10 +297,10 @@ export default class DeviceList extends Component {
                 } )
             },
 
-            UpdateImage: function ( data, callback ) {
+            /*UpdateImage: function ( data, callback ) {
                 let dat = {
                     UUID: data.UUID,
-                    Path: data.uploadImg
+                    Path: data.Image
                 }
                 TPostData( this.url, "UpdateImage", dat, function ( res ) {
                     console.log( '路径设置成功', res );
@@ -297,7 +308,7 @@ export default class DeviceList extends Component {
                 }, function ( error ) {
                     message.info( error );
                 } )
-            },
+            },*/
             // 删除操作
             Delete: function ( data, callback ) {
                 var dat = {

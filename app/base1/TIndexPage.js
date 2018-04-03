@@ -16,6 +16,26 @@ export default class TIndexPage extends React.Component {
 
     constructor( props ) {
         super( props );
+        this.state={
+            minHeight:0,
+            maxHeight:0
+        }
+    }
+
+    componentWillMount(){   }
+
+    componentDidMount(){
+        this.setState({
+            maxHeight:innerHeight-64,
+            minHeight:innerHeight-64});
+
+        window.onresize=(e)=>{
+            // console.log('e',e);
+            // console.log("innerHeight",innerHeight);
+            this.setState({
+                maxHeight:innerHeight-64,
+                minHeight:innerHeight-64})
+        }
     }
 
     onOpenChange = ( openKeys ) => {
@@ -57,6 +77,9 @@ export default class TIndexPage extends React.Component {
         // console.log("call in father");
         // onClick={(c)=>this.TPageOpen('TWorkShopList')}
     }
+    handleScroll(e){
+        console.log("Scroll",e);
+    }
 
     render() {
         const { children } = this.props
@@ -89,10 +112,10 @@ export default class TIndexPage extends React.Component {
                             autoHideDuration={200}
                             autoHeight
                             autoHeightMin={500}
-                            autoHeightMax={560}
+                            autoHeightMax={this.state.maxHeight}
+                            // autoHeightMax={560}
                             thumbMinSize={30}
                             universal={true}
-                            // style={{height: 920 }}
                             >
                             <Menu theme="light" mode="inline" defaultSelectedKeys={['4']}  onClick={this.THandleClick}>
                               <Menu.Item key="THome">
@@ -316,6 +339,9 @@ export default class TIndexPage extends React.Component {
                                         {/* <Link to={'/TWarningConfig'}>
                                         </Link> */}
                                     </Menu.Item>
+                                    <Menu.Item key="TDA_Terminal">
+                                        <span>终端管理</span>
+                                    </Menu.Item>
                                     {/* <Menu.Item key="TWorkShopCategory">车间类型</Menu.Item>
                                     <Menu.Item key="TWorkCenterCategory">工作中心类型</Menu.Item> */}
                               </SubMenu>
@@ -340,10 +366,12 @@ export default class TIndexPage extends React.Component {
                     {/* <THeader /> */}
                     <Scrollbars
                       // onScroll={this.handleScroll}
-                      // onScrollFrame={(e1,e2)=>{console.log('onScrollFrame')}}
-                      // onScrollStart={this.handleScrollStart}
-                      // onScrollStop={this.handleScrollStop}
+                      // onScrollFrame={this.handleScroll}
+                      // onScrollStart={this.handleScroll}
+                      // onScrollStop={this.handleScroll}
+                      // onUpdate={this.handleScroll}
                       // onUpdate={()=>{console.log('onUpdate')}}
+
                       // renderView={(e1,e2)=>{console.log('renderView')}}
                       // renderTrackHorizontal={this.renderTrackHorizontal}
                       // renderTrackVertical={this.renderTrackVertical}
@@ -354,12 +382,12 @@ export default class TIndexPage extends React.Component {
                       autoHideDuration={200}
                       autoHeight
                       autoHeightMin={500}
-                      autoHeightMax={560}
+                      // autoHeightMax={560}
+                      autoHeightMax={this.state.maxHeight}
                       thumbMinSize={30}
                       universal={true}
-                      // style={{height: 920 }}
                       >
-                    <Layout>
+                    <Layout >
                       <Content style={{ margin: '24px 16px 0' }}>
                           <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
                             <TTabMain ref={child => this._child = child} content ={children} />

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { message, Menu, Icon, Row, Col, Card, Table, Divider, DatePicker, Button, Select } from 'antd';
+import { message, Menu, Icon, Row, Col, Card, Table, Divider,
+     DatePicker, Button, Select } from 'antd';
 import { TPostData } from '../../utils/TAjax';
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -143,18 +144,18 @@ export default class TProductionReport extends Component {
                     UUID: item.UUID, //加工订单UUID
                     BomUUID: item.BomUUID,
                     lotJobID: item.lotJobID ? item.lotJobID : `#${index}`,
-                    FinishDateTime: item.FinishDateTime ? item.FinishDateTime : '2018-03-12',
                     FinishNumber: item.FinishNumber,
                     MoldModelUUID: item.MoldModelUUID,
-                    PlanFinishDateTime: item.PlanFinishDateTime ? item.PlanFinishDateTime : '2018-03-18',
+                    PlanFinishDateTime: item.PlanFinishDateTime.slice(0,10),
+                    FinishDateTime: item.FinishDateTime.slice(0,10),
+                    PlanStartDateTime: item.PlanStartDateTime.slice(0,10) ,
+                    StartDateTime: item.StartDateTime.slice(0,10),
                     PlanNumber: item.PlanNumber,
-                    PlanStartDateTime: item.PlanStartDateTime ? item.PlanStartDateTime : '2018-02-14',
                     ProductModelID: item.ProductModelID,
                     ProductModelName: item.ProductModelName,
                     ProductModelSN: item.ProductModelSN,
                     ProductModelUUID: item.ProductModelUUID,
                     RejectNumber: item.RejectNumber,
-                    StartDateTime: item.StartDateTime ? item.StartDateTime : '2018-02-14',
                     Status: item.Status,
                     UUID: item.UUID,
                     UpdateDateTime: item.UpdateDateTime,
@@ -260,27 +261,38 @@ export default class TProductionReport extends Component {
                 title: '工单状态',
                 dataIndex: 'Status',
                 key: 'Status',
-                render: ( e1, record ) => {
-                    // console.log('工单状态',record);
-                    // return <StateBotton stateType='workOrder' state = { record.Status }/>
+                render: (e1, record) => {
+                    // console.log('任务状态',record);
+                    let status='';
+                    status=e1==0?(<span>生产取消(0)</span>):
+                        e1==1?(<span>未派工(1)</span>):
+                        e1==2?(<span>已派工(2)</span>):
+                        e1==3?(<span>生产中(3)</span>):
+                        e1==4?(<span>生产挂起(4)</span>):
+                        e1==5?(<span>生产完成(5)</span>):
+                        e1==6?(<span>生产中(6)</span>):
+                        e1==9?(<span>生产挂起(9)</span>):
+                        e1==10?(<span>已完成(10)</span>):
+                        e1==11?(<span>暂停中(11)</span>):
+                        <span>{e1}</span>
+                    return  status;
                 }
-            }, {
+            },
+            /*{
                 title: '操作',
                 dataIndex: 'uMachineUUID',
                 type: 'operate', // 操作的类型必须为 operate
                 multipleType: "dispatch",
-          }
+            }*/
         ];
         // console.log("workshopList",this.state.workshopList);
         return (
             <div>
-                <Row gutter={16}>
+                {/* <Row gutter={16}>
                   <Col className="gutter-row" span={4}>
                     <Menu
-                          // onClick={this.handleClick}
                           style={{ width: 256 }}
                           defaultSelectedKeys={['1']}
-                          // defaultOpenKeys={['sub1']}
                           mode="inline"
                           >
                           {
@@ -290,10 +302,22 @@ export default class TProductionReport extends Component {
                           }
                     </Menu>
                   </Col>
-                  <Col span={20}>
+                  <Col span={20}> */}
                       <Card style={{marginBottom:20}}>
                           <Row gutter={16}>
-                              <Col className="gutter-row" span={6}>
+                              <Col className="gutter-row" span={5}>
+                                  <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
+                                      <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
+                                          <Option value="-1" key="all">全部</Option>
+                                          {
+                                              this.state.workshopList.map((item,index)=>{
+                                                      return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                              })
+                                          }
+                                      </Select>
+                                  </div>
+                              </Col>
+                              <Col className="gutter-row" span={5}>
                                   <div className="gutter-box"><span style={{ width: "40%" }}>产品:</span>
                                       <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
                                           <Option value="-1" key="all">全部</Option>
@@ -305,7 +329,7 @@ export default class TProductionReport extends Component {
                                       </Select>
                                   </div>
                               </Col>
-                              <Col className="gutter-row" span={6}>
+                              <Col className="gutter-row" span={5}>
                                   <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
                                       <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
                                           <Option value="-1" key="all">全部</Option>
@@ -317,12 +341,12 @@ export default class TProductionReport extends Component {
                                       </Select>
                                   </div>
                               </Col>
-                              <Col className="gutter-row" span={6}>
+                              <Col className="gutter-row" span={5}>
                                   <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
                                       <DatePicker style={{ width: "60%" }} />
                                   </div>
                               </Col>
-                              <Col className="gutter-row" span={6}>
+                              <Col className="gutter-row" span={4}>
                                   <div className="gutter-box">
                                       <Button type="primary" icon="search">查询</Button>
                                   </div>
@@ -335,8 +359,8 @@ export default class TProductionReport extends Component {
                           bordered={true}
                           size="small"
                       />
-                  </Col>
-                </Row>
+                  {/* </Col>
+                </Row> */}
             </div>
         )
     }

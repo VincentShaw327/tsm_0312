@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactEcharts from 'echarts-for-react';
+import styles from './timeLine.less';
 
 export default class statusOverview extends Component {
 
@@ -10,113 +10,238 @@ export default class statusOverview extends Component {
         }
     }
 
-    render() {
-        const{workCenterList}=this.props;
+    componentDidMount(){
+/*        var canvas1=document.getElementById("xAxis");
+        var context=canvas1.getContext("2d");
 
-        let option1 = {
-            tooltip: {
-                trigger: 'axis',
-                axisPointer: { // 坐标轴指示器，坐标轴触发有效
-                    type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+        var x0=0.1*canvas1.width;
+        var y0=0.9*canvas1.height;
+        //the begin of the axis
+        var widthAx=0.8*canvas1.width;
+        var heightAx=0.8*canvas1.height;
+        //the width and height of the axis system
+
+        context.moveTo(0,0.5*canvas1.height);
+        context.lineTo(1*canvas1.width,0.5*canvas1.height);
+        context.strokeStyle='black';
+        context.lineWidth=5;
+        context.stroke();
+        // context.beginPath();
+        context.moveTo(0,0.5*canvas1.height);
+        context.lineWidth=1;
+        // context.strokeStyle='black';
+        let textX=[0,1,2,3,4],
+                ax0=0,
+                ay0=0;
+        for (var i = 0; i <12; i++) {
+            context.lineTo(0.08333*i*canvas1.width,0.1*canvas1.height);
+            ax0=0.08333*i*canvas1.width;
+            ay0=0.7*canvas1.height;
+            // context.stroke();
+            // context.beginPath();
+            context.font="12px normal";
+            context.fillText(textX[i],ax0,ay0);
+            context.moveTo(0.08333*(i+1)*canvas1.width,0.5*canvas1.height);
+        }
+        context.stroke();*/
+
+    }
+
+    render() {
+        const{lineLabelList}=this.props;
+
+        const timeDataList=[
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:13,type:'waring'}
+            ],
+            [
+                {min:108,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:188,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+            [
+                {min:118,type:'run'},
+                {min:198,type:'waring'},
+                {min:148,type:'OffLine'},
+                {min:218,type:'standby'},
+                {min:432,type:'run'},
+                {min:188,type:'OffLine'},
+                {min:3,type:'waring'}
+            ],
+        ];
+
+        const timeData=[
+            {
+                min:118,
+                type:'run'
+            },
+            {
+                min:198,
+                type:'waring'
+            },
+            {
+                min:148,
+                type:'OffLine'
+            },
+            {
+                min:218,
+                type:'standby'
+            },
+            {
+                min:432,
+                type:'run'
+            },
+            {
+                min:188,
+                type:'OffLine'
+            },
+            {
+                min:3,
+                type:'waring'
+            },
+        ];
+
+        let lineWidth=0;
+
+        /*const timeLineItem=(
+            <div className="timeLineItem" >
+                {
+                    timeData.map((item,index)=>{
+                        lineWidth=Math.round((item.min/1440)*100);
+                        console.log('lineWidth',lineWidth);
+                        return <span
+                                    key={index}
+                                    className={item.type}
+                                    style={{width:`${lineWidth}%`}}
+                                    >{item.type}</span>
+                    })
                 }
-            },
-            legend: {
-                data: [ '离线', '待机', '运行中', '报警' ]
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            xAxis: {
-                type: 'value',
-                /*axisLabel: {
-                    formatter: function ( value, index ) {
-                        let t = Math.floor( value / 60 );
-                        let min = value % 60;
-                        if ( min < 10 ) min = '0' + min;
-                        if ( t < 10 ) t = '0' + t;
-                        return `${t}:${min}`;
-                    }
-                }*/
-            },
-            yAxis: {
-                type: 'category',
-                // data: [ '周一', '周二', '周三', '周四', '周五', '周六', '周日' ]
-                data:workCenterList
-            },
-            series: [
-                {
-                    name: '离线',
-                    type: 'bar',
-                    stack: '总量',
-                    /*label: {
-                        normal: {
-                            show: true,
-                            position: 'insideRight'
+            </div>
+        )*/
+        console.log('lineLabelList',lineLabelList);
+        const timeLineItem=(timeData,index)=>{
+
+            return  (
+                <div className="timeLineItem"  key={index}>
+                    <span className="LineLabel">
+                        {
+                            lineLabelList.length?lineLabelList[index].Name:''
                         }
-                    },*/
-                    data: [ 182, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 282, 122, 182, 212 ],
-              },
-                {
-                    name: '待机',
-                    type: 'bar',
-                    stack: '总量',
-                    /*label: {
-                        normal: {
-                            show: true,
-                            position: 'insideRight'
+                    </span>
+                    <div className="stateTime">
+                        {
+                            timeData.map((item,index)=>{
+                                lineWidth=Math.round((item.min/1440)*100);
+                                // console.log('lineWidth',lineWidth);
+                                return <span
+                                    key={index}
+                                    className={item.type}
+                                    style={{width:`${lineWidth}%`}}
+                                    ></span>
+                            })
                         }
-                    },*/
-                    data: [ 120, 132,254,234,34,34,52,24,152 ]
-              },
-                {
-                    name: '运行中',
-                    type: 'bar',
-                    stack: '总量',
-                    /*label: {
-                        normal: {
-                            show: true,
-                            position: 'insideRight'
-                        }
-                    },*/
-                    data: [ 630, 680, 680, 680,456,345,345,482 ]
-              },
-              {
-                    name: '报警',
-                    type: 'bar',
-                    stack: '总量',
-                    /*label: {
-                        normal: {
-                            show: true,
-                            position: 'insideRight'
-                        }
-                    },*/
-                    data: [34,53,13,65,123,24,52,52,14,23]
-              },
-              {
-                  name: '离线',
-                  type: 'bar',
-                  stack: '总量',
-                  /*label: {
-                      normal: {
-                          show: true,
-                          position: 'insideRight'
-                      }
-                  },*/
-                  data: [ 82, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 282, 122, 182, 212 ],
-            },
-          ]
-        };
+                    </div>
+                </div>
+            )
+        }
 
         return (
-            <div>
-              <ReactEcharts
-                  option={option1}
-                  style={{height:550}}
-                  className='react_for_echarts' />
-             </div>
+            <div className="timeLine">
+                <div className="tooltip">
+                    <span className="tooltip-item">
+                        <span className="tip-run" />
+                        <span className="tip-txt">
+                            运行中
+                        </span>
+                    </span>
+                    <span className="tooltip-item">
+                        <span className="tip-offline"/>
+                        <span className="tip-txt">离线中</span>
+                    </span>
+                    <span className="tooltip-item">
+                        <span className="tip-waring"/>
+                        <span className="tip-txt">报警中</span>
+                    </span>
+                    <span className="tooltip-item">
+                        <span className="tip-standby"/>
+                        <span className="tip-txt">待机中</span>
+                    </span>
+                </div>
+                {
+                    timeDataList.map((item,index)=>{
+                        // lineWidth=Math.round((item.min/1440)*100);
+                        // console.log('lineWidth',lineWidth);
+                        return timeLineItem(item,index)
+                    })
+                }
+                {/* <div className="xAxis" id="xAxis" /> */}
+                <canvas className="xAxis" id="xAxis" />
+
+            </div>
         )
     }
 }

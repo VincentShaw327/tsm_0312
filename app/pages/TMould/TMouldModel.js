@@ -54,17 +54,17 @@ export default class MouldModel extends Component {
                 },
                 {
                   title: '图片',
-                  dataIndex: 'moldImag',
+                  dataIndex: 'Image',
                   render:(e,record)=>{
                       const content = (
                           <div>
-                            <img width="300"  src={urlBase+record.uploadImg}/>
+                            <img width="300"  src={urlBase+e}/>
                           </div>
                         );
                       return (
                           <Popover placement="right"  content={content} trigger="hover">
                             {/* <Button>Right</Button> */}
-                            <img height='50' src={urlBase+record.uploadImg}/>
+                            <img height='50' src={urlBase+e}/>
                           </Popover>
                         )
                   }
@@ -143,11 +143,10 @@ export default class MouldModel extends Component {
                     type: 'string',
                     placeholder: '请输入备注'
                 }, {
-                  name: 'uploadImg',
+                  name: 'Image',
                   label: '图片',
                   type: 'antUpload',
                   url: '/api/tupload/do',
-                  // url:this.props.server.url+'Handler_FileTrans_V1.ashx',
                 },
             ],
             //添加的弹出框菜单
@@ -165,7 +164,13 @@ export default class MouldModel extends Component {
                     type: 'string',
                     placeholder: '请输入编号',
                     rules: [{ required: true,  message: '请输入编号' }]
-                }
+                },
+                {
+                  name: 'Image',
+                  label: '图片',
+                  type: 'antUpload',
+                  url: '/api/tupload/do',
+                },
             ],
             //查询的数据项
             RType: [
@@ -200,7 +205,7 @@ export default class MouldModel extends Component {
                             strMoldModelDesc: item.Desc,
                             strMoldModelNote: item.Note,
                             UpdateDateTime:item.UpdateDateTime,
-                            uploadImg:item.Image
+                            Image:item.Image
                         })
                     })
                     callback(list, {
@@ -216,7 +221,8 @@ export default class MouldModel extends Component {
                 let dat = {
                     key: '1000',
                     ID: data.strMoldModelID,
-                    Name: data.strMoldModelName
+                    Name: data.strMoldModelName,
+                    Path:data.Image
                 }
                 // console.log("设备创建后的字段",data);
                 TPostData(this.url, "Add", dat, function(res) {
@@ -232,8 +238,9 @@ export default class MouldModel extends Component {
                     ID: data.strMoldModelID,
                     Name: data.strMoldModelName,
                     Size: data.strMoldModelSize,
+                    Path : data.Image,
                     Desc: data.strMoldModelDesc,
-                    Note: data.strMoldModelNote
+                    Note: data.strMoldModelNote,
                 }
 
                 TPostData(this.url, "Update", dat, function(res) {
@@ -241,20 +248,24 @@ export default class MouldModel extends Component {
                     callback(data);
                 })
             },
-            UpdateImage: function(data, callback) {
+
+            /*UpdateImage: function(data, callback) {
                 // console.log("看看MoldModel---UPDATE data",data);
                 let dat={
                     UUID : data.UUID,
-                    Path : data.uploadImg
+                    Path : data.Image
                 }
 
-                TPostData(this.url, "UpdateImage", dat, function(res) {
-                    console.log('路径设置成功',res);
-                    callback(data);
-                }, function(error) {
-                    message.info(error);
-                })
-            },
+                TPostData(this.url, "UpdateImage", dat,
+                    function(res) {
+                        console.log('路径设置成功',res);
+                        callback(data);
+                    },
+                    function(error) {
+                        message.info(error);
+                    }
+                )
+            },*/
             // 删除操作
             Delete: function(data, callback) {
                 var dat = {

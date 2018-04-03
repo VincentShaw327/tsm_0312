@@ -26,7 +26,9 @@ let RForm = React.createClass({
                 <div></div>;
     },
 
-    handleRetrieve: function(){
+    handleRetrieve: function(value){
+        // console.log('选中的值是:',value);
+        // console.log('表单值是:',this.props.form.getFieldsValue());
       this.props.submit(this.props.form.getFieldsValue())
     }
 })

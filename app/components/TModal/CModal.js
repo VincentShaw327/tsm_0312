@@ -29,22 +29,8 @@ export default class CModal extends Component {
                 message.error( '添加失败' )
                 return;
             } else {
-                if ( values.hasOwnProperty( 'range-pick' ) ) {
-                    subValue = {
-                        ...values,
-                        'range-picker': [ values[ 'range-pick' ][ 0 ].format( 'YYYY-MM-DD' ), values[ 'range-pick' ][ 1 ].format( 'YYYY-MM-DD' ) ],
-                    }
-                } else if ( values.hasOwnProperty( 'date-picker' ) ) {
-                    subValue = {
-                        ...values,
-                        'date-picker': values[ 'date-picker' ].format( 'YYYY-MM-DD' ),
-                    }
-                } else {
-                    subValue = {
-                        ...values,
-                    }
-                }
-                this.props.submit( subValue );
+
+                this.props.submit( values );
                 this.hideModal();
                 // message.success('添加成功');
             }

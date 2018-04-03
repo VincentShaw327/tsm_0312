@@ -95,10 +95,6 @@ export function TPostData(url,op,obj,cb,err)
  /*.then((err)=>{
    cb(err);
  })*/;
-//.catch((err)=>{
-//  err(err);
-//});
-
 
 
 }

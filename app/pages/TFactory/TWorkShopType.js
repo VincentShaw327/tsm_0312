@@ -4,10 +4,9 @@
  *添加人:shaw
  **/
 import React, { Component } from 'react'
-// import FeatureSetConfig from '../zengcommon/FeatureSet';
+// import {CommonTable} from '../../components/TTable';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
 import { Table, Menu, Icon, Badge, Dropdown,message } from 'antd';
-// import FeatureSetConfig from '../zengcommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
 let seft;
 
@@ -270,10 +269,13 @@ export default class App extends Component {
 
         };
         this.feature = FeatureSetConfig(tableConfig);
+        // this.config=tableConfig;
     }
 
     render() {
         let Feature=this.feature;
+        // console.log('CommonTable',CommonTable);
+        // <CommonTable config={this.config} />
         return (
             <Feature />
         )

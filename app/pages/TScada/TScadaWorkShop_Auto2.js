@@ -6,7 +6,7 @@
 import React, { Component } from 'react'
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
 import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
+import { TPostData ,urlBase} from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM4.jpg';
 var mqtt = require( 'mqtt' );
 const { Header, Footer, Sider, Content } = Layout;
@@ -257,6 +257,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
                     ID: item.ID,
                     UUID: item.UUID,
                     WorkshopUUID: item.WorkshopUUID,
+                    Image:item.Image,
                     Name: item.Name,
                     style: 'top-equip-light' //默认机台为离线状态
                 } )
@@ -572,7 +573,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                             <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <img src={devicePic} style={{width:"100%"}} />
+                                                        <img src={urlBase+item.Image} style={{width:"100%"}} />
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={5}>

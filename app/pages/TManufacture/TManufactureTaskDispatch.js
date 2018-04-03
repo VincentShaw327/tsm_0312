@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import {Table, Button,Radio, Row, Col, Divider,Select,
-     List, Card, DatePicker,Input,message,Form,Switch } from 'antd';
+     List, Card, DatePicker,Input,message,Form,Switch,Popconfirm } from 'antd';
 const Option = Select.Option;
 const FormItem = Form.Item;
-
 import { TPostData, urlBase } from '../../utils/TAjax';
 import { CModal } from '../../components/TModal';
+import TableExport from 'tableexport';
 
 export default class TstateTimeOverview extends Component {
 
@@ -24,6 +24,7 @@ export default class TstateTimeOverview extends Component {
             loading:true,
             DModalShow:false,
             bordered:false,
+            hasAddBtn:false,
             size:"small",
             subTableSize:"default",
             scroll:undefined
@@ -65,19 +66,19 @@ export default class TstateTimeOverview extends Component {
                         key: index,
                         UUID: item.UUID, //加工订单UUID
                         BomUUID: item.BomUUID,
-                        lotJobID: item.lotJobID ? item.lotJobID : `#${index}`,
-                        FinishDateTime: item.FinishDateTime ? item.FinishDateTime : '2018-03-12',
+                        lotJobID: item.ID,
+                        FinishDateTime: item.FinishDateTime,
                         FinishNumber: item.FinishNumber,
                         MoldModelUUID: item.MoldModelUUID,
-                        PlanFinishDateTime: item.PlanFinishDateTime ? item.PlanFinishDateTime : '2018-03-18',
+                        PlanStartDateTime: item.PlanStartDateTime,
+                        PlanFinishDateTime: item.PlanFinishDateTime,
                         PlanNumber: item.PlanNumber,
-                        PlanStartDateTime: item.PlanStartDateTime ? item.PlanStartDateTime : '2018-02-14',
                         ProductModelID: item.ProductModelID,
                         ProductModelName: item.ProductModelName,
                         ProductModelSN: item.ProductModelSN,
                         ProductModelUUID: item.ProductModelUUID,
                         RejectNumber: item.RejectNumber,
-                        StartDateTime: item.StartDateTime ? item.StartDateTime : '2018-02-14',
+                        StartDateTime: item.StartDateTime ,
                         Status: item.Status,
                         UUID: item.UUID,
                         UpdateDateTime: item.UpdateDateTime,
@@ -87,6 +88,21 @@ export default class TstateTimeOverview extends Component {
                     } )
                 } );
                 this.setState({dispatchLotList:list,loading:false});
+                if(this.state.hasAddBtn==false){
+                    let tableDom=document.getElementById("dispatchTableWrap")
+                    .getElementsByClassName("ant-table-body")[0];
+                    let btnWrap=document.getElementById("exportDispatchMenu");
+                    const btn=TableExport(tableDom.children[0]);
+                    let children= btn.selectors[0].children[0];
+                    let childNodes=children.getElementsByTagName('button');
+                    childNodes[0].innerHTML="xlsx";
+                    childNodes[1].innerHTML="csv";
+                    childNodes[2].innerHTML="txt";
+                    console.log("btn",children);
+                    console.log("childNodes",childNodes);
+                    btnWrap.appendChild(children);
+                }
+                this.setState({hasAddBtn:true});
             },
             ( error )=> {
                 message.info( error );
@@ -185,19 +201,31 @@ export default class TstateTimeOverview extends Component {
 
     handleDispatch(data){
         const {updateFromItem}=this.state;
-        console.log('data',data,updateFromItem);
-
         let dat = {
-            UUID: updateFromItem.UUID, //生产调度单UUID
-            WorkstationUUID: data.WorkstationUUID, //工作中心UUID
-            PlanNumber: data.Number, //派工数量
-            PlanStartTime : data[ 'range-picker' ][ 0 ],         //计划开始时间
-            PlanFinishTime :data[ 'range-picker' ][ 1 ]      //计划结束时间
+            UUID: data.UUID,  //订单UUID
         }
-        TPostData(this.url, "DeliverLotJob", dat,
-            (res)=> {
-                //这块请求更新数据 成功回调
-                message.success( '更新成功' );
+        TPostData(this.url, "Dispatch", dat,
+            ( res )=> {
+                message.success("派工成功！")
+                this.getDispatchLotList();
+            },
+            (err)=>{
+                message.error("派工失败！")
+            }
+        )
+    }
+
+    handleCancel(data){
+        let dat = {
+            UUID: data.UUID,  //订单UUID
+        }
+        TPostData(this.url, "UndoDispatch", dat,
+            ( res )=> {
+                message.success("取消派工成功！")
+                this.getDispatchLotList();
+            },
+            (err)=>{
+                message.error("取消派工失败！")
             }
         )
     }
@@ -294,7 +322,12 @@ export default class TstateTimeOverview extends Component {
               type: 'string'
             },*/
             {
-              title: '计划开始',
+              title: '计划产量',
+              dataIndex: 'PlanNumber',
+              type: 'sort'
+            },
+            {
+              title: '计划开始时间',
               dataIndex: 'PlanStartDateTime',
               type: 'string'
             },
@@ -304,7 +337,7 @@ export default class TstateTimeOverview extends Component {
               type: 'string'
             },*/
             {
-              title: '计划完成',
+              title: '计划完成时间',
               dataIndex: 'PlanFinishDateTime',
               type: 'string'
             },
@@ -312,20 +345,27 @@ export default class TstateTimeOverview extends Component {
               title: '实际完成',
               dataIndex: 'FinishDateTime',
               type: 'string'
-            },*/
-            /* {
-                title: '更新时间',
-                dataIndex: 'UpdateDateTime',
-                key: 'UpdateDateTime',
-            },*/
+            },
+             */
             {
-                title: '工单状态',
+                title: '派工单状态',
                 dataIndex: 'Status',
                 key: 'Status',
                 render: (e1, record) => {
-                    // console.log('工单状态',record);
-                    return(<span>{e1}</span>)
-                    // return <StateBotton stateType='workOrder' state = { record.Status }/>
+                    // console.log('任务状态',record);
+                    let status='';
+                    status=e1==0?(<span>生产取消(0)</span>):
+                        e1==1?(<span>未派工(1)</span>):
+                        e1==2?(<span>已派工(2)</span>):
+                        e1==3?(<span>生产中(3)</span>):
+                        e1==4?(<span>生产挂起(4)</span>):
+                        e1==5?(<span>生产完成(5)</span>):
+                        e1==6?(<span>生产中(6)</span>):
+                        e1==9?(<span>生产挂起(9)</span>):
+                        e1==10?(<span>已完成(10)</span>):
+                        e1==11?(<span>暂停中(11)</span>):
+                        <span>{e1}</span>
+                    return  status;
                 }
             },
             {
@@ -333,12 +373,35 @@ export default class TstateTimeOverview extends Component {
                 dataIndex: 'uMachineUUID',
                 type: 'operate', // 操作的类型必须为 operate
                 // multipleType: "dispatch",
-                render:(e1,e2)=>{
-                    return(
-                        <div>
-                            <a href="#" onClick={this.toggleDModalShow.bind(this,e2)}>派工</a>
-                        </div>
-                    )
+                render:(e1,record)=>{
+                    let operate='';
+                    if(record.Status&&record.Status==1){
+                        operate=(
+                            <span>
+                                <Popconfirm
+                                    placement="topLeft"
+                                    title="确定执行派工？"
+                                    onConfirm={this.handleDispatch.bind(this,record)}
+                                    okText="确定" cancelText="取消">
+                                    <a href="#">派工</a>
+                                </Popconfirm>
+                            </span>
+                        )
+                    }
+                    else if(record.Status&&record.Status==2){
+                        operate=(
+                            <span>
+                                <Popconfirm
+                                    placement="topLeft"
+                                    title="确定取消派工？"
+                                    onConfirm={this.handleCancel.bind(this,record)}
+                                    okText="确定" cancelText="取消">
+                                    <a href="#">取消派工</a>
+                                </Popconfirm>
+                            </span>
+                        )
+                    }
+                    return operate;
                 }
             }
         ];
@@ -392,7 +455,7 @@ export default class TstateTimeOverview extends Component {
 
             return (
                 <div>
-                    <Card style={{marginBottom:20}}>
+                    <Card>
                         <Row gutter={16}>
                             <Col className="gutter-row" span={6}>
                                 <div className="gutter-box"><span style={{ width: "40%" }}>搜索内容:</span>
@@ -406,8 +469,12 @@ export default class TstateTimeOverview extends Component {
                                 <div className="gutter-box"><span style={{ width: "40%" }}>派工单状态:</span>
                                 <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange.bind(this)}>
                                     <Option value="-1" key="all">全部</Option>
+                                    <Option value="0" key="0">已取消</Option>
                                     <Option value="1" key="1">未派工</Option>
                                     <Option value="2" key="2">已派工</Option>
+                                    <Option value="3" key="3">生产中</Option>
+                                    <Option value="4" key="4">生产挂起</Option>
+                                    <Option value="5" key="5">生产完成</Option>
                                 </Select>
                                 </div>
                             </Col>
@@ -418,34 +485,41 @@ export default class TstateTimeOverview extends Component {
                             </Col>
                         </Row>
                     </Card>
-                    <div style={{margin:20}}>
-                        <Form layout="inline">
-                            <FormItem label="边框">
-                                <Switch checked={bordered} onChange={this.handleToggleBorder.bind(this)} />
-                            </FormItem>
-                            <FormItem label="大小">
-                                <Radio.Group size="default" value={size} onChange={this.handleSizeChange.bind(this)}>
-                                    {/* <Radio.Button value="biger">大</Radio.Button> */}
-                                    <Radio.Button value="default">大</Radio.Button>
-                                    <Radio.Button value="middle">中</Radio.Button>
-                                    <Radio.Button value="small">小</Radio.Button>
-                                </Radio.Group>
-                            </FormItem>
-                        </Form>
+                    <div style={{margin:'20px 0',overflow:'auto',zoom:1}}>
+                        <div style={{float:'right'}}>
+                            <Form layout="inline">
+                                <FormItem label="导出">
+                                    <div className="exportMenuWrap" id="exportDispatchMenu" style={{display:'flex'}}></div>
+                                </FormItem>
+                                <FormItem label="边框">
+                                    <Switch checked={bordered} onChange={this.handleToggleBorder.bind(this)} />
+                                </FormItem>
+                                <FormItem label="大小">
+                                    <Radio.Group size="default" value={size} onChange={this.handleSizeChange.bind(this)}>
+                                        {/* <Radio.Button value="biger">大</Radio.Button> */}
+                                        <Radio.Button value="default">大</Radio.Button>
+                                        <Radio.Button value="middle">中</Radio.Button>
+                                        <Radio.Button value="small">小</Radio.Button>
+                                    </Radio.Group>
+                                </FormItem>
+                            </Form>
+                        </div>
                     </div>
-                    <Table
-                      dataSource={dispatchLotList}
-                      columns={columns}
-                      loading={this.state.loading}
-                      bordered={bordered}
-                      size={size}
-                      scroll={scroll}
-                      // expandedRowRender={this.renderSubTable.bind(this)}
-                      // rowSelection={this.state.isSelection?rowSelection:null}
-                      // pagination={pagination}
-                      // hideDefaultSelections={true}
-                      // onExpand={this.handleExpand}
-                      />
+                    <div id="dispatchTableWrap">
+                        <Table
+                          dataSource={dispatchLotList}
+                          columns={columns}
+                          loading={this.state.loading}
+                          bordered={bordered}
+                          size={size}
+                          scroll={scroll}
+                          // expandedRowRender={this.renderSubTable.bind(this)}
+                          // rowSelection={this.state.isSelection?rowSelection:null}
+                          // pagination={pagination}
+                          // hideDefaultSelections={true}
+                          // onExpand={this.handleExpand}
+                          />
+                    </div>
                     <CModal
                         FormItem={DFormItem}
                         submit={this.handleDispatch.bind(this)}

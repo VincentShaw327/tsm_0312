@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { message, Menu, Icon, Row, Col, Card, Table, Divider, DatePicker,Button} from 'antd'
+import { message, Menu, Icon, Row, Col, Card, Table, Divider,
+    DatePicker,Button,Select} from 'antd'
 import { TPostData } from '../../utils/TAjax';
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -125,7 +126,7 @@ export default class TOEEAnalysis extends Component {
                 dataIndex: 'OEE',
                 key: 'OEE',
             },
-            {
+            /*{
                 title: '操作',
                 key: 'action',
                 render: ( text, record ) => (
@@ -139,7 +140,7 @@ export default class TOEEAnalysis extends Component {
                       </a>
                     </span>
                 ),
-            }
+            }*/
         ];
 
         const data = [
@@ -245,7 +246,7 @@ export default class TOEEAnalysis extends Component {
 
         return (
             <div>
-                <Row gutter={16}>
+                {/* <Row gutter={16}>
                   <Col className="gutter-row" span={4} style={{border:'solid 0px'}}>
                       <div className="gutter-box">
                           <Menu
@@ -264,8 +265,8 @@ export default class TOEEAnalysis extends Component {
                       </div>
                   </Col>
                   <Col className="gutter-row" span={20}>
-                      <div className="gutter-box">
-                            <Row>
+                      <div className="gutter-box"> */}
+                            {/* <Row>
                                 <Col span={7}>
                                     <Menu
                                         // onClick={this.handleClick}
@@ -290,10 +291,48 @@ export default class TOEEAnalysis extends Component {
                                 <Col span={3}>
                                     <Button>查询</Button>
                                 </Col>
-                            </Row>
-                          <Card>
+                            </Row> */}
+                            <Card style={{marginBottom:20}}>
+                                <Row gutter={16}>
+                                    <Col className="gutter-row" span={6}>
+                                        <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
+                                            <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
+                                                <Option value="-1" key="all">全部</Option>
+                                                {
+                                                    this.state.workshopList.map((item,index)=>{
+                                                            return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                                    })
+                                                }
+                                            </Select>
+                                        </div>
+                                    </Col>
+                                    <Col className="gutter-row" span={6}>
+                                        <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
+                                            <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
+                                                <Option value="-1" key="all">全部</Option>
+                                                {
+                                                    this.state.workCenterList.map((item,index)=>{
+                                                            return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                                    })
+                                                }
+                                            </Select>
+                                        </div>
+                                    </Col>
+                                    <Col className="gutter-row" span={6}>
+                                        <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
+                                            <DatePicker style={{ width: "60%" }} />
+                                        </div>
+                                    </Col>
+                                    <Col className="gutter-row" span={6}>
+                                        <div className="gutter-box">
+                                            <Button type="primary" icon="search">查询</Button>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Card>
+                          {/* <Card> */}
                                 {/* <Divider /> */}
-                              <Card style={{ marginBottom:30}}>
+                              <div style={{border:'solid 1px #d7d9d8', marginBottom:30}}>
                                   <Row>
                                     <Col span={6}>
                                         <ReactEcharts
@@ -320,17 +359,17 @@ export default class TOEEAnalysis extends Component {
                                           className='react_for_echarts' />
                                     </Col>
                                   </Row>
-                              </Card>
+                              </div>
                               <Table
                                   columns={columns}
                                   dataSource={this.state.workCenterList}
                                   bordered={true}
                                   size="small"
                               />
-                          </Card>
-                      </div>
+                          {/* </Card> */}
+                      {/* </div>
                   </Col>
-                </Row>
+                </Row> */}
             </div>
         )
     }

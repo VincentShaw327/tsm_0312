@@ -3,8 +3,9 @@
 import React from 'react';
 import moment from 'moment';
 import { Form, Select, Input, Button, Icon , DatePicker, TimePicker, Radio, Switch, Cascader, Checkbox,message} from 'antd';
+// import BDUploader from './BDUploader';
 import AntUploader from './AntUploader';
-import { TPostData } from '../../utils/TAjax';
+import { TPostData } from '../../../utils/TAjax';
 const RangePicker = DatePicker.RangePicker;
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -53,8 +54,8 @@ let CFormItem = React.createClass({
                             label={item.label}
                             key={item.name}
                             {...formItemLayout}>
-                            {getFieldDecorator(item.name, {rules:item.rules,initialValue: defaultValue})(
-                                <DatePicker showTime format="YYYY/MM/DD HH:mm:ss" />
+                            {getFieldDecorator('date-picker', {rules:item.rules,initialValue: defaultValue})(
+                                <DatePicker showTime format="YYYY/MM/DD" />
                             )}
                         </FormItem>
                 break;
@@ -170,7 +171,8 @@ let CFormItem = React.createClass({
                             label={item.label}
                             key={item.name}
                             {...formItemLayout}>
-                            {getFieldDecorator(item.name, {rules:item.rules, initialValue: defaultValue })(
+
+                            {getFieldDecorator(item.name, { initialValue: defaultValue })(
                                 <RadioGroup>
                                     {
                                         item.options.map(function(item){
