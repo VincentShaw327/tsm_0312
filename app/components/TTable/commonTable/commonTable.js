@@ -321,7 +321,9 @@ export default class CommonTable extends Component{
                         {/* <Tiltle typeIcon={'table'} centent={'查询列表'}/> */}
                     </span>
                     <RForm RType={this.props.config.RType} submit={self.handleRetrieve}/>
-                <CForm CType={this.props.config.CType} submit={self.handleCreate}/>
+                <CForm 
+                    CType={this.props.config.CType}
+                    submit={self.handleCreate}/>
                 <UForm UType={this.props.config.UType}
                         submit={self.handleUpdate}
                         isShow={this.state.updateFromShow}

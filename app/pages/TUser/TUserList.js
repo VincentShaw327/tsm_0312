@@ -6,8 +6,8 @@
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router';
 import { Button, Icon,Popover,message,Breadcrumb} from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import MD5 from '../../components/TCommon/shawCommon/md5';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
+import MD5 from '../../components/TCommon/md5';
 import { TPostData,urlBase } from '../../utils/TAjax';
 import TUserDetails from './TUserDetails';
 

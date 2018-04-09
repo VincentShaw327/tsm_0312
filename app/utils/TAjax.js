@@ -5,6 +5,7 @@ import { ENOPROTOOPT, EOPNOTSUPP } from 'constants';
 
 // let urlBase = 'http://localhost:8888';
 export  let urlBase = 'http://localhost:9000';
+// export  let urlBase = 'http://192.168.200.5';
 // export  let urlBase = 'http://demo.mes.top-link.me';
  // urlBase;
 
@@ -64,17 +65,12 @@ export function TPostForm(url, form_id)
 }
 
 
-export function TPostData(url,op,obj,cb,err)
+export function TPostData(url,op,obj,cb,ecb)
 {
-
-    // todo:删除中间数据
-    //return ; //
-
     let reqObj = {
         op : op,
         obj : JSON.stringify(obj)
     }
-  // 请求数据
 
   fetch(urlBase + url, {
     method: 'POST',
@@ -92,32 +88,38 @@ export function TPostData(url,op,obj,cb,err)
  .then((json)=>{
    cb(json);
  })
- /*.then((err)=>{
-   cb(err);
- })*/;
-
-
+ .catch(err => {
+     ecb(err);
+ })
 }
 
+export function TPPostData(url, op, obj, cb, ecb) {
+    let reqObj = {
+        op: op,
+        obj: JSON.stringify(obj)
+    }
 
-
-// TPostDataDemo = () =>{
-
-//   let obj = {
-//         PageIndex: 0,
-//         PageSize: -1,
-//         ProductModelUUID : -1,
-//         KeyWord : ""
-//     }
-
-// // 调用后台
-//    temp = TPostData('/api/tbom/bom','GetList', obj,
-//   function(json){
-//     console.log(json);
-//   },
-//   function(err){
-
-//   }
-//   );
-
-// }
+    return new Promise((resolve, reject)=>{
+        fetch(urlBase + url, {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify(reqObj),
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept-Type': 'application/json;charset=utf-8'
+            }
+        })
+        .then(checkStatus)
+        .then(parseJSON)
+        .then((json) => {
+            // cb(json);
+            // resolve(cb(json));
+            resolve(json);
+        })
+        .catch(err =>{
+            // ecb(err)
+            // reject(ecb(err));
+            reject(err);
+        });
+    })
+}

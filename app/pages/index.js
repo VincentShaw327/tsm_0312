@@ -1,4 +1,4 @@
-import  THome from './THome';
+import  THome from './THome/THome';
 import {TScadaWorkShop_Auto,TScadaWorkShop_Auto2,TScadaPunchingworkshop,TScadaInjectionWorkshop} from './TScada';
 import { TManufactureOrder,TOrderScheduling ,TManufactureTaskDispatch} from './TManufacture';
 import {TDeviceList,TDeviceModel,TDeviceType} from './TDevice';

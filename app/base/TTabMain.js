@@ -1,8 +1,7 @@
 import React from 'react';
 import { Tabs, Button,Icon } from 'antd';
-
-import TFooter from '../components/TCommon/TUtils/TFooter';
-import THeader from '../components/TCommon/TUtils/THeader';
+import PropTypes from 'prop-types';
+import styles from './index.less';
 import {
     THome,
     TScadaWorkShop_Auto,
@@ -141,7 +140,10 @@ export default class TTabMain extends React.Component {
                   type="editable-card"
                   onEdit={this.onEdit}
                   tabBarExtraContent={
-                      (<Icon type="close-circle-o" onClick={this.clearTab.bind(this)} style={{marginRight:23,fontSize:25}} />)
+                      (<span><Icon
+                          type="close"
+                          className="clearTabBottom"
+                          onClick={this.clearTab.bind(this)}/></span>)
                   }
                 >
                   {/* {this.state.panes.map(pane => <TabPane tab={pane.title} key={pane.key}>{pane.content}</TabPane>)} */}

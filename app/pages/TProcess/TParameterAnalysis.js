@@ -6,7 +6,7 @@
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
 import { Row, Col, Divider } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData, urlBase } from '../../utils/TAjax';
 import Mock from 'mockjs';
 

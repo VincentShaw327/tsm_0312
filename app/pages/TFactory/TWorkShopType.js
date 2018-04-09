@@ -5,7 +5,7 @@
  **/
 import React, { Component } from 'react'
 // import {CommonTable} from '../../components/TTable';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { Table, Menu, Icon, Badge, Dropdown,message } from 'antd';
 import { TPostData } from '../../utils/TAjax';
 let seft;

@@ -5,7 +5,7 @@
  **/
 import React, { Component } from 'react';
 import { Button, Icon,message } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
 
 let seft

@@ -1,12 +1,11 @@
 import React from 'react';
-import { Layout, Menu, Icon } from 'antd';
+import PropTypes from 'prop-types';
+import { Layout, Menu, Icon,Switch } from 'antd';
 import { hashHistory, Link } from 'react-router';
 import { Scrollbars } from 'react-custom-scrollbars';
-// import { connect } from 'dva';
 import TFooter from './TFooter';
-import THeader from './THeader';
+import THeader from './Header/THeader';
 import TTabMain from './TTabMain';
-
 import { TPostData } from '../utils/ajax';
 import LOGO from '../images/SCLOGO1.png';
 const { Header, Content, Footer, Sider } = Layout;
@@ -17,6 +16,7 @@ export default class TIndexPage extends React.Component {
     constructor( props ) {
         super( props );
         this.state={
+            siderTheme:false,
             minHeight:0,
             maxHeight:0
         }
@@ -25,10 +25,7 @@ export default class TIndexPage extends React.Component {
     componentWillMount(){   }
 
     componentDidMount(){
-        this.setState({
-            maxHeight:innerHeight-64,
-            minHeight:innerHeight-64});
-
+        this.setState({maxHeight:innerHeight-64,minHeight:innerHeight-64});
         window.onresize=(e)=>{
             // console.log('e',e);
             // console.log("innerHeight",innerHeight);
@@ -50,35 +47,17 @@ export default class TIndexPage extends React.Component {
         }
     }
 
-    //const TIndexPage = () => {
-    TFetchTest = () => {
-        let obj = {
-            PageIndex: 0,
-            PageSize: -1,
-            ProductModelUUID: -1,
-            KeyWord: ""
-        }
-        // 调用后台
-        TPostData( '/api/tbom/bom', 'GetList', obj,
-            function ( json ) {
-                console.log( json );
-            },
-            function ( err ) {
-
-            }
-        );
-    }
     // 调用子组件方法获取孩子名字
     THandleClick = ( e ) => {
-        // console.log( e );
-        // console.log( 'click ', e );
         this._child.TPageOpen( e.key );
-        //this.refs["TTabMain"].TPageOpen(key);
-        // console.log("call in father");
-        // onClick={(c)=>this.TPageOpen('TWorkShopList')}
     }
+
     handleScroll(e){
         console.log("Scroll",e);
+    }
+
+    toggleTheme(value){
+        this.setState({siderTheme:value});
     }
 
     render() {
@@ -86,38 +65,27 @@ export default class TIndexPage extends React.Component {
         return (
             <Layout style={{height:"100%"}}>
                 <THeader  />
-              <Layout
-                // style={{maxHeight:"80%"}}
-                >
+                <Layout>
                       <Sider
-                        // style={{maxHeight:"80%"}}
                         breakpoint="md"
                         collapsedWidth="0"
-                        onCollapse={(collapsed, type) => { console.log(collapsed, type); }}
-                          >
+                        onCollapse={(collapsed, type) => { console.log(collapsed, type); }}>
                         {/* <div style={{background: `url(${LOGO})`,backgroundSize:'200px 85px',height:96}}></div> */}
                         <Scrollbars
-                            // onScroll={this.handleScroll}
-                            // onScrollFrame={(e1,e2)=>{console.log('onScrollFrame')}}
-                            // onScrollStart={this.handleScrollStart}
-                            // onScrollStop={this.handleScrollStop}
-                            // onUpdate={()=>{console.log('onUpdate')}}
-                            // renderView={(e1,e2)=>{console.log('renderView')}}
-                            // renderTrackHorizontal={this.renderTrackHorizontal}
-                            // renderTrackVertical={this.renderTrackVertical}
-                            // renderThumbHorizontal={this.renderThumbHorizontal}
-                            // renderThumbVertical={this.renderThumbVertical}
                             autoHide
                             autoHideTimeout={1000}
                             autoHideDuration={200}
                             autoHeight
                             autoHeightMin={500}
                             autoHeightMax={this.state.maxHeight}
-                            // autoHeightMax={560}
                             thumbMinSize={30}
                             universal={true}
                             >
-                            <Menu theme="light" mode="inline" defaultSelectedKeys={['4']}  onClick={this.THandleClick}>
+                            <Menu
+                                theme="light"
+                                mode="inline"
+                                defaultSelectedKeys={['4']}
+                                onClick={this.THandleClick}>
                               <Menu.Item key="THome">
                                 <Icon type="home" />
                                 <span className="nav-text">系统首页</span>
@@ -365,18 +333,6 @@ export default class TIndexPage extends React.Component {
                       </Sider>
                     {/* <THeader /> */}
                     <Scrollbars
-                      // onScroll={this.handleScroll}
-                      // onScrollFrame={this.handleScroll}
-                      // onScrollStart={this.handleScroll}
-                      // onScrollStop={this.handleScroll}
-                      // onUpdate={this.handleScroll}
-                      // onUpdate={()=>{console.log('onUpdate')}}
-
-                      // renderView={(e1,e2)=>{console.log('renderView')}}
-                      // renderTrackHorizontal={this.renderTrackHorizontal}
-                      // renderTrackVertical={this.renderTrackVertical}
-                      // renderThumbHorizontal={this.renderThumbHorizontal}
-                      // renderThumbVertical={this.renderThumbVertical}
                       autoHide
                       autoHideTimeout={1000}
                       autoHideDuration={200}
@@ -387,23 +343,21 @@ export default class TIndexPage extends React.Component {
                       thumbMinSize={30}
                       universal={true}
                       >
-                    <Layout >
-                      <Content style={{ margin: '24px 16px 0' }}>
-                          <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
+                        <Layout >
+                            <Content style={{ margin: '24px 16px 0' }}>
+                        <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>
                             <TTabMain ref={child => this._child = child} content ={children} />
-                          {/* {children} */}
+                            {/* {children} */}
                         </div>
-                          <TFooter />
+                        <TFooter />
                       </Content>
-                    </Layout>
-                  </Scrollbars>
+                        </Layout>
+                    </Scrollbars>
                 </Layout>
              </Layout>
         );
     }
 }
 
-// TIndexPage.propTypes = {
-// };
-
-// export default connect()(TIndexPage);
+TIndexPage.propTypes = {
+};

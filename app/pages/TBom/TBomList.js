@@ -7,7 +7,7 @@ import React, { Component } from 'react';
 import { hashHistory, Link } from 'react-router';
 import { Button, Icon, Popover,message,Breadcrumb,Table,
     Card,Row,Col,Select,Input,Popconfirm  } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
 import { CModal } from '../../components/TModal';
 import TBomDetail from './TBomDetail';

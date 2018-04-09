@@ -5,8 +5,8 @@
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
+import { TPostData,urlBase } from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM3.jpg';
 var mqtt = require( 'mqtt' );
 const { Header, Footer, Sider, Content } = Layout;
@@ -32,6 +32,10 @@ export default class TScadaWorkShop_Auto2 extends Component {
     }
     //查询工作中心
     componentWillMount() {
+        /***
+        测试数据
+        暂时先保留
+        ********************/
         let objectlist = [
             {
                 machine_id: "HDMI-STATION-001", // 机器识别号
@@ -227,10 +231,9 @@ export default class TScadaWorkShop_Auto2 extends Component {
         let obj = {
             dataList: objectlist
         }
-
         let testData = JSON.stringify( obj )
         // console.log('测试数据',testData);
-
+        /***********************/
         //获取机台数量临时变量
         let aEquipList = [];
         let dat = {
@@ -240,12 +243,6 @@ export default class TScadaWorkShop_Auto2 extends Component {
             TypeUUID: -1,   //类型UUID，不作为查询条件时取值设为-1
             KeyWord : ""
         };
-
-        /**
-        从服务端获取工作中心记录数据,
-        确定机台数量, 以及默认机台状态
-        **/
-
         TPostData( '/api/TProcess/workcenter', "ListActive", dat,  ( res )=> {
             var Ui_list = res.obj.objectlist || [];
             var totalcount = res.obj.objectlist.length;
@@ -256,6 +253,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
                     ID: item.ID,
                     UUID: item.UUID,
                     WorkshopUUID: item.WorkshopUUID,
+                    Image:item.Image,
                     Name: item.Name,
                     style: 'top-equip-light' //默认机台为离线状态
                 } )
@@ -579,7 +577,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                             <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <img src={devicePic} style={{width:"100%"}} />
+                                                        <img src={urlBase+item.Image} style={{width:"100%"}} />
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={5}>

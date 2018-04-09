@@ -6,6 +6,7 @@
 // 下面是示例：
 
 import React from 'react';
+import PropTypes from 'prop-types';
 class Greeting extends React.Component {
 
   constructor(props) {

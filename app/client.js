@@ -5,7 +5,7 @@ import { LocaleProvider } from 'antd';
 import zhCN from 'antd/lib/locale-provider/zh_CN';
 import { Router, Route, IndexRoute } from 'react-router'
 import hashHistory from './history'
-import App1 from './base1/TIndexPage'
+import App1 from './base/TIndexPage'
 import './index.less'
 
 

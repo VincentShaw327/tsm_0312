@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
 import { Button, Icon,message,Breadcrumb,Popover } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData,urlBase } from '../../utils/TAjax';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
+import { TPostData,TPPostData,urlBase } from '../../utils/TAjax';
 import TWorkCenterDetail from './TWorkCenterDetail';
 
 //作用域
@@ -18,16 +18,18 @@ export default class TWorkCenter extends Component {
             loading: false,
             showDetal:false,
             detailID:0,
-            detailMessage:{}
+            detailMessage:{},
+            workshopList:[]
         }
         this.url='/api/TFactory/workshop';
         seft = this;
     }
-    componentWillMount() {
+    componentWillMount  () {
         //工作中心类型下拉框
         let workCenterType = [],
+            workshopList=[];
         //车间数据下拉
-            workshopList = [];
+        // this.state.workshopList = [];
         /**** 拉取下拉款类型数据 *****/
         TPostData('/api/TProcess/workcenter_type', 'ListActive',
             {
@@ -36,6 +38,7 @@ export default class TWorkCenter extends Component {
                 'TypeUUID': -1
             },
             function ( res ) {
+                // console.log("workcenter_type",res);
                 let Ui_list = res.obj.objectlist || [];
                 Ui_list.forEach( function ( item, index ) {
                     workCenterType.push( { key: index, value:item.UUID.toString(), text: item.Name} )
@@ -43,21 +46,53 @@ export default class TWorkCenter extends Component {
             },
             function ( error ) {
                 message.info( error );
-            }, false
+                console.log("发生错误了");
+            }
         )
         /**** 拉取下拉关联工作车间数据 *****/
-        TPostData( '/api/TFactory/workshop', 'ListActive', {
+        const data={
                 'PageIndex': 0,
                 'PageSize': 100,
                 'TypeUUID': -1
-            }, function ( res ) {
+            };
+
+        /*TPostData( '/api/TFactory/workshop', 'ListActive', data,
+            function ( res ){
+                console.log("查询到车间列表：",res);
                 var Ui_list = res.obj.objectlist || [];
                 Ui_list.forEach( function ( item, index ) {
                     workshopList.push( { key: index, value:item.UUID.toString(), text: item.Name} )
                 } )
-            }, function ( error ) {
+            },
+            function ( error ) {
                 message.info( error );
-        }, true )
+            }
+        )*/
+
+        TPPostData( '/api/TFactory/workshop', 'ListActive', {
+                'PageIndex': 0,
+                'PageSize': 100,
+                'TypeUUID': -1
+            }).then((res)=>{
+            console.log("workshopData====:",res);
+            var Ui_list = res.obj.objectlist || [];
+            let list=[];
+            Ui_list.forEach((item,index)=>{
+                workshopList.push(
+                    {
+                        key: index,
+                        value:item.UUID.toString(),
+                        text: item.Name
+                    }
+                );
+            });
+            // this.setState({workshopList:list});
+            return workshopList;
+        }).then((data)=>{
+            console.log("workshopList resoved:",data);
+        })
+
+        // this.getWorkShopList();
 
         const config = {
             type: 'tableFeature',
@@ -184,7 +219,7 @@ export default class TWorkCenter extends Component {
                     label: '车间',
                     type: 'select',
                     defaultValue: '1',
-                    options: workshopList
+                    options:workshopList
                 },
                 {
                     name: 'Desc',
@@ -213,34 +248,34 @@ export default class TWorkCenter extends Component {
                     type: 'string',
                     placeholder: '请输入名称',
                     rules: [{required: true,min: 1,message: '名称不能为空'}]
-				}, {
+                }, {
                     name: 'ID',
                     label: '编号',
                     type: 'string',
                     placeholder: '请输入编号',
                     rules: [{required: true,message: '编号不能为空'}]
-				}, {
+                }, {
                     name: 'TypeUUID',
                     label: '中心类型',
                     type: 'select',
                     // defaultValue: '1',
                     rules: [{required: true,message: '请选择工作中心类型'}],
                     options: workCenterType
-				}, {
+                }, {
                     name: 'WorkshopUUID',
                     label: '车间',
                     type: 'select',
                     defaultValue: '1',
                     rules: [{required: true,message: '请选择所属车间'}],
-                    options: workshopList
-				},
+                    options:workshopList
+                },
                 {
                     name: 'Image',
                     label: '图片',
                     type: 'antUpload',
                     url: '/api/tupload/do',
                 }
-			],
+            ],
 
             RType: [
                 {
@@ -263,7 +298,7 @@ export default class TWorkCenter extends Component {
                     defaultValue: '-1',
                     hasAllButtom: true,
                     width: 150,
-                    options: workshopList
+                    options:workshopList
                 }
             ],
             // 初始化页面的数据 回调函数传入 items 列表
@@ -408,6 +443,44 @@ export default class TWorkCenter extends Component {
 
     getWorkCenterType(){
 
+    }
+
+    async getWorkShopList(){
+        let data={
+                'PageIndex': 0,
+                'PageSize': -1,
+                'TypeUUID': -1
+            };
+        let wsList=await TPPostData( '/api/TFactory/workshop', 'ListActive',data)
+        /*.then((res)=>{
+            console.log("workshopList",res);
+            let list=[];
+            var Ui_list = res.obj.objectlist || [];
+            Ui_list.forEach((item,index)=>{
+                list.push(
+                    {
+                        key: index,
+                        value:item.UUID.toString(),
+                        text: item.Name
+                    }
+                );
+            })
+            this.setState({workshopList:list});
+        })*/
+        // .catch(err=>console.log('err',err));
+        console.log('wsList',wsList);
+        let list=[];
+        var Ui_list = wsList.obj.objectlist || [];
+        Ui_list.forEach((item,index)=>{
+            list.push(
+                {
+                    key: index,
+                    value:item.UUID.toString(),
+                    text: item.Name
+                }
+            );
+        });
+        this.setState({workshopList:list});
     }
 
     toggleRender(record){

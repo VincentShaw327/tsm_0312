@@ -5,9 +5,9 @@
  **/
 import React, { Component } from 'react';
 import {Icon,Row,Col,Divider,Table,Button,Popconfirm,message } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import Tiltle from '../../components/TCommon/shawCommon/Tiltle/Tiltle';
-import { _topfOrderBy } from '../../components/TCommon/shawCommon/utils/dataHandle/arrayHandle';
+// import FeatureSetConfig from '../../components/TCommon/tableConfig';
+import Tiltle from '../../components/TCommon/Tiltle/Tiltle';
+import { _topfOrderBy } from '../../components/TCommon/utils/dataHandle/arrayHandle';
 import { TPostData } from '../../utils/TAjax';
 import { CModal } from '../../components/TModal';
 

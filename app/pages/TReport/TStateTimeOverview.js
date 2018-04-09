@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import { Button, Radio, Row, Col, Divider, List, Timeline, Menu, Card,
     DatePicker,Select } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData, urlBase } from '../../utils/TAjax';
 import StatusOverview from './components/statusOverview';
 import TimeLine from './components/timeLine';

@@ -5,7 +5,7 @@
  **/
 import { Upload, Icon, message } from 'antd';
 import React, { Component } from 'react';
-import { TPostData,urlBase } from '../../../utils/TAjax';
+import { TPostData,urlBase } from '../../utils/TAjax';
 
 
 function getBase64(img, callback) {

@@ -3,21 +3,17 @@
  *添加日期:2017.12.20
  **/
 /******引入ant或其他第三方依赖文件*******************/
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
+import { TPostData,urlBase } from '../../utils/TAjax';
 import devicePic from '../../images/assets/exple.png';
 var mqtt = require( 'mqtt' );
 const { Header, Footer, Sider, Content } = Layout;
 
-/**   控制this作用域指针   **/
 let self
-
-// let _storage = window.localStorage;  //暂时不启用缓存加载方式， 后端未推送离线状态，不易监控
-
 var client //注塑车间消息订阅初始化变量
-
 export default class TScadaInjectionWorkshop extends Component {
 
     constructor( props ) {
@@ -34,206 +30,6 @@ export default class TScadaInjectionWorkshop extends Component {
     }
     //查询工作中心
     componentWillMount() {
-        let objectlist = [
-            {
-                machine_id: "HDMI-STATION-001", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-001", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 234, // 产量：pcs
-                    prod_rate: 35, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-002", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-003", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-003", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-004", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-005", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-006", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-007", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-008", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-009", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-010", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-        ]
-        let obj = {
-            dataList: objectlist
-        }
-
-        let testData = JSON.stringify( obj )
-        // console.log('测试数据',testData);
-
-        //获取机台数量临时变量
         let aEquipList = [];
         let dat = {
             PageIndex: 0,
@@ -242,11 +38,6 @@ export default class TScadaInjectionWorkshop extends Component {
             TypeUUID: -1,   //类型UUID，不作为查询条件时取值设为-1
             KeyWord : ""
         };
-
-        /**
-        	从服务端获取工作中心记录数据,
-        	确定机台数量, 以及默认机台状态
-        **/
         TPostData( '/api/TProcess/workcenter', "ListActive", dat,  ( res )=> {
             var Ui_list = res.obj.objectlist || [];
             var totalcount = res.obj.objectlist.length;
@@ -258,6 +49,7 @@ export default class TScadaInjectionWorkshop extends Component {
                     UUID: item.UUID,
                     WorkshopUUID: item.WorkshopUUID,
                     Name: item.Name,
+                    Image:item.Image,
                     style: 'top-equip-light' //默认机台为离线状态
                 } )
             } );
@@ -435,7 +227,7 @@ export default class TScadaInjectionWorkshop extends Component {
 
     componentDidMount() {
         //mqtt消息连接建立
-        // client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
+        client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
         client.on( 'connect', function () {
             //订阅消息
             client.subscribe( 'topstarltd/iec/app/#' )
@@ -582,7 +374,8 @@ export default class TScadaInjectionWorkshop extends Component {
                                             <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <img src={devicePic} style={{width:"100%"}} />
+                                                        {/* <img src={devicePic} style={{width:"100%"}} /> */}
+                                                        <img src={urlBase+item.Image} style={{width:"100%"}} />
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={5}>

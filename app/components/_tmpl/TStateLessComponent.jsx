@@ -4,6 +4,7 @@
 //例如下面代码所示:
 
 import React from 'react';
+import PropTypes from 'prop-types';
 const TStateLessComponent = ({
   day,
   increment

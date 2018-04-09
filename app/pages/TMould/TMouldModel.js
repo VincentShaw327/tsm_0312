@@ -6,7 +6,7 @@
 import React, { Component } from 'react'
 import { hashHistory, Link } from 'react-router'
 import { Button, Icon,Popover,message } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData,urlBase } from '../../utils/TAjax';
 let seft
 
@@ -68,49 +68,49 @@ export default class MouldModel extends Component {
                           </Popover>
                         )
                   }
-              }, {
+                }, {
                     title: '名称',
                     dataIndex: 'strMoldModelName',
                     type: 'string'
-              }, {
+                }, {
                     title: '编号',
                     dataIndex: 'strMoldModelID',
                     type: 'string'
-              }, {
+                }, {
                 title: '尺寸',
                 dataIndex: 'strMoldModelSize',
                 type: 'string'
-              }, /*{
-                title: '描述',
-                dataIndex: 'strMoldModelNote',
-                type: 'string'
-              },*/ {
-                title: '备注',
-                dataIndex: 'strMoldModelDesc',
-                type: 'string'
-              }, {
-                  title: '修改时间',
-                  dataIndex: 'UpdateDateTime',
-                  type: 'string'
-              }, {
-                title: '操作',
-                dataIndex: 'operate',
-                type: 'operate', // 操作的类型必须为 operate
-                btns: [
-                    {
-                        text: '修改',
-                        type: 'edit',
-                        icon: 'edit'
-                    },
-                    {
-                        text: '删除',
-                        type: 'delete',
-                        icon: 'delete',
-                        havePopconfirm: true,
-                        popText: '确定要删除此记录吗?'
-                    }
-                ]
-              }
+                },{
+                    title: '穴数',
+                    dataIndex: 'strCavity',
+                    type: 'string'
+                },{
+                    title: '备注',
+                    dataIndex: 'strMoldModelDesc',
+                    type: 'string'
+                }, {
+                    title: '修改时间',
+                    dataIndex: 'UpdateDateTime',
+                    type: 'string'
+                }, {
+                    title: '操作',
+                    dataIndex: 'operate',
+                    type: 'operate', // 操作的类型必须为 operate
+                    btns: [
+                        {
+                            text: '修改',
+                            type: 'edit',
+                            icon: 'edit'
+                        },
+                        {
+                            text: '删除',
+                            type: 'delete',
+                            icon: 'delete',
+                            havePopconfirm: true,
+                            popText: '确定要删除此记录吗?'
+                        }
+                    ]
+                }
             ],
             //更新弹框数据项
             UType: [
@@ -132,6 +132,12 @@ export default class MouldModel extends Component {
                     type: 'string',
                     placeholder: '尺寸',
                     rules: [{ required: true, message: '请输入尺寸' }]
+                },{
+                    name: 'strCavity',
+                    label: '穴数',
+                    type: 'string',
+                    placeholder: '请输入模具穴数',
+                    rules: [{ required: true,  message: '模具穴数不能为空' }]
                 }, {
                     name: 'strMoldModelDesc',
                     label: '描述',
@@ -164,6 +170,13 @@ export default class MouldModel extends Component {
                     type: 'string',
                     placeholder: '请输入编号',
                     rules: [{ required: true,  message: '请输入编号' }]
+                },
+                {
+                    name: 'strCavity',
+                    label: '穴数',
+                    type: 'string',
+                    placeholder: '请输入模具穴数',
+                    rules: [{ required: true,  message: '模具穴数不能为空' }]
                 },
                 {
                   name: 'Image',
@@ -205,6 +218,7 @@ export default class MouldModel extends Component {
                             strMoldModelDesc: item.Desc,
                             strMoldModelNote: item.Note,
                             UpdateDateTime:item.UpdateDateTime,
+                            strCavity:item.Cavity,
                             Image:item.Image
                         })
                     })
@@ -222,6 +236,7 @@ export default class MouldModel extends Component {
                     key: '1000',
                     ID: data.strMoldModelID,
                     Name: data.strMoldModelName,
+                    Cavity:data.strCavity,
                     Path:data.Image
                 }
                 // console.log("设备创建后的字段",data);
@@ -238,6 +253,7 @@ export default class MouldModel extends Component {
                     ID: data.strMoldModelID,
                     Name: data.strMoldModelName,
                     Size: data.strMoldModelSize,
+                    Cavity:data.strCavity,
                     Path : data.Image,
                     Desc: data.strMoldModelDesc,
                     Note: data.strMoldModelNote,

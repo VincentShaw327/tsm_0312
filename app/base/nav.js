@@ -1,170 +1,196 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { hashHistory, Link } from 'react-router'
-// import { routerActions } from 'react-router-redux'
+import { Layout, Menu, Icon } from 'antd';
+const SubMenu = Menu.SubMenu;
 import { Menu, Icon, Spin } from 'antd'
-import { updateTabList } from 'actions/tabList'
+// import { updateTabList } from 'actions/tabList'
 
-const { SubMenu } = Menu
 
-// @connect((state, props) => ({
-//   config: state.config,
-// }))
 export default class LeftNav extends Component {
-  constructor(props, context) {
-    super(props, context)
+    constructor(props, context) {
+      super(props, context)
 
-    const { pathname } = props.location
-    this.state = {
-      current: pathname,
-      openKeys: ['sub1'],
-      isLeftNavMini: false,
-    }
-
-    this._handleClick = this._handleClick.bind(this)
-    this._handleToggle = this._handleToggle.bind(this)
-    this.navMini = this.navMini.bind(this)
-    this.renderLeftNav = this.renderLeftNav.bind(this)
-  }
-
-  componentWillMount() {
-    // 初始化左侧菜单是mini模式还是正常模式
-    if (sessionStorage.getItem('isLeftNavMini') == 'false') {
-      this.setState({
+      const { pathname } = props.location
+      this.state = {
+        current: pathname,
+        openKeys: ['sub1'],
         isLeftNavMini: false,
-      })
-    }
-    if (sessionStorage.getItem('isLeftNavMini') == 'true') {
-      this.setState({
-        isLeftNavMini: true,
-      })
-    }
-    const menu = window.gconfig.nav
-    const curPath = `${this.props.location.pathname.replace('/', '')}`
-    // console.log(menu)
-    let len = 0
-    let curSub = 0
-    menu.map((item) => {
-      if (item.url && curPath === item.url) {
-        curSub = len
-      } else if (item.children && item.children.length > 0) {
-        item.children.map((record) => {
-          if (curPath === record.url) {
-            curSub = len
-          }
-        })
       }
-      if (item.children && item.children.length > 0) {
-        len++
-      }
-    })
-    // console.log(curSub)
-    this.setState({
-      openKeys: [`sub${curSub}`],
-    })
-  }
 
-  _handleClick = (e) => {
-    this.setState({
-      current: e.key,
-      // openKeys: e.keyPath.slice(1),
-    }, () => {
-      hashHistory.push(e.key)
-      this.props.dispatch(updateTabList({ title: e.item.props.name, content: '', key: e.key }))
-    })
-  }
-
-  _handleToggle = (openKeys) => {
-    const { state } = this;
-    const latestOpenKey = openKeys.find(key => !(state.openKeys.indexOf(key) > -1));
-    const latestCloseKey = state.openKeys.find(key => !(openKeys.indexOf(key) > -1));
-
-    let nextOpenKeys = [];
-    if (latestOpenKey) {
-      nextOpenKeys = this.getAncestorKeys(latestOpenKey).concat(latestOpenKey);
+      this._handleClick = this._handleClick.bind(this)
     }
-    if (latestCloseKey) {
-      nextOpenKeys = this.getAncestorKeys(latestCloseKey);
+    _handleClick = (e)=>{ // 调用子组件方法获取孩子名字
+
+      console.log(e);
+
+            //this.refs["TTabMain"].TPageOpen(key);
+            this._child.TPageOpen(e.key);
+
+           // console.log("call in father");
+
+            // onClick={(c)=>this.TPageOpen('TWorkShopList')}
+
+            console.log('click ', e);
+
     }
-    this.setState({ openKeys: nextOpenKeys });
-  }
 
-  getAncestorKeys = (key) => {
-    const map = {
-      sub3: ['sub2'],
-    };
-    return map[key] || [];
-  }
-  // 左侧菜单切换显示模式
-  navMini = () => {
-    this.setState({
-      isLeftNavMini: !this.state.isLeftNavMini,
-    }, () => {
-      // console.log(this.state.isLeftNavMini)
-      this.props.leftNavMode(this.state.isLeftNavMini)
-    })
-  }
-
-  // 二级菜单的生成
-  renderLeftNav(options) {
-    const self = this
-    return options.map((item, index) => {
-      if (!item.children) {
-        return (
-          // <SubMenu key={index} title={item.name}>
-          <Menu.Item key={item.url ? item.url : item.id} name={item.name}>
-            <Icon type={item.icon} title={item.name} />
-            <span className="menu-name">{item.name}</span>
-          </Menu.Item>
-          // </SubMenu>
-        )
-      }
+    render() {
+      const selectedKeys = [this.props.location.pathname.replace('/', '')]
       return (
-        <SubMenu key={`sub${index}`}
-          title={
-            <span>
-              <Icon type="caret-down" title={item.name} />
-              <span className="menu-name">{item.name}</span>
-            </span>}
-        >
-          {
-            item.url ?
-              <Menu.Item key={item.url} name={item.name}>
-                <Icon type={item.icon} title={item.name} />
-                <span className="menu-name">{item.name}</span>
-              </Menu.Item> : null
-          }
+          <Sider
+            breakpoint="lg"
+            collapsedWidth="0"
+            onCollapse={(collapsed, type) => { console.log(collapsed, type); }}
+              >
+            <div className="logo" onClick={this.TFetchTest}>
+              T-MES
+            </div>
+            <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}  onClick={this.THandleClick}>
+              <Menu.Item key="8">
+                <Icon type="TTabMain" />
+                <span className="nav-text">系统首页</span>
+              </Menu.Item>
+              <SubMenu
+                    key="TScada"
+                    title={<span><Icon type="user" /><span>车间监控</span></span>}
+                  >
+                    <Menu.Item key="TScadaWorkShop_Auto">自动车间一</Menu.Item>
+                    <Menu.Item key="TScada_Auto2">自动车间二</Menu.Item>
+                    <Menu.Item key="TScada_CY">冲压车间</Menu.Item>
+                    <Menu.Item key="TScada_ZS">注塑车间一</Menu.Item>
+                  </SubMenu>
 
-          {
-            item.children && item.children.length > 0 ? self.renderLeftNav(item.children) : null
-          }
-        </SubMenu>
-      )
-    })
-  }
+              <SubMenu
+                    key="TManufacture"
+                    title={<span><Icon type="user" /><span>生产管理</span></span>}
+                  >
+                    <Menu.Item key="TManufactureOrder">生产订单</Menu.Item>
+                    <Menu.Item key="TManufactureTask">任务排程</Menu.Item>
+                    <Menu.Item key="TManufactureTaskDispatch">派工</Menu.Item>
+                    <Menu.Item key="TManufactureTaskQuery">工单查询</Menu.Item>
+                  </SubMenu>
 
-  render() {
-    const selectedKeys = [this.props.location.pathname.replace('/', '')]
-    return (
-      <div className={this.state.isLeftNavMini ? 'LeftNavMini' : ''}>
-        <nav id="mainnav-container" className="mainnav-container">
-          <div className="LeftNav-control" onClick={() => this.navMini()}>
-            <i className="qqbicon qqbicon-navcontrol" />
-          </div>
-          <Spin spinning={false}>
-            <Menu onClick={this._handleClick}
-              theme="dark"
-              openKeys={this.state.openKeys}
-              onOpenChange={this._handleToggle}
-              selectedKeys={selectedKeys}
-              mode="inline"
-              inlineIndent="12"
-            >
-              {this.renderLeftNav(this.props.config.nav || [])}
+              <SubMenu
+                    key="TDevice"
+                    title={<span><Icon type="user" /><span>设备管理</span></span>}
+                  >
+                    <Menu.Item key="TDeviceCategory">设备类别</Menu.Item>
+                    <Menu.Item key="TDeviceModel">设备型号</Menu.Item>
+                    <Menu.Item key="TDeviceList">设备列表</Menu.Item>
+                  </SubMenu>
+
+              <SubMenu
+                    key="TMould"
+                    title={<span><Icon type="user" /><span>模具管理</span></span>}
+                  >
+                    <Menu.Item key="TMouldCategory">模具类别</Menu.Item>
+                    <Menu.Item key="TMouldList_ZS">注塑模具</Menu.Item>
+                    <Menu.Item key="TMouldList_CY">冲压模具</Menu.Item>
+                    <Menu.Item key="TMouldUserHistory">模具使用</Menu.Item>
+                  </SubMenu>
+
+
+              <SubMenu
+                    key="TProduct"
+                    title={<span><Icon type="user" /><span>产品定义</span></span>}
+                  >
+                    <Menu.Item key="TProductCategory">产品类别</Menu.Item>
+                    <Menu.Item key="TProductModel">产品型号</Menu.Item>
+                    <Menu.Item key="TProductList">产品列表</Menu.Item>
+                  </SubMenu>
+
+              <SubMenu
+                    key="TMaterial"
+                    title={<span><Icon type="user" /><span>物料管理</span></span>}
+                  >
+                    <Menu.Item key="TMaterialCategory">物料类别</Menu.Item>
+                    <Menu.Item key="TMaterialCode">物料编码</Menu.Item>
+                  </SubMenu>
+
+              <Menu.Item key="TBom">
+                <Icon type="user" />
+                <span className="nav-text">BOM管理</span>
+              </Menu.Item>
+
+
+                  <SubMenu
+                    key="TWarning"
+                    title={<span><Icon type="user" /><span>报警管理</span></span>}
+                  >
+                     <Menu.Item key="TWarningItem">报警内容</Menu.Item>
+                    <Menu.Item key="TWarningHistory">报警历史记录</Menu.Item>
+                  </SubMenu>
+
+              <SubMenu
+                    key="TReport"
+                    title={<span><Icon type="user" /><span>报表中心</span></span>}
+                  >
+                  <SubMenu
+                    key="TReportOEE"
+                    title={<span><Icon type="user" /><span>设备OEE</span></span>}
+                  >
+                     <Menu.Item key="TReportOEE_General">OEE概览</Menu.Item>
+                     <Menu.Item key="TReportOEE_Auto">自动组装OEE</Menu.Item>
+                    <Menu.Item key="TReportOEE_CY">冲床OEE</Menu.Item>
+                    <Menu.Item key="TReportOEE_ZS">注塑OEE</Menu.Item>
+                  </SubMenu>
+
+
+                   <SubMenu
+                    key="TReportManufactory"
+                    title={<span><Icon type="user" /><span>生产报表</span></span>}
+                  >
+                     <Menu.Item key="TReportManufactory_Day">生产日报</Menu.Item>
+                     <Menu.Item key="TReportManufactory_Week">生产周报</Menu.Item>
+                    <Menu.Item key="TReportManufactory_Month">生产月报</Menu.Item>
+                    <Menu.Item key="TReportManufactory_Year">生产年报</Menu.Item>
+                  </SubMenu>
+
+                   <SubMenu
+                    key="TReportProduction"
+                    title={<span><Icon type="user" /><span>产能分析</span></span>}
+                  >
+                     <Menu.Item key="TReportProduction_Auto">自动组装机</Menu.Item>
+                     <Menu.Item key="TReportProduction_CY">冲床</Menu.Item>
+                    <Menu.Item key="TReportProduction_ZS">注塑机</Menu.Item>
+                  </SubMenu>
+
+                  <Menu.Item key="TReportQuality">品质趋势</Menu.Item>
+
+                    {/* <Menu.Item key="XXXX">生产报表</Menu.Item>
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item>
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item>
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item> */}
+                  </SubMenu>
+
+
+              <SubMenu
+                    key="TSystemSetting"
+                    title={<span><Icon type="user" /><span>系统设置</span></span>}
+                  >
+                    <Menu.Item key="TUserAccountList">用户管理</Menu.Item>
+                    <Menu.Item key="TUserAuthList">权限组</Menu.Item>
+                    <Menu.Item key="TWorkShopCategory">车间类型</Menu.Item>
+                    <Menu.Item key="TWarningConfig">报警配置</Menu.Item>
+                    <Menu.Item key="TWorkCenterCategory">工作中心类型</Menu.Item>
+                  </SubMenu>
+
+
+              {/* <SubMenu
+                    key="XXXXX"
+                    title={<span><Icon type="user" /><span>XXXXXXX</span></span>}
+                  >
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item>
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item>
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item>
+                    <Menu.Item key="XXXX">XXXXX</Menu.Item>
+                  </SubMenu> */}
+
+              <Menu.Item key="TAboutSupport">
+                <Icon type="user" />
+                <span className="nav-text">技术支持</span>
+              </Menu.Item>
             </Menu>
-          </Spin>
-        </nav>
-      </div>
-    )
-  }
+          </Sider>
+      )
+    }
 }

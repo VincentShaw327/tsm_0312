@@ -8,7 +8,7 @@ import React, { Component } from 'react'
 import { Table, Tabs, Button, Radio, Icon, Menu, Modal, Popconfirm, Dropdown,message } from 'antd'
 import ReactGantt from 'gantt-for-react';
 /******引入自定义的依赖文件*******************/
-// import FeatureSetConfig from '../shawCommon/tableConfig';
+// import FeatureSetConfig from '../tableConfig';
 // import config from '../../config';
 // import { DoPost, HandleCreateform } from '../../server'
 

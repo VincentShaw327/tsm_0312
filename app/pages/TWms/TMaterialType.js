@@ -6,7 +6,7 @@
  import React, { Component } from 'react'
  import { hashHistory, Link } from 'react-router'
  import { Button, Icon, Popover,message } from 'antd';
- import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+ import FeatureSetConfig from '../../components/TCommon/tableConfig';
  import { TPostData } from '../../utils/TAjax';
 let seft
 

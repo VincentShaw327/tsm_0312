@@ -5,7 +5,7 @@
  **/
 import React, { Component } from 'react';
 import { Table, Button, Icon, Row, Col, message } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData } from '../../utils/TAjax';
 import Immutable from 'immutable';
 import workCenterPic from '../../images/assets/AM1.jpg';

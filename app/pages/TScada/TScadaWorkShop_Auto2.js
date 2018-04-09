@@ -3,23 +3,15 @@
  *添加日期:2017.12.20
  **/
 /******引入ant或其他第三方依赖文件*******************/
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
-import FeatureSetConfig from '../../components/TCommon/shawCommon/tableConfig';
+import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData ,urlBase} from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM4.jpg';
 var mqtt = require( 'mqtt' );
 const { Header, Footer, Sider, Content } = Layout;
 
-/**   控制this作用域指针   **/
-let self
-
-// let _storage = window.localStorage;  //暂时不启用缓存加载方式， 后端未推送离线状态，不易监控
-
-var client //注塑车间消息订阅初始化变量
-
 export default class TScadaWorkShop_Auto2 extends Component {
-
     constructor( props ) {
         super( props )
         this.state = {
@@ -30,209 +22,9 @@ export default class TScadaWorkShop_Auto2 extends Component {
             allQuery: '-',
             loading: true
         }
-        self = this;
     }
-    //查询工作中心
+
     componentWillMount() {
-        let objectlist = [
-            {
-                machine_id: "HDMI-STATION-001", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-001", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 234, // 产量：pcs
-                    prod_rate: 35, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-002", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-003", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-003", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-004", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-005", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-006", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-007", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-008", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-009", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-            {
-                machine_id: "HDMI-STATION-010", // 机器识别号
-                data: {
-                    machine_id: "HDMI-STATION-002", // 机器识别号
-                    run_status: 1, // 0：空闲 1：正常运行 2：报警
-                    prod_count: 21, // 产量：pcs
-                    prod_rate: 25, // 产能：pcs/min
-                    rej_count: 1, // 不良品：pcs
-                    rej_rate: 1, // 不良率: pcs/10000，每一万片的不良数目
-                    alarm: 0x0000, // 告警码 32bit
-                },
-                task: {
-                    task_no: "T201470812554", // 工单号
-                    task_name: "AV音视频端子", // 生产内容
-                    task_progress: 90, // 生产进度:90%
-                    task_finish: "15682/20000", // 生产完成比例
-                    task_finishtime: "2017-09-03 10:15:33", // 结束时间
-                }
-            },
-        ]
-        let obj = {
-            dataList: objectlist
-        }
-
-        let testData = JSON.stringify( obj )
-        // console.log('测试数据',testData);
-
         //获取机台数量临时变量
         let aEquipList = [];
         let dat = {
@@ -242,46 +34,37 @@ export default class TScadaWorkShop_Auto2 extends Component {
             TypeUUID: -1,   //类型UUID，不作为查询条件时取值设为-1
             KeyWord : ""
         };
-
-        /**
-        	从服务端获取工作中心记录数据,
-        	确定机台数量, 以及默认机台状态
-        **/
-        TPostData( '/api/TProcess/workcenter', "ListActive", dat,  ( res )=> {
-            var Ui_list = res.obj.objectlist || [];
-            var totalcount = res.obj.objectlist.length;
-            Ui_list.forEach( function ( item, index ) {
-
-                aEquipList.push( {
-                    key: index,
-                    ID: item.ID,
-                    UUID: item.UUID,
-                    WorkshopUUID: item.WorkshopUUID,
-                    Image:item.Image,
-                    Name: item.Name,
-                    style: 'top-equip-light' //默认机台为离线状态
-                } )
-            } );
-            this.setState( {
-                aEquipList: aEquipList,
-                loading: false
-            } )
-        }, function ( error ) {
-            message.info( error );
-        }, false )
+        TPostData( '/api/TProcess/workcenter', "ListActive", dat,
+            ( res )=> {
+                var Ui_list = res.obj.objectlist || [];
+                var totalcount = res.obj.objectlist.length;
+                Ui_list.forEach( function ( item, index ) {
+                    aEquipList.push( {
+                        key: index,
+                        ID: item.ID,
+                        UUID: item.UUID,
+                        WorkshopUUID: item.WorkshopUUID,
+                        Image:item.Image,
+                        Name: item.Name,
+                        style: 'top-equip-light'
+                    } )
+                } );
+                this.setState( {
+                    aEquipList: aEquipList,
+                    loading: false
+                } );
+            },
+            ( error )=> {
+                message.info( error );
+            }
+        )
 
         const graph_conf1 = {
-
-            type: 'graphList', // tableList graphList simpleObject complexObject
-
+            type: 'graphList',
             EchartStyle: {
                 width: '100%',
                 height: '250px'
             },
-
-            // 初始化展现的数据，使用callback 回传列表数据
-            // 需要手动添加唯一id key
-            // callback 组件数据的回调函数(接受列表数据参数)
             initData: function ( callback ) {
                 // 参考echarts 参数
                 var option = {
@@ -325,6 +108,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
             }
 
         };
+
         const graph_conf2 = {
 
             type: 'graphList', // tableList graphList simpleObject complexObject
@@ -436,23 +220,19 @@ export default class TScadaWorkShop_Auto2 extends Component {
 
     componentDidMount() {
         //mqtt消息连接建立
-        client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
-        client.on( 'connect', function () {
+        this.client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
+        this.client.on( 'connect', ()=> {
             //订阅消息
-            client.subscribe( 'topstarltd/iec/app/#' )
-        } )
-        let renderaEquip = [] //零时渲染变量
-
-        client.on( 'message', function ( topic, payload ) {
+            this.client.subscribe( 'topstarltd/iec/app/#' );
+        } );
+        let renderaEquip = [];
+        this.client.on( 'message',( topic, payload )=> {
             // 接收到mqtt消息推送数据
-            let mqttData = JSON.parse( payload )
-            let g = 0
-            let w = 0
-            console.log( '接收到MQTT信息', mqttData )
+            console.log( '接收到MQTT信息', mqttData );
+            let mqttData = JSON.parse( payload );
             // 判断消息包内有数据的情况下,把数据更新至组件.
-
             if ( mqttData && Array.isArray( mqttData.dataList ) ) {
-                renderaEquip = self.state.aEquipList.map( function ( item, i ) {
+                renderaEquip = this.state.aEquipList.map(( item, i )=> {
                     //判断接受消息是哪一台机器
                     mqttData.dataList.forEach( ( mqttItem, index ) => {
                         if ( item.ID == mqttItem.machine_id ) {
@@ -467,57 +247,38 @@ export default class TScadaWorkShop_Auto2 extends Component {
                             item.task_no = mqttItem.task.task_no //工单号
                             item.task_name = mqttItem.task.task_name //产品名称
                             item.Badge = mqttItem.run_status == '1' ?
-                                'success' //运行
-                                :
-                                mqttItem.data.run_status == '0' ?
-                                'default' //待机
-                                :
-                                'warning', //告警
-                                /** 根据状态值确定样式 **/
-                                item.style = mqttItem.data.run_status == '1' ?
-                                'top-equip-nomal' //运行
-                                :
-                                mqttItem.data.run_status == '0' ?
-                                'top-equip-light' //待机
-                                :
-                                'top-equip-warning' //告警
-                            return item
-                        } else {
+                                'success':mqttItem.data.run_status == '0' ?
+                                    'default':'warning', //告警
+                            /** 根据状态值确定样式 **/
+                            item.style = mqttItem.data.run_status == '1' ?
+                                'top-equip-nomal':mqttItem.data.run_status == '0' ?
+                                    'top-equip-light':'top-equip-warning' //告警
                             return item
                         }
-
+                        else {
+                            return item
+                        }
                     } )
                     return item;
                 } )
-                console.log( 'renderaEquip', renderaEquip )
-                renderaEquip.forEach( function ( item, i ) {
-                    if ( item.Status == '1' ) {
-                        g = g + 1
-                    } else if ( item.Status == '2' ) {
-                        w = w + 1
-                    }
-                } )
-                self.setState( {
-                    loading: false, //加载完毕取消蒙城
+                console.log( 'renderaEquip', renderaEquip );
+                this.setState( {
+                    loading: false,
                     aEquipList: renderaEquip,
-                    allQuery: renderaEquip.length,
-                    onLine: g,
-                    warning: w,
-                    offLine: renderaEquip.length - w - g
                 } )
             }
-        } )
 
+        } )
     }
 
     componentWillUnmount() {
-        client.end()
+        this.client.end();
     }
 
     render() {
+        console.log( '工作中心列表:', this.state.aEquipList );
         const Dailychart = this.dailychart1;
         const Barchart = this.barChart;
-        console.log( '工作中心列表:', this.state.aEquipList );
         const ListHeader = (
             <Row gutter={16} style={{fontSize:16}}>
               <Col className="gutter-row" span={3}>
@@ -608,7 +369,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                                         <Progress
                                                             // type="dashboard"
                                                             // width={25}
-                                                            percent={parseInt(item.task_progress || 15)}
+                                                            percent={parseInt(item.task_progress || 0)}
                                                             strokeWidth={15}/>
                                                     </div>
                                                 </Col>
@@ -616,17 +377,6 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                                     <Tag
                                                         color={`${stateObj.color}`}
                                                         style={{marginTop:30, fontSize: 'larger'}}>{stateObj.text}</Tag>
-                                                    {
-                                                        // let stateObj={};
-                                                        // parseInt(item.task_progress || 0) >= 100
-                                                        // ? stateObj={text："已完成",color:'blue'}
-                                                        // : item.Status == '1'
-                                                        // ? <Tag color="rgba(82, 196, 26, 0.84)" style={{marginRight: '0', fontSize: 'larger'}}>生产中</Tag>
-                                                        // : item.Status == '2' ? <Tag color="#ffc069" style={{marginRight: '0', fontSize: 'larger'}}>告警</Tag>
-                                                        //     : <Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>
-
-                                                        // (<Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>)
-                                                    }
                                                     &nbsp;&nbsp;
                                                 </Col>
                                             </Row>
