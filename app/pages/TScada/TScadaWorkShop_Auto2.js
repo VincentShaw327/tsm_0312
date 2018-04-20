@@ -7,16 +7,16 @@ import React, { Component } from 'react';
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
 import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData ,urlBase} from '../../utils/TAjax';
-import devicePic from '../../images/assets/AM4.jpg';
-var mqtt = require( 'mqtt' );
-const { Header, Footer, Sider, Content } = Layout;
-
+import {  yuan,Pie} from '../../components/ant-design-pro/Charts';
+import mqtt from 'mqtt';
+let client
 export default class TScadaWorkShop_Auto2 extends Component {
     constructor( props ) {
         super( props )
         this.state = {
             //单台机台数据状态
             aEquipList: [],
+            stateCount:[],
             onLine: '-',
             warning: '-',
             allQuery: '-',
@@ -220,39 +220,30 @@ export default class TScadaWorkShop_Auto2 extends Component {
 
     componentDidMount() {
         //mqtt消息连接建立
-        this.client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
-        this.client.on( 'connect', ()=> {
+        // client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
+        client = mqtt.connect( 'ws://192.168.200.3:9011' );
+
+        client.on( 'connect', ()=> {
             //订阅消息
-            this.client.subscribe( 'topstarltd/iec/app/#' );
+            client.subscribe("0101/086325608001/201712290001/kanban/02/B");
         } );
         let renderaEquip = [];
-        this.client.on( 'message',( topic, payload )=> {
+        client.on( 'message',( topic, payload )=> {
             // 接收到mqtt消息推送数据
-            console.log( '接收到MQTT信息', mqttData );
             let mqttData = JSON.parse( payload );
+            console.log( '接收到MQTT_02B信息', mqttData );
             // 判断消息包内有数据的情况下,把数据更新至组件.
-            if ( mqttData && Array.isArray( mqttData.dataList ) ) {
+            if ( mqttData && Array.isArray( mqttData.data ) ) {
                 renderaEquip = this.state.aEquipList.map(( item, i )=> {
                     //判断接受消息是哪一台机器
-                    mqttData.dataList.forEach( ( mqttItem, index ) => {
-                        if ( item.ID == mqttItem.machine_id ) {
+                    mqttData.data.forEach( ( mqttItem, index ) => {
+                        if ( item.UUID == mqttItem.workstation ) {
                             item.key = i
-                            item.Status = mqttItem.data.run_status
-                            item.prod_count = mqttItem.data.prod_count //产量
-                            item.prod_rate = mqttItem.data.prod_rate //产能
-                            item.rej_count = mqttItem.data.rej_count //不良数
-                            item.rej_rate = mqttItem.data.rej_rate //不良率
-                            item.task_finish = mqttItem.task.task_finish //完成比例
-                            item.task_progress = mqttItem.task.task_progress //完成进度
-                            item.task_no = mqttItem.task.task_no //工单号
-                            item.task_name = mqttItem.task.task_name //产品名称
-                            item.Badge = mqttItem.run_status == '1' ?
-                                'success':mqttItem.data.run_status == '0' ?
-                                    'default':'warning', //告警
-                            /** 根据状态值确定样式 **/
-                            item.style = mqttItem.data.run_status == '1' ?
-                                'top-equip-nomal':mqttItem.data.run_status == '0' ?
-                                    'top-equip-light':'top-equip-warning' //告警
+                            item.Status = mqttItem.run_status
+                            item.prod_count = mqttItem.finished //产量
+                            item.prod_rate = mqttItem.capacity //产能
+                            item.plan = mqttItem.plan //计划
+                            item.product=mqttItem.product
                             return item
                         }
                         else {
@@ -261,22 +252,43 @@ export default class TScadaWorkShop_Auto2 extends Component {
                     } )
                     return item;
                 } )
-                console.log( 'renderaEquip', renderaEquip );
+                // console.log( 'renderaEquip', renderaEquip );
                 this.setState( {
                     loading: false,
                     aEquipList: renderaEquip,
                 } )
+            }
+            if(mqttData&&mqttData.statics){
+                let Mstatics=mqttData.statics;
+                let MstateCount=[
+                    {
+                        x:'报警',
+                        y:Mstatics.failure
+                    },
+                    {
+                        x:'离线',
+                        y:Mstatics.offline
+                    },
+                    {
+                        x:'运行',
+                        y:Mstatics.running
+                    },
+                    {
+                        x:'待机',
+                        y:Mstatics.stopped
+                    }
+                ];
+                this.setState({stateCount:MstateCount});
             }
 
         } )
     }
 
     componentWillUnmount() {
-        this.client.end();
+        client.end();
     }
 
     render() {
-        console.log( '工作中心列表:', this.state.aEquipList );
         const Dailychart = this.dailychart1;
         const Barchart = this.barChart;
         const ListHeader = (
@@ -319,15 +331,15 @@ export default class TScadaWorkShop_Auto2 extends Component {
                             renderItem={item => {
                                 let stateObj={};
                                 if(item.task_progress &&item.task_progress >= 100)
-                                stateObj={text:"已完成",color:'blue'};
-                                    // stateObj.text="已完成";
-                                    // stateObj.text="已完成";
-                                else if(item.Status &&item.Status== 1)
-                                stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
-                                else if(item.Status &&item.Status== 2)
-                                stateObj={text:"报警",color:'#ffc069'};
-                                else
-                                stateObj={text:"待机",color:'#bfbfbf'};
+                                    stateObj={text:"已完成",color:'blue'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== 1)
+                                    stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
+                                else if(item.hasOwnProperty('Status') &&item.Status== 2)
+                                    stateObj={text:"报警中",color:'#ffc069'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== 0)
+                                    stateObj={text:"待机中",color:'#4184de'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== -1)
+                                    stateObj={text:"离线中",color:'#bfbfbf'};
 
                                 return(
                                         <List.Item>
@@ -346,12 +358,12 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
                                                         <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div>
-                                                        <div>产品:{item.task_name?item.task_name:'-'}</div>
+                                                    <div>产品:{item.product?item.product:'-'}</div>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                            <span>{item.prod_count?item.prod_count:'-'}</span>
+                                                        <span>{item.hasOwnProperty('prod_count')?item.prod_count:'-'}</span>
                                                     </div>
                                                 </Col>
                                                 {/* <Col className="gutter-row" span={3}>
@@ -361,15 +373,17 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                                 </Col> */}
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <span>{item.prod_rate?item.prod_rate:'-'}</span>
+                                                        <span>{item.hasOwnProperty('prod_rate')?item.prod_rate:'-'}</span>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
+                                                        <span>{item.prod_count||0}/{item.plan||0}</span>
                                                         <Progress
                                                             // type="dashboard"
                                                             // width={25}
-                                                            percent={parseInt(item.task_progress || 0)}
+                                                            // percent={parseInt(item.task_progress || 0)}
+                                                            percent={parseFloat(((item.prod_count/item.plan )*100|| 0).toFixed(2))}
                                                             strokeWidth={15}/>
                                                     </div>
                                                 </Col>
@@ -390,7 +404,16 @@ export default class TScadaWorkShop_Auto2 extends Component {
                   <Col className="gutter-row" span={6}>
                     <div className="gutter-box">
                         <Card title="状态统计">
-                            <Dailychart />
+                            {/* <Dailychart /> */}
+                            <Pie
+                              hasLegend
+                              title="销售额"
+                              subTitle="设备状态"
+                              total={"总共"+ this.state.stateCount.reduce((pre, now) => now.y + pre, 0)+"台"}
+                              data={this.state.stateCount}
+                              valueFormat={val =>('&nbsp;&nbsp'+val+'台')}
+                              height={294}
+                            />
                         </Card>
                         <Card title="时间统计"  style={{marginTop:20}}>
                             <Barchart />

@@ -8,7 +8,7 @@ import hashHistory from './history'
 import App1 from './base/TIndexPage'
 import './index.less'
 
-
+console.log("React========",React);
 // 登录*/
 const Login = ( location, cb ) => {
     require.ensure( [], ( require ) => {

@@ -4,16 +4,15 @@
  **/
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
-import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,Alert,List,message} from 'antd';
+import {Card,Row,Col,Progress,Divider,Tag,Spin,Alert,List,message} from 'antd';
 import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData,urlBase } from '../../utils/TAjax';
-import devicePic from '../../images/assets/AM1.jpg';
-var mqtt = require( 'mqtt' );
-const { Header, Footer, Sider, Content } = Layout;
+import {  yuan,Pie} from '../../components/ant-design-pro/Charts';
+// var mqtt = require( 'mqtt' );
+import mqtt from 'mqtt';
 
 let self
 
-// let _storage = window.localStorage;  //暂时不启用缓存加载方式， 后端未推送离线状态，不易监控
 var client //注塑车间消息订阅初始化变量
 
 export default class TScadaWorkShop_Auto extends Component {
@@ -23,6 +22,7 @@ export default class TScadaWorkShop_Auto extends Component {
         this.state = {
             //单台机台数据状态
             aEquipList: [],
+            stateCount:[],
             onLine: '-',
             warning: '-',
             allQuery: '-',
@@ -228,46 +228,150 @@ export default class TScadaWorkShop_Auto extends Component {
     }
 
     componentDidMount() {
+        /*{
+            data: [
+                {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: "",
+                    run_status:-1,
+                    title:"HDMI全自动机001",
+                    workstation:10
+                }, {
+                    capacity: 46,
+                    finished: 3741,
+                    order_status: "success",
+                    plan: 211000,
+                    product: "11号接插件"
+                }, {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: ""
+                }, {
+                    capacity: 19,
+                    finished: 1177,
+                    order_status: "success",
+                    plan: 213000,
+                    product: "13号接插件"
+                }, {
+                    capacity: 37,
+                    finished: 3366,
+                    order_status: "success",
+                    plan: 214000,
+                    product: "14号接插件"
+                }, {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: ""
+                }, {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: ""
+                }, {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: ""
+                }, {
+                    capacity: 36,
+                    finished: 3678,
+                    order_status: "success",
+                    plan: 218000,
+                    product: "18号接插件"
+                }, {
+                    capacity: 29,
+                    finished: 3043,
+                    order_status: "success",
+                    plan: 219000,
+                    product: "19号接插件"
+                }, {
+                    capacity: 53,
+                    finished: 2859,
+                    order_status: "success",
+                    plan: 220000,
+                    product: "20号接插件"
+                }, {
+                    capacity: 37,
+                    finished: 3229,
+                    order_status: "success",
+                    plan: 221000,
+                    product: "21号接插件"
+                }, {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: ""
+                }, {
+                    capacity: 0,
+                    finished: 1194,
+                    order_status: "success",
+                    plan: 223000,
+                    product: "23号接插件"
+                }, {
+                    capacity: 0,
+                    finished: 1,
+                    order_status: "success",
+                    plan: 1,
+                    product: ""
+                }, {
+                    capacity: 26,
+                    finished: 1925,
+                    order_status: "success",
+                    plan: 225000,
+                    product: "25号接插件"
+                }
+            ],
+            statics: {
+                failure: 0,
+                offline: 7,
+                running: 7 ,
+                stopped: 2
+            }
+        }*/
+
         //mqtt消息连接建立
-        client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
+        client = mqtt.connect( 'ws://192.168.200.3:9011' );
+        // client = mqtt.connect( 'mqtt://192.168.200.3:9011' );
         client.on( 'connect', function () {
             //订阅消息
-            client.subscribe( 'topstarltd/iec/app/#' )
+            client.subscribe( '0101/086325608001/201712290001/kanban/01/B' );
+            // client.subscribe( "0101/086325608001/201712290001/kanban/01/A" );
+            // client.subscribe( 'topstarltd/iec/app/#' )
         } )
         let renderaEquip = [];
-        client.on( 'message', function ( topic, payload ) {
+        client.on( 'message',( topic, payload )=> {
             // 接收到mqtt消息推送数据
             let mqttData = JSON.parse( payload );
-            let g = 0;
-            let w = 0;
             console.log( '接收到MQTT信息', mqttData );
             // 判断消息包内有数据的情况下,把数据更新至组件.
-
-            if ( mqttData && Array.isArray( mqttData.monitor ) ) {
-                renderaEquip = self.state.aEquipList.map(( item, i )=> {
+            if ( mqttData && Array.isArray( mqttData.data ) ) {
+                renderaEquip = this.state.aEquipList.map(( item, i )=> {
                     //判断接受消息是哪一台机器
-                    mqttData.monitor.forEach( ( mqttItem, index ) => {
-                        if ( item.ID == mqttItem.workstation_uuid ) {
+                    mqttData.data.forEach( ( mqttItem, index ) => {
+                        if ( item.UUID == mqttItem.workstation ) {
                             item.key = i
-                            item.Status = mqttItem.status
-                            item.prod_count = mqttItem.prod_count //产量
-                            item.prod_rate = mqttItem.prod_rate //产能
-                            item.rej_count = mqttItem.data.rej_count //不良数
-                            item.rej_rate = mqttItem.data.rej_rate //不良率
-                            item.task_finish = mqttItem.task.task_finish //完成比例
-                            item.task_progress = mqttItem.finished_ratio //完成进度
-                            item.task_no = mqttItem.task.task_no //工单号
-                            item.task_name = mqttItem.task.task_name //产品名称
-                            item.Badge = mqttItem.run_status == '1' ?
-                                'success':
-                                    mqttItem.status == '0' ?
-                                        'default':'warning', //告警
-                                /** 根据状态值确定样式 **/
-                            item.style = mqttItem.data.run_status == '1' ?
-                                'top-equip-nomal':
-                                    mqttItem.data.run_status == '0' ?
-                                        'top-equip-light':'top-equip-warning'
-                            return item
+                            item.Status = mqttItem.run_status
+                            item.prod_count = mqttItem.finished //产量
+                            item.prod_rate = mqttItem.capacity //产能
+                            item.plan = mqttItem.plan //计划
+                            item.product=mqttItem.product
+                            // item.rej_count = mqttItem.data.rej_count //不良数
+                            // item.rej_rate = mqttItem.data.rej_rate //不良率
+                            // item.task_finish = mqttItem.task.task_finish //完成比例
+                            // item.task_progress = mqttItem.finished_ratio //完成进度
+                            // item.task_no = mqttItem.task.task_no //工单号
+                            // item.task_name = mqttItem.task.task_name //产品名称
+                            return item;
                         }
                         else {
                             return item
@@ -275,34 +379,56 @@ export default class TScadaWorkShop_Auto extends Component {
                     } )
                     return item;
                 } )
-                console.log( 'renderaEquip', renderaEquip )
-                renderaEquip.forEach( function ( item, i ) {
-                    if ( item.Status == '1' ) {
-                        g = g + 1
-                    } else if ( item.Status == '2' ) {
-                        w = w + 1
-                    }
-                } )
-                self.setState( {
+                // console.log( 'renderaEquip', renderaEquip );
+
+                this.setState( {
                     loading: false, //加载完毕取消蒙城
                     aEquipList: renderaEquip,
-                    allQuery: renderaEquip.length,
-                    onLine: g,
-                    warning: w,
-                    offLine: renderaEquip.length - w - g
+                    // allQuery: renderaEquip.length,
+                    // onLine: g,
+                    // warning: w,
+                    // offLine: renderaEquip.length - w - g
                 } )
             }
-        } )
+            if(mqttData&&mqttData.statics){
+                let Mstatics=mqttData.statics;
+                let MstateCount=[
+                    {
+                        x:'报警',
+                        y:Mstatics.failure
+                    },
+                    {
+                        x:'离线',
+                        y:Mstatics.offline
+                    },
+                    {
+                        x:'运行',
+                        y:Mstatics.running
+                    },
+                    {
+                        x:'待机',
+                        y:Mstatics.stopped
+                    }
+                ];
+                this.setState({stateCount:MstateCount});
+            }
+        } );
+
+        // let topicA="0101/086325608001/201712290001/kanban/01/A";
+        // client.on( 'message',(topicA , payload )=> {
+        //     let mqttData = JSON.parse( payload );
+        //     console.log( '接收到MQTT---A信息', mqttData );
+        // });
     }
 
     componentWillUnmount() {
-        // client.end()
+        client.end()
     }
 
     render() {
+        // console.log( '工作中心列表:', this.state.aEquipList );
         const Dailychart = this.dailychart1;
         const Barchart = this.barChart;
-        console.log( '工作中心列表:', this.state.aEquipList );
         const ListHeader = (
             <Row gutter={16} style={{fontSize:16}}>
               <Col className="gutter-row" span={3}>
@@ -327,7 +453,35 @@ export default class TScadaWorkShop_Auto extends Component {
                 <div className="gutter-box">状态</div>
               </Col>
             </Row>
-        )
+        );
+
+        const salesPieData = [
+          {
+            x: '家用电器',
+            y: 4544,
+          },
+          {
+            x: '食用酒水',
+            y: 3321,
+          },
+          {
+            x: '个护健康',
+            y: 3113,
+          },
+          {
+            x: '服饰箱包',
+            y: 2341,
+          },
+          {
+            x: '母婴产品',
+            y: 1231,
+          },
+          {
+            x: '其他',
+            y: 1231,
+          },
+        ];
+
         return (
             <div style={{marginTop:15}}>
                 <Row gutter={16}>
@@ -344,14 +498,14 @@ export default class TScadaWorkShop_Auto extends Component {
                                 let stateObj={};
                                 if(item.task_progress &&item.task_progress >= 100)
                                 stateObj={text:"已完成",color:'blue'};
-                                    // stateObj.text="已完成";
-                                    // stateObj.text="已完成";
-                                else if(item.Status &&item.Status== 1)
+                                else if(item.hasOwnProperty('Status')&&item.Status== 1)
                                 stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
-                                else if(item.Status &&item.Status== 2)
-                                stateObj={text:"报警",color:'#ffc069'};
-                                else
-                                stateObj={text:"待机",color:'#bfbfbf'};
+                                else if(item.hasOwnProperty('Status') &&item.Status== 2)
+                                stateObj={text:"报警中",color:'#ffc069'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== 0)
+                                stateObj={text:"待机中",color:'#4184de'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== -1)
+                                stateObj={text:"离线中",color:'#bfbfbf'};
 
                                 return(
                                         <List.Item>
@@ -370,25 +524,26 @@ export default class TScadaWorkShop_Auto extends Component {
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
                                                         <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div>
-                                                        <div>产品:{item.task_name?item.task_name:'-'}</div>
+                                                        <div>产品:{item.product?item.product:'-'}</div>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                            <span>{item.prod_count?item.prod_count:'-'}</span>
+                                                        <span>{item.hasOwnProperty('prod_count')?item.prod_count:'-'}</span>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <span>{item.prod_rate?item.prod_rate:'-'}</span>
+                                                        <span>{item.hasOwnProperty('prod_rate')?item.prod_rate:'-'}</span>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
+                                                        <span>{item.prod_count||0}/{item.plan||0}</span>
                                                         <Progress
                                                             // type="dashboard"
                                                             // width={25}
-                                                            percent={parseInt(item.task_progress || 0)}
+                                                            percent={parseFloat(((item.prod_count/item.plan )*100|| 0).toFixed(2))}
                                                             strokeWidth={15}/>
                                                     </div>
                                                 </Col>
@@ -409,7 +564,22 @@ export default class TScadaWorkShop_Auto extends Component {
                   <Col className="gutter-row" span={6}>
                     <div className="gutter-box">
                         <Card title="状态统计">
-                            <Dailychart />
+                            {/* <Dailychart /> */}
+                            <Pie
+                              hasLegend
+                              title="销售额"
+                              subTitle="设备状态"
+                              // total={yuan(salesPieData.reduce((pre, now) => now.y + pre, 0))}
+                              total={"总共"+ this.state.stateCount.reduce((pre, now) => now.y + pre, 0)+"台"}
+                              // total={()=>{
+                              //   let total=this.state.stateCount.reduce((pre, now) => now.y + pre, 0);
+                              //   return <span>{total}</span>
+                              // }}
+                              data={this.state.stateCount}
+                              valueFormat={val =>('&nbsp;&nbsp'+val+'台')}
+                              // valueFormat={val => yuan(val)}
+                              height={294}
+                            />
                         </Card>
                         <Card title="时间统计"  style={{marginTop:20}}>
                             <Barchart />

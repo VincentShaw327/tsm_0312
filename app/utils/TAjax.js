@@ -4,8 +4,8 @@ import { format } from 'upath';
 import { ENOPROTOOPT, EOPNOTSUPP } from 'constants';
 
 // let urlBase = 'http://localhost:8888';
-export  let urlBase = 'http://localhost:9000';
-// export  let urlBase = 'http://192.168.200.5';
+// export  let urlBase = 'http://localhost:9000';
+export  let urlBase = 'http://192.168.200.5';
 // export  let urlBase = 'http://demo.mes.top-link.me';
  // urlBase;
 

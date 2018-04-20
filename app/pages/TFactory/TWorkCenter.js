@@ -366,6 +366,7 @@ export default class TWorkCenter extends Component {
             },
             //信息修改
             Update: function ( data, callback ) {
+                console.log("工作中心更新：",data);
                 let dat = {
                     UUID: data.UUID,
                     TypeUUID: data.TypeUUID,

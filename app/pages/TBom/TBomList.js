@@ -393,7 +393,7 @@ export default class TBomList extends Component {
     }
 
     toggleRender(record){
-        console.log("toggleRender",record);
+        // console.log("toggleRender",record);
         this.setState({
             showDetal:!this.state.showDetal,
             detailID:record.UUID,

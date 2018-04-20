@@ -147,9 +147,9 @@ export default class TAuthGroupList extends Component {
                     'PageSize': -1
                 }
                 TPostData( this.url, "ListActive", dat, function ( res ) {
+                    console.log("查询到权限组列表：",res);
                     var list = [];
                     var Ui_list = res.obj.objectlist || [];
-
                     var totalcount = res.obj.objectlist.length;
                     creatKeyWord = res.obj.objectlist.length;
 

@@ -181,9 +181,18 @@ export default class TUserDetails extends Component {
         return (
             <div>
                 <div style={{marginTop:25,height:180}}>
-                        {/* <img height='50' src={urlBase+detailMessage.Image}/> */}
+                        {/* <img height='50' src={urlBase+detailMessage.Image}/>avatarPic */}
                     <Row>
-                        <Col span={5}><img width={'80%'} src={avatarPic}/></Col>
+                        <Col span={5}>
+                            <div style={{
+                                    fontSize:16,
+                                    display:'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-evenly',
+                                    height: 180}}>
+                                <img width={'80%'} src={urlBase+detailMessage.Image}/>
+                            </div>
+                        </Col>
                         <Col span={6}>
                             <div style={{
                                     fontSize:16,

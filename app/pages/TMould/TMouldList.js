@@ -78,13 +78,13 @@ export default class DeviceList extends Component {
                         )
                     }
                 },
-                {
+                /*{
                     title: '名称',
                     dataIndex: 'Name',
                     type: 'string'
-                },
+                },*/
                 {
-                    title: '型号名称',
+                    title: '型号',
                     dataIndex: 'ModelName',
                     type: 'string'
                 },
@@ -94,13 +94,13 @@ export default class DeviceList extends Component {
                     type: 'string'
                 },
                 {
-                    title: '标签',
-                    dataIndex: 'Label',
+                    title: '规格尺寸（材料/尺寸/步距）',
+                    dataIndex: 'ModelSize',
                     type: 'string'
                 },
                 {
-                    title: '尺寸',
-                    dataIndex: 'ModelSize',
+                    title: '标签',
+                    dataIndex: 'Label',
                     type: 'string'
                 },
                 {
@@ -174,6 +174,13 @@ export default class DeviceList extends Component {
             //添加的弹出框菜单
             CType: [
                 {
+                    name: 'ModelUUID',
+                    label: '模具型号',
+                    type: 'select',
+                    rules: [ { required: true, message: '请选择型号' } ],
+                    options: MoldModelList
+                },
+                {
                     name: 'Name',
                     label: '模具名称',
                     type: 'string',
@@ -187,13 +194,6 @@ export default class DeviceList extends Component {
                     placeholder: '请输入模具编号',
                     rules: [ { required: true, message: '编号不能为空' } ],
                 },
-                {
-                    name: 'ModelUUID',
-                    label: '模具型号',
-                    type: 'select',
-                    rules: [ { required: true, message: '请选择型号' } ],
-                    options: MoldModelList
-                }
             ],
             //查询的数据项
             RType: [

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Card, DatePicker,Form, Modal, message } from 'antd';
 import { TPostData, urlBase } from '../../utils/TAjax';
-import CFormItem from './CreateFormItem';
+// import CFormItem from './CreateFormItem';
+import CFormItem from '../TForm/CreatFormItem/CreateFormItem';
 
 export default class CModal extends Component {
 
@@ -22,7 +23,7 @@ export default class CModal extends Component {
 
     handleCreate() {
         this.props.form.validateFields( ( errors, values ) => {
-            // console.log('收到表单值：', values);
+            console.log('收到表单值：', values);
             let subValue = {};
             if ( !!errors ) {
                 console.log( 'Errors in form!!!' );
@@ -35,10 +36,6 @@ export default class CModal extends Component {
                 // message.success('添加成功');
             }
         } );
-    }
-    handlePlace() {
-        this.props.placeSubmit( this.props.form.getFieldsValue() )
-        // console.log("place的提交值是",this.props.form.getFieldsValue());
     }
 
     handleReset() {

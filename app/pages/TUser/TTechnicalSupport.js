@@ -9,7 +9,6 @@ const FormItem = Form.Item;
 import { TPostData } from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM1.jpg';
 
-
 export default class TTechnicalSupport extends Component {
     constructor( props ) {
         super( props )

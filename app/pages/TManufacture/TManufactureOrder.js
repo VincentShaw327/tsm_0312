@@ -323,7 +323,6 @@ export default class TstateTimeOverview extends React.Component {
     }
 
     handleCreat(data){
-        console.log('data',data);
         let dat = {
             key: '1000',
             ID: data.ID, //订单编号
@@ -333,6 +332,8 @@ export default class TstateTimeOverview extends React.Component {
             PlanNumber: data.Number, //计划产量
             PlanDeliverDate: data.PlanDeliverDate.format( 'YYYY-MM-DD' ) //计划交期
         }
+        console.log('data',dat);
+
         TPostData('/api/tmanufacture/manufacture', "AddProductOrder", dat,
             ( res )=> {
                 message.success("创建新订单成功！")

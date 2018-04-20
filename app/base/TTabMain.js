@@ -41,7 +41,7 @@ import {
     TOEEAnalysis,
     TDA_Terminal
 } from '../pages/index.js'
-
+import ComponentsDemo from '../components/componentDemo'
 const TabPane = Tabs.TabPane;
 
 export default class TTabMain extends React.Component {
@@ -243,6 +243,8 @@ export default class TTabMain extends React.Component {
                                 return <TabPane tab='技术支持' key={pane.key}><TTechnicalSupport/></TabPane>; break;
                           case "TDA_Terminal":
                                 return <TabPane tab='终端管理' key={pane.key}><TDA_Terminal/></TabPane>; break;
+                          case "TDemo":
+                                return <TabPane tab='组件DEMO' key={pane.key}><ComponentsDemo/></TabPane>; break;
                           default:return <TabPane tab='未知' key={pane.key}></TabPane>;
                        }
                      })

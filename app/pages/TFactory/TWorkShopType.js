@@ -4,23 +4,36 @@
  *添加人:shaw
  **/
 import React, { Component } from 'react'
-// import {CommonTable} from '../../components/TTable';
 import FeatureSetConfig from '../../components/TCommon/tableConfig';
-import { Table, Menu, Icon, Badge, Dropdown,message } from 'antd';
+import { Table, Menu, Icon, Badge, Dropdown,message,Divider,Popconfirm } from 'antd';
 import { TPostData } from '../../utils/TAjax';
-let seft;
+import SimpleTable from '../../components/TTable/SimpleTable';
+import { CreateModal,UpdateModal } from '../../components/TModal';
+import {SimpleQForm,StandardQForm } from '../../components/TForm';
 
-// const Feature = FeatureSetConfig( conf );
+let seft;
 
 export default class App extends Component {
 
     constructor( props ) {
         super( props )
-        this.state = {}
+        this.state = {
+            wslist:[],
+            selectedRows: [],
+            updateFromItem:{},
+            keyWord:'',
+            current:1,
+            pageSize:10,
+            total:0,
+            UModalShow:false,
+            loading:true,
+        }
         seft = this;
+        this.url='/api/TFactory/workshop_type';
     }
 
     componentWillMount() {
+
         const tableConfig = {
 
             type: 'tableList',
@@ -176,6 +189,9 @@ export default class App extends Component {
                         ...seft.state.pagination
                     }
                     pagination.total = totalcount;
+
+                    // self.setState({wslist:list});
+
                     callback( list, {
                         total: pagination.total,
                         nPageSize: 10
@@ -268,16 +284,245 @@ export default class App extends Component {
             }
 
         };
-        this.feature = FeatureSetConfig(tableConfig);
-        // this.config=tableConfig;
+        // this.feature = FeatureSetConfig(tableConfig);
+        this.getWSTypeList();
+    }
+
+    componentDidMount(){
+        // this.getWSTypeList();
+    }
+
+    getWSTypeList(str){
+        const {current,pageSize}=this.state;
+        // console.log("keyWord:==",this.state.keyWord);
+        const dat = {
+            PageIndex: 0,
+            PageSize: -1,
+            KeyWord: str||''
+        }
+        TPostData('/api/TFactory/workshop_type', "ListActive", dat,
+            ( res )=> {
+                var list = [];
+                console.log( "查询到车间类别列表", res );
+                var data_list = res.obj.objectlist || [];
+                var totalcount = res.obj.totalcount;
+                data_list.forEach( ( item, index )=> {
+                    list.push( {
+                        key: index,
+                        UUID: item.UUID,
+                        Name: item.Name,
+                        Number: item.ID,
+                        Desc: item.Desc,
+                        UpdateDateTime: item.UpdateDateTime,
+                        Note: item.Note,
+                    } )
+                } );
+                this.setState({wslist:list,loading:false});
+            },
+            ( error )=> {
+                message.info( error );
+            }
+        )
+    }
+
+    handleCreat=(data)=>{
+        let dat = {
+            Name: data.Name,
+            ID: "---"
+        }
+        console.log('创建后的数据是:', data);
+        TPostData( this.url, "Add", dat,
+            ( res )=> {
+                message.success("创建车间成功！");
+                this.getWSTypeList();
+            },
+            ( err )=> {
+                message.error("创建车间失败！");
+                console.log('err',err);
+            }
+        )
+    }
+
+    handleQuery=(data)=>{
+        // console.log("查询的只是:",data.keyWord);
+        // this.setState({keyWord:data.keyWord});
+        this.getWSTypeList(data.keyWord);
+    }
+
+    handleUpdate=(data)=>{
+        let dat = {
+            UUID: this.state.updateFromItem.UUID,
+            Name: data.Name,
+            Desc: data.Desc,
+            ID: "--",
+            Note: "--"
+        }
+        TPostData( this.url, "Update", dat,
+            ( res )=> {
+                message.success("更新成功！");
+                this.getWSTypeList();
+            },
+            ( err )=> {
+                message.error("更新失败！");
+                console.log('err',err);
+            }
+        )
+    }
+
+    handleDelete=(data)=>{
+        var dat = {
+            UUID: data.UUID,
+        }
+        // console.log("看看data",data);
+        TPostData( this.url, "Inactive", dat,
+            ( res )=> {
+                message.success("删除成功！");
+                this.getWSTypeList();
+            },
+            ( err )=> {
+                message.error("删除失败！");
+                console.log('err',err);
+            }
+        )
+    }
+
+    toggleUModalShow=(record)=>{
+        this.setState({UModalShow:!this.state.UModalShow,updateFromItem:record});
+
     }
 
     render() {
         let Feature=this.feature;
-        // console.log('CommonTable',CommonTable);
-        // <CommonTable config={this.config} />
+        const {wslist}=this.state;
+        let Data={list:wslist};
+        const Tcolumns =[
+            {
+                title: '序号',
+                dataIndex: 'key',
+                type: 'string'
+            },
+            {
+                title: '类别名称',
+                dataIndex: 'Name',
+                type: 'string',
+                // sorter: (a, b) => a.Name.length - b.Name.length
+            },
+            {
+                title: '备注',
+                dataIndex: 'Note',
+                type: 'string',
+            },
+            {
+                title: '修改时间',
+                dataIndex: 'UpdateDateTime',
+                type: 'string',
+            },
+            {
+                title: '操作',
+                dataIndex: 'UUID',
+                render:(txt,record)=>{
+                    return <span>
+                        <a onClick={this.toggleUModalShow.bind(this,record)}>编辑</a>
+                        <Divider type="vertical"/>
+                        <Popconfirm
+                            placement="topRight"
+                            title="确定删除此项数据？"
+                            onConfirm={this.handleDelete.bind(this,record)}
+                            okText="确定" cancelText="取消">
+                            <a href="#">删除</a>
+                        </Popconfirm>
+                    </span>
+                }
+            }
+        ];
+
+        const RFormItem=[
+            {
+                name: 'keyWord',
+                label: '搜索内容',
+                type: 'string',
+                placeholder: '请输入搜索内容'
+          }
+        ];
+        const RFormItem2= [
+            {
+                name: 'KeyWord',
+                label: '搜索内容',
+                type: 'string',
+                placeholder: '请输入搜索内容'
+            }, {
+                name: 'TypeUUID',
+                label: '中心类型',
+                type: 'select',
+                defaultValue: '-1',
+                hasAllButtom: true,
+                // width: 230,
+                options:[{txt:'12',value:1},{txt:'12',value:1}]
+            }, {
+                name: 'WorkshopUUID',
+                label: '车间',
+                type: 'select',
+                defaultValue: '-1',
+                hasAllButtom: true,
+                // width: 150,
+                // options:workshopList
+                options:[{txt:'12',value:1},{txt:'12',value:1}]
+            }
+        ];
+        const CFormItem= [
+            {
+                name: 'Name',
+                label: '名称',
+                type: 'string',
+                placeholder: '请输入车间类别名称',
+                rules: [{required: true,message: '名称不能为空'}]
+            }
+        ];
+        const UFormItem= [
+            {
+                name: 'Name',
+                label: '类别名称',
+                type: 'string',
+                rules: [{ required: true, message: '名称不能为空' }],
+                placeholder: '请输入车间类别名称'
+            },
+            {
+                name: 'Desc',
+                label: '描述',
+                type: 'string',
+                placeholder: '请输入描述',
+            },
+        ];
         return (
-            <Feature />
+            <div>
+                {/* <Feature /> */}
+                <SimpleQForm
+                    FormItem={RFormItem}
+                    submit={this.handleQuery}
+                 />
+                {/* <StandardQForm
+                    FormItem={RFormItem2}
+                    submit={this.handleQuery}
+                 /> */}
+                <CreateModal
+                    FormItem={CFormItem}
+                    submit={this.handleCreat.bind(this)}
+                />
+                <SimpleTable
+                  loading={this.state.loading}
+                  data={{list:wslist}}
+                  columns={Tcolumns}
+                  isHaveSelect={false}
+                  // onChange={this.handleSimpleTableChange}
+                />
+                <UpdateModal
+                    FormItem={UFormItem}
+                    updateItem={this.state.updateFromItem}
+                    submit={this.handleUpdate.bind(this)}
+                    showModal={this.state.UModalShow}
+                    hideModal={this.toggleUModalShow}
+                />
+            </div>
         )
     }
 }

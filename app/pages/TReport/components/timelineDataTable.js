@@ -110,12 +110,12 @@ export default class TimelineDataTable extends Component {
                     <Col span={8}>
                         <Card>
                             <Timeline>
-                              <Timeline.Item color="green">创建服务现场 2015-09-01</Timeline.Item>
-                              <Timeline.Item color="green">创建服务现场 2015-09-01</Timeline.Item>
+                              <Timeline.Item color="green">初始打样 2018-04-01 07:12:13</Timeline.Item>
+                              <Timeline.Item color="green">生产前预调 2018-04-01 07:21:24</Timeline.Item>
                               <Timeline.Item color="red">
-                                <p>初步排除网络异常1</p>
-                                <p>初步排除网络异常2</p>
-                                <p>初步排除网络异常3 2015-09-01</p>
+                                <p>阻塞报警1</p>
+                                <p>阻塞报警2</p>
+                                <p>阻塞报警3 2018-04-01 09:21:24</p>
                               </Timeline.Item>
                               <Timeline.Item>
                                 <p>技术测试异常1</p>

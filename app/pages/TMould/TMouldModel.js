@@ -77,16 +77,16 @@ export default class MouldModel extends Component {
                     dataIndex: 'strMoldModelID',
                     type: 'string'
                 }, {
-                title: '尺寸',
-                dataIndex: 'strMoldModelSize',
-                type: 'string'
+                    title: '规格 （材料/尺寸(注塑：周期)/步距）',
+                    dataIndex: 'strMoldModelSize',
+                    type: 'string'
                 },{
                     title: '穴数',
                     dataIndex: 'strCavity',
                     type: 'string'
                 },{
                     title: '备注',
-                    dataIndex: 'strMoldModelDesc',
+                    dataIndex: 'strMoldModelNote',
                     type: 'string'
                 }, {
                     title: '修改时间',
@@ -138,12 +138,12 @@ export default class MouldModel extends Component {
                     type: 'string',
                     placeholder: '请输入模具穴数',
                     rules: [{ required: true,  message: '模具穴数不能为空' }]
-                }, {
+                },/* {
                     name: 'strMoldModelDesc',
                     label: '描述',
                     type: 'string',
                     placeholder: '请输入描述'
-                }, {
+                },*/ {
                     name: 'strMoldModelNote',
                     label: '备注',
                     type: 'string',
@@ -255,7 +255,8 @@ export default class MouldModel extends Component {
                     Size: data.strMoldModelSize,
                     Cavity:data.strCavity,
                     Path : data.Image,
-                    Desc: data.strMoldModelDesc,
+                    // Desc: data.strMoldModelDesc,
+                    Desc: "-",
                     Note: data.strMoldModelNote,
                 }
 

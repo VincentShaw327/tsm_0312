@@ -15,11 +15,12 @@ import {
     Divider,
     Tag,
     Input,
-    Popconfirm
+    Popconfirm,
+    Breadcrumb
 } from 'antd';
 import {TPostData, urlBase} from '../../utils/TAjax';
-import avatarPic from '../../images/men01.jpg';
 import { CModal } from '../../components/TModal';
+import TerminalDetail from './TerminalDetail';
 
 const EditableCell = ({editable, value, onChange}) => (<div>
     {
@@ -39,6 +40,9 @@ export default class TDA_Terminal extends Component {
         this.state = {
             terminalList: [],
             CModalShow:false,
+            showDetal:false,
+            detailID:0,
+            detailMessage:{},
         }
         this.url = '/api/TIot/dau';
     }
@@ -194,7 +198,17 @@ export default class TDA_Terminal extends Component {
         this.setState({CModalShow:!this.state.CModalShow});
     }
 
+    toggleRender(record){
+        this.setState({
+            showDetal:!this.state.showDetal,
+            detailID:record.UUID,
+            detailMessage:record
+        })
+    }
+
     render() {
+        const {showDetal,detailID,detailMessage}=this.state;
+
         const columns = [
             {
                 title: '编号',
@@ -249,7 +263,7 @@ export default class TDA_Terminal extends Component {
                             <a>删除</a>
                         </Popconfirm>
                         <span className="ant-divider"></span>
-                        <a>详情</a>
+                        <a onClick={this.toggleRender.bind(this,record)}>详情</a>
                     </div>);
                 }
             }
@@ -265,7 +279,24 @@ export default class TDA_Terminal extends Component {
             }
         ];
 
-        return (
+        const TDA_TerminalDetail=(
+            <div>
+                <div>
+                    <Breadcrumb style={{display:"inline-block"}}>
+                        <Breadcrumb.Item>
+                            <a onClick={this.toggleRender.bind(this)} href="#">工作中心</a>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>工作中心详情</Breadcrumb.Item>
+                    </Breadcrumb>
+                    <span onClick={this.toggleRender.bind(this)} className="backup-button">
+                        <Icon type="rollback" />
+                    </span>
+                </div>
+                <TerminalDetail detailMessage={detailMessage} UUID={detailID}/>
+            </div>
+        );
+
+        const TerminalList=(
             <div>
                 <Button type="primary" icon="plus" onClick={this.toggleCModalShow.bind(this)}>添加</Button>
                 <Divider/>
@@ -281,7 +312,10 @@ export default class TDA_Terminal extends Component {
                     isShow={this.state.CModalShow}
                     hideForm={this.toggleCModalShow.bind(this)}
                 />
-        </div>
-        )
+            </div>
+        );
+
+        return showDetal?TDA_TerminalDetail:TerminalList;
+
     }
 }

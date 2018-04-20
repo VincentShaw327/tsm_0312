@@ -4,20 +4,112 @@
  *添加人:shaw
  **/
 import React, { Component } from 'react';
-import {Icon,Row,Col,Divider,Table,Button,Popconfirm,message } from 'antd';
+import {Icon,Input,Row,Col,Divider,Modal,Radio ,Table,Form,Button,
+    Popconfirm,message,Select  } from 'antd';
 // import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import Tiltle from '../../components/TCommon/Tiltle/Tiltle';
 import { _topfOrderBy } from '../../components/TCommon/utils/dataHandle/arrayHandle';
 import { TPostData } from '../../utils/TAjax';
 import { CModal } from '../../components/TModal';
+const FormItem = Form.Item;
+const RadioGroup = Radio.Group;
+const Option = Select.Option;
 
-//作用域
-let self
-let creatKeyWord;
-//工作中心类型下拉框
-let MtrlTpList = []
-//车间数据下拉
-let MtrlTpWorkshopList = []
+/*class TModal extends Component {
+    constructor( props ) {
+        super( props )
+        this.state = {
+            CModalShow:false,
+            UModalShow:false,
+            Modalshow:false,
+            EModalshow:false,
+            isBaseMtrl:true,
+            selectedItem:'0',
+            MtrlTypeValue:'0',
+            MtrlModelValue:'',
+            ProModelValue:'',
+            UsedNumberValue:0,
+            UnitValue:''
+        }
+        this.url='/api/TBom/bom';
+    }
+
+    render(){
+
+        return(
+            <Modal
+                title="新建对象"
+                visible={this.state.Modalshow}
+                onOk={this.addBomItem}
+                onCancel={this.toggleCModalShow}>
+                    <Form layout="horizontal">
+                        <FormItem
+                            label="物料类型"
+                            key="MtrlType"
+                            {...formItemLayout}>
+                            {
+                                getFieldDecorator("MtrlType", {rules:[{required: true,message: '请选择物料类型'}], initialValue: MtrlTypeValue })(
+                                <RadioGroup onChange={this.toggleMtrlType}>
+                                    <Radio key="0" value={0}>基础物料</Radio>
+                                    <Radio key="1" value={1}>半成品物料</Radio>
+                                </RadioGroup>
+                            )}
+                        </FormItem>
+                        <FormItem
+                            label="物料型号"
+                            key="MtrlModel"
+                            {...formItemLayout}>
+                            {
+                                getFieldDecorator("MtrlModelUUID", {rules:!isBaseMtrl?[]:[{required: true,message: '请选择物料型号'}], initialValue: MtrlModelValue })(
+                                <Select disabled={!isBaseMtrl}>
+                                    {
+                                        MtrModelList.map(function(item, i,arr){
+                                            return <Option key={i} value={item.value}>{item.text || item.value}</Option>
+                                        })
+                                    }
+                                </Select>
+                            )}
+                        </FormItem>
+                        <FormItem
+                            label="产品型号"
+                            key="ProModel"
+                            {...formItemLayout}>
+                            {
+                                getFieldDecorator("ProModelUUID", {rules:isBaseMtrl?[]:[{required: true,message: '请选择产品型号'}], initialValue: ProModelValue })(
+                                <Select disabled={isBaseMtrl}>
+                                    {
+                                        ProductModelList.map(function(item, i,arr){
+                                            return <Option key={i} value={item.value}>{item.text || item.value}</Option>
+                                        })
+                                    }
+                                </Select>
+                            )}
+                        </FormItem>
+                        <FormItem
+                            label="使用量"
+                            key="UserNumber"
+                            {...formItemLayout}>
+                            {
+                                getFieldDecorator("UsedNumber", {rules:[{required: true,message: '请输入使用量'}], initialValue: UsedNumberValue })
+                                (<Input placeholder={"请输入使用量"} />)
+                            }
+                        </FormItem>
+                        <FormItem
+                            label="单位"
+                            key="Unit"
+                            {...formItemLayout}>
+                            {
+                                getFieldDecorator("Unit", {rules:[{required: true,message: '请输入单位'}], initialValue: UnitValue })
+                                (<Input placeholder={"请输入物料单位"} />)
+                            }
+                        </FormItem>
+                    </Form>
+            </Modal>
+        )
+    }
+}
+TModal = Form.create()(TModal)
+*/
 
 export default class TBomDetail extends Component {
 
@@ -25,21 +117,33 @@ export default class TBomDetail extends Component {
         super( props )
         this.state = {
             UUID: props.UUID,
+            UpdateUUID:0,
             bom: {},
             BMtrList:[],
             MtrModelList:[],
+            ProductModelList:[],
             updateFromItem:{},
+            loading:true,
             loading: false,
             CModalShow:false,
             UModalShow:false,
+            Modalshow:false,
+            EModalshow:false,
+            isBaseMtrl:true,
+            selectedItem:'0',
+            MtrlTypeValue:'0',
+            MtrlModelValue:'',
+            ProModelValue:'',
+            UsedNumberValue:0,
+            UnitValue:''
         }
         this.url='/api/TBom/bom';
-        self = this;
     }
 
     componentWillMount() {
         this.getBomDefine();
         this.getMtrModelList();
+        this.getProModelList();
     }
 
     componentDidMount() {
@@ -58,7 +162,7 @@ export default class TBomDetail extends Component {
                 var Ui_list = res.obj.objectlist || [];
                 Ui_list.forEach( function ( item, index ) {
                     list.push( {
-                        key: item.MtrlModelUUID,
+                        key: index,
                         UUID: item.UUID,
                         BomUUID: item.BomUUID,
                         ReplaceToUUID: item.ReplaceToUUID,
@@ -75,7 +179,7 @@ export default class TBomDetail extends Component {
                         Status: item.Status,
                     } )
                 } )
-                this.setState({BMtrList:list});
+                this.setState({BMtrList:list,loading:false});
             },
             ( error )=> {
                 message.info( error );
@@ -119,8 +223,71 @@ export default class TBomDetail extends Component {
         )
     }
 
-    toggleCModalShow(){
-        this.setState({CModalShow:!this.state.CModalShow});
+    getProModelList(){
+        const dat = {
+            PageIndex : 0,
+            PageSize : -1,
+            TypeUUID : -1,
+            KeyWord : ""
+        }
+        TPostData( '/api/TProduct/product_model', "ListActive", dat,
+            ( res )=> {
+              var list = [];
+              console.log("查询到产品型号列表", res);
+              var data_list = res.obj.objectlist || [];
+              var totalcount = res.obj.totalcount;
+              data_list.forEach(( item, index )=> {
+                list.push( {
+                  key:index,
+                  value : item.UUID.toString(),
+                  TypeUUID: item.TypeUUID,
+                  Image:item.Image,
+                  text:item.Name,
+                  Status :1,
+                  Note : "-",
+                } )
+              } )
+              this.setState({ProductModelList:list});
+            },
+            ( error )=> {
+              message.info( error );
+            }
+        )
+    }
+
+    toggleCModalShow=()=>{
+        // this.setState({CModalShow:!this.state.CModalShow});
+        this.setState(
+            {
+                Modalshow:!this.state.Modalshow,
+                isBaseMtrl:true,
+                MtrlTypeValue:0,
+                MtrlModelValue:'',
+                ProModelValue:'',
+                UserNumberValue:0,
+                UnitValue:'',
+                LossRateValue:'',
+                LossNumberValue:0
+            }
+        );
+    }
+
+    toggleEModalShow=(record)=>{
+        console.log("record",record);
+        this.setState(
+            {
+                EModalshow:!this.state.EModalshow,
+                isBaseMtrl:record.MtrlType==0?true:false,
+                UpdateUUID:record.UUID,
+                MtrlTypeValue:record.MtrlType,
+                MtrlModelValue:record.MtrlModelUUID&&record.MtrlModelUUID.toString(),
+                ProModelValue:record.MtrlModelUUID&&record.MtrlModelUUID.toString(),
+                UsedNumberValue:record.UsedNumber,
+                UnitValue:record.Unit,
+                LossRateValue:record.LossRate,
+                LossNumberValue:record.ConstLossNumber
+            }
+        );
     }
 
     toggleUModalShow(record){
@@ -128,14 +295,15 @@ export default class TBomDetail extends Component {
         this.setState({UModalShow:!this.state.UModalShow,updateFromItem:record});
     }
 
-    handleCreat(data){
+    handleCreat=(data)=>{
         console.log('data',data);
+        const {MtrlType,MtrlModelUUID,ProModelUUID,Unit,UsedNumber}=data;
         let dat = {
             UUID:this.state.UUID,  //UUID
-            MtrlType:data.MtrlType,  //物料类型
-            MtrlModelUUID:data.MtrlModelUUID,     //物料型号UUID
-            Unit:data.Unit,           //物料计量单位
-            UsedNumber:data.UsedNumber
+            MtrlType:MtrlType,  //物料类型
+            MtrlModelUUID:MtrlType==0?MtrlModelUUID:ProModelUUID,     //物料型号UUID
+            Unit:Unit,           //物料计量单位
+            UsedNumber:UsedNumber
         }
         TPostData(this.url, "AddItem", dat,
             ( res )=> {
@@ -148,16 +316,19 @@ export default class TBomDetail extends Component {
         )
     }
 
-    handleUpdate(data){
-        const {updateFromItem}=this.state;
+    handleUpdate=(data)=>{
+        const {updateFromItem,UpdateUUID}=this.state;
+        const {MtrlType,MtrlModelUUID,ProModelUUID,Unit,UsedNumber,LossRate,ConstLossNumber}=data;
+
         let dat = {
-            ItemUUID:updateFromItem.UUID,                                                    //Bom物料定义UUID
-            MtrlType:data.MtrlType,                                                         //物料类型
-            MtrlModelUUID:data.MtrlModelUUID,                                              //物料型号UUID
-            Unit:data.Unit,                                                              //物料计量单位
-            UsedNumber:data.UsedNumber,                                               //使用量
-            LossRate : data.LossRate,                                                      //损耗率
-            ConstLossNumber : data.ConstLossNumber
+            ItemUUID:UpdateUUID,                                                    //Bom物料定义UUID
+            MtrlType:MtrlType,                                                         //物料类型
+            MtrlModelUUID:MtrlType==0?MtrlModelUUID:ProModelUUID,     //物料型号UUID
+            // MtrlModelUUID:MtrlModelUUID,                                              //物料型号UUID
+            Unit:Unit,                                                              //物料计量单位
+            UsedNumber:UsedNumber,                                               //使用量
+            LossRate : LossRate,                                                      //损耗率
+            ConstLossNumber : ConstLossNumber
         }
         console.log('data',data);
         console.log('updateFromItem',updateFromItem);
@@ -188,9 +359,85 @@ export default class TBomDetail extends Component {
         )
     }
 
+    toggleItem=(e)=>{
+        console.log('toggleItem',e);
+        this.setState({selectedItem:e.target.value});
+    }
+
+    addBomItem=()=>{
+        // validateFields
+        // getFieldsValue
+        this.props.form.validateFields(
+            [
+                'MtrlType',
+                'MtrlModelUUID',
+                'ProModelUUID',
+                'UsedNumber',
+                'Unit'
+            ],
+            ( errors, values ) => {
+            console.log('收到表单值：', values);
+            let subValue = {};
+            if ( !!errors ) {
+                console.log( 'Errors in form!!!' );
+                message.error( '添加失败' )
+                return;
+            } else {
+                this.handleCreat( values );
+                this.toggleCModalShow();
+                this.props.form.resetFields();
+                // message.success('添加成功');
+            }
+        } );
+    }
+
+    editBomItem=()=>{
+        this.props.form.validateFields( ( errors, values ) => {
+            console.log('收到表单值：', values);
+            let subValue = {};
+            if ( !!errors ) {
+                console.log( 'Errors in form!!!' );
+                message.error( '添加失败' )
+                return;
+            } else {
+                this.handleUpdate( values );
+                this.setState({EModalshow:!this.state.EModalshow});
+                this.props.form.resetFields();
+                // message.success('添加成功');
+            }
+        } );
+    }
+
+    toggleMtrlType=(e)=>{
+        // console.log("toggleMtrlType",e);
+        let value=e.target.value;
+        this.setState({isBaseMtrl:value==0?true:false});
+    }
+
+    resetField=()=>{
+        this.props.form.resetFields();
+        this.setState({
+            EModalshow:false,
+            Modalshow:false,
+            // isBaseMtrl:false
+        });
+    }
+
     render() {
-        const {detailMessage}=this.props;
-        const {BMtrList}=this.state;
+        const {detailMessage,form:{getFieldDecorator},}=this.props;
+        const {
+            BMtrList,
+            MtrModelList,
+            ProductModelList,
+            MtrlTypeValue,
+            MtrlModelValue,
+            ProModelValue,
+            UsedNumberValue,
+            UnitValue,
+            LossRateValue,
+            LossNumberValue,
+            isBaseMtrl
+        }=this.state;
 
         const columns= [
             {
@@ -239,7 +486,7 @@ export default class TBomDetail extends Component {
                 key: 'operate',
                 render:(UUID,record)=>{
                     return  <span>
-                                <a href="#" onClick={this.toggleUModalShow.bind(this,record)}>编辑</a>
+                                <a href="#" onClick={this.toggleEModalShow.bind(this,record)}>编辑</a>
                                 <span className="ant-divider"></span>
                                 <Popconfirm
                                     placement="topLeft"
@@ -260,6 +507,7 @@ export default class TBomDetail extends Component {
                 type: 'radio',
                 placeholder: '请输入使用量',
                 rules: [{required: true,message: '请选择物料类型'}],
+                toggleItem:this.toggleItem,
                 defaultValue: '0',
                 options: [
                     {key: 0,value: '0',text: '基本物料'},
@@ -271,8 +519,20 @@ export default class TBomDetail extends Component {
                 label: '物料型号',
                 type: 'select',
                 placeholder: '请输入物料名称',
+                currentItem:'0',
+                selectedItem:this.state.selectedItem,
                 rules: [{required: true,message: '物料名称不能为空'}],
                 options:this.state.MtrModelList
+            },
+            {
+                name: 'productModelUUID',
+                label: '产品型号',
+                type: 'select',
+                placeholder: '请选择产品型号',
+                currentItem:'1',
+                selectedItem:this.state.selectedItem,
+                rules: [{required: true,message: '产品型号不能为空'}],
+                options:this.state.ProductModelList
             },
             /*{
                 name: 'ConstLossNumber',
@@ -355,6 +615,11 @@ export default class TBomDetail extends Component {
             }
         ];
 
+        const formItemLayout = {
+            labelCol: { span: 6 },
+            wrapperCol: { span: 18 },
+        };
+
         return (
             <div>
                 <div style={{marginTop:25,height:150, border:'solid 0px #bbbbbb',borderRadius:6,paddingLeft:8}}>
@@ -389,17 +654,174 @@ export default class TBomDetail extends Component {
                     <Button
                         type="primary"
                         icon="plus"
+                        // onClick={this.toggleCModalShow.bind(this)}>
                         onClick={this.toggleCModalShow.bind(this)}>
                         添加
                     </Button>
                 </div>
                 <div>
                     <Table
+                        loading={this.state.loading}
                         size={"small"}
+                        rowKey={record => record.key}
                         title={()=><span style={{fontSize:25}}>物料清单</span>}
                         dataSource={BMtrList}
                         columns={columns}/>
                 </div>
+                <Modal
+                    title="新建对象"
+                    visible={this.state.Modalshow}
+                    onOk={this.addBomItem}
+                    onCancel={this.toggleCModalShow}>
+                        <Form layout="horizontal">
+                            <FormItem
+                                label="物料类型"
+                                key="MtrlType"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("MtrlType", {rules:[{required: true,message: '请选择物料类型'}], initialValue: MtrlTypeValue })(
+                                    <RadioGroup onChange={this.toggleMtrlType}>
+                                        <Radio key="0" value={0}>基础物料</Radio>
+                                        <Radio key="1" value={1}>半成品物料</Radio>
+                                    </RadioGroup>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                label="物料型号"
+                                key="MtrlModel"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("MtrlModelUUID", {rules:!isBaseMtrl?[]:[{required: true,message: '请选择物料型号'}], initialValue: MtrlModelValue })(
+                                    <Select disabled={!isBaseMtrl}>
+                                        {
+                                            MtrModelList.map(function(item, i,arr){
+                                                return <Option key={i} value={item.value}>{item.text || item.value}</Option>
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                label="产品型号"
+                                key="ProModel"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("ProModelUUID", {rules:isBaseMtrl?[]:[{required: true,message: '请选择产品型号'}], initialValue: ProModelValue })(
+                                    <Select disabled={isBaseMtrl}>
+                                        {
+                                            ProductModelList.map(function(item, i,arr){
+                                                return <Option key={i} value={item.value}>{item.text || item.value}</Option>
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                label="使用量"
+                                key="UserNumber"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("UsedNumber", {rules:[{required: true,message: '请输入使用量'}], initialValue: UsedNumberValue })
+                                    (<Input placeholder={"请输入使用量"} />)
+                                }
+                            </FormItem>
+                            <FormItem
+                                label="单位"
+                                key="Unit"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("Unit", {rules:[{required: true,message: '请输入单位'}], initialValue: UnitValue })
+                                    (<Input placeholder={"请输入物料单位"} />)
+                                }
+                            </FormItem>
+                        </Form>
+                </Modal>
+                <Modal
+                    title="编辑对象"
+                    visible={this.state.EModalshow}
+                    onOk={this.editBomItem}
+                    onCancel={this.resetField}>
+                        <Form layout="horizontal">
+                            <FormItem
+                                label="物料类型"
+                                key="MtrlType"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("MtrlType", {rules:[{required: true,message: '请选择物料类型'}], initialValue: MtrlTypeValue })(
+                                    <RadioGroup onChange={this.toggleMtrlType}>
+                                        <Radio key="0" value={0}>基础物料</Radio>
+                                        <Radio key="1" value={1}>半成品物料</Radio>
+                                    </RadioGroup>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                label="物料型号"
+                                key="MtrlModel"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("MtrlModelUUID", {rules:!isBaseMtrl?[]:[{required: true,message: '请选择物料型号'}], initialValue: MtrlModelValue })(
+                                    <Select disabled={!isBaseMtrl}>
+                                        {
+                                            MtrModelList.map(function(item, i,arr){
+                                                return <Option key={i} value={item.value}>{item.text || item.value}</Option>
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                label="产品型号"
+                                key="ProModel"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("ProModelUUID", {rules:isBaseMtrl?[]:[{required: true,message: '请选择产品型号'}], initialValue: ProModelValue })(
+                                    <Select disabled={isBaseMtrl}>
+                                        {
+                                            ProductModelList.map(function(item, i,arr){
+                                                return <Option key={i} value={item.value}>{item.text || item.value}</Option>
+                                            })
+                                        }
+                                    </Select>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                label="使用量"
+                                key="UserNumber"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("UsedNumber", {rules:[{required: true,message: '使用量不能为空'}], initialValue: UsedNumberValue })
+                                    (<Input placeholder={"请输入使用量"} />)
+                                }
+                            </FormItem>
+                            <FormItem
+                                label="单位"
+                                key="Unit"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("Unit", {rules:[{required: true,message: '单位不能为空'}], initialValue: UnitValue })
+                                    (<Input placeholder={"请输入物料单位"} />)
+                                }
+                            </FormItem>
+                            <FormItem
+                                label="损耗率"
+                                key="LossRate"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("LossRate", {rules:[{required: true,message: '损耗率不能为空！'}], initialValue: LossRateValue })
+                                    (<Input placeholder={"请输入损耗率"} />)
+                                }
+                            </FormItem>
+                            <FormItem
+                                label="固定损耗率"
+                                key="LossNumber"
+                                {...formItemLayout}>
+                                {
+                                    getFieldDecorator("ConstLossNumber", {rules:[{required: true,message: '固定损耗不能为空！'}], initialValue: LossNumberValue })
+                                    (<Input placeholder={"请输入固定损耗率"} />)
+                                }
+                            </FormItem>
+                        </Form>
+                </Modal>
                 <CModal
                     FormItem={CFormItem}
                     submit={this.handleCreat.bind(this)}
@@ -417,3 +839,4 @@ export default class TBomDetail extends Component {
         )
     }
 }
+TBomDetail = Form.create()(TBomDetail)

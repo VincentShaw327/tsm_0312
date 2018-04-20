@@ -105,8 +105,8 @@ export default class TIndexPage extends React.Component {
                                           {/* <Link to={'/monitor2'}>
                                          </Link> */}
                                     </Menu.Item>
-                                    <Menu.Item key="TScada_CY">冲压车间</Menu.Item>
                                     <Menu.Item key="TScada_ZS">注塑车间</Menu.Item>
+                                    <Menu.Item key="TScada_CY">冲压车间</Menu.Item>
                               </SubMenu>
 
                               <SubMenu
@@ -327,6 +327,11 @@ export default class TIndexPage extends React.Component {
                               <Menu.Item key="TAboutSupport">
                                 <Icon type="user" />
                                 <span className="nav-text">技术支持</span>
+                              </Menu.Item>
+
+                              <Menu.Item key="TDemo">
+                                <Icon type="appstore" />
+                                <span className="nav-text">组件DEMO</span>
                               </Menu.Item>
                             </Menu>
                         </Scrollbars>

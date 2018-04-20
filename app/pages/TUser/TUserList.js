@@ -57,13 +57,13 @@ export default class TUserList extends Component {
                     type: 'string'
                 },
                 {
-                    name: 'LoginName',
-                    label: '登录名',
+                    title: '登录名',
+                    dataIndex: 'LoginName',
                     type: 'string',
         		},
                 {
-                    name: 'Email',
-                    label: '邮箱',
+                    title: '邮箱',
+                    dataIndex: 'Email',
                     type: 'string',
         		},
                 {
@@ -81,11 +81,11 @@ export default class TUserList extends Component {
                     dataIndex: 'ActiveDateTime',
                     type: 'string'
                 },
-                {
+                /*{
                     title: '用户冻结时间',
                     dataIndex: 'InactiveDateTime',
                     type: 'string'
-                },
+                },*/
                 {
                     title: '备注',
                     dataIndex: 'Note',
@@ -223,8 +223,9 @@ export default class TUserList extends Component {
                     var list = [];
                     var Ui_list = res.obj.objectlist || [];
                     var totalcount = res.obj.totalcount;
-                    creatKeyWord = totalcount;
-                    Ui_list.forEach( function ( item, index ) {
+                    creatKeyWord = res.obj.objectlist.length;
+                    // creatKeyWord = totalcount;
+                    Ui_list.forEach(( item, index )=> {
                         list.push( {
                             key: index,
                             Name: item.Name,
@@ -244,6 +245,8 @@ export default class TUserList extends Component {
                     const pagination = {
                         ...seft.state.pagination
                     }
+                    console.log( 'res2', list );
+
                     pagination.total = totalcount;
                     callback( list, {
                         total: pagination.total,

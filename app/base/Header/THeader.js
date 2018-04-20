@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { Component ,createElement} from 'react';
 import PropTypes from 'prop-types';
 import { Layout, Menu, Icon, Input, Row, Col, Avatar, Dropdown } from 'antd';
 
 import LOGO from '../../images/T-3.png';
 import styles from './THeader.less';
+import HeaderSearch from '../../components/ant-design-pro/HeaderSearch';
 const { Header, Content, Footer, Sider } = Layout;
 const Search = Input.Search;
-
 const userMenu = (
     <Menu className="userlistMenu">
         <Menu.Item>

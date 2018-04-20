@@ -58,7 +58,7 @@ export default class statusOverview extends Component {
                         }
                     },*/
                     data: [ 182, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 282, 122, 182, 212 ],
-              },
+                },
                 {
                     name: '待机',
                     type: 'bar',
@@ -70,7 +70,7 @@ export default class statusOverview extends Component {
                         }
                     },*/
                     data: [ 120, 132,254,234,34,34,52,24,152 ]
-              },
+                },
                 {
                     name: '运行中',
                     type: 'bar',
@@ -82,8 +82,8 @@ export default class statusOverview extends Component {
                         }
                     },*/
                     data: [ 630, 680, 680, 680,456,345,345,482 ]
-              },
-              {
+                },
+                {
                     name: '报警',
                     type: 'bar',
                     stack: '总量',
@@ -94,19 +94,7 @@ export default class statusOverview extends Component {
                         }
                     },*/
                     data: [34,53,13,65,123,24,52,52,14,23]
-              },
-              {
-                  name: '离线',
-                  type: 'bar',
-                  stack: '总量',
-                  /*label: {
-                      normal: {
-                          show: true,
-                          position: 'insideRight'
-                      }
-                  },*/
-                  data: [ 82, 102, 131, 34, 90, 30, 20, 136, 86, 39, 29, 282, 122, 182, 212 ],
-            },
+                },
           ]
         };
 

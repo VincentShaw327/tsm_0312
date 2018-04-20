@@ -8,12 +8,11 @@ import PropTypes from 'prop-types';
 import {Layout,Card,Row,Col,Progress,Divider,Tag,Spin,List,message} from 'antd';
 import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData,urlBase } from '../../utils/TAjax';
-import devicePic from '../../images/assets/exple.png';
-var mqtt = require( 'mqtt' );
-const { Header, Footer, Sider, Content } = Layout;
+import {  yuan,Pie} from '../../components/ant-design-pro/Charts';
+import mqtt from 'mqtt';
 
 let self
-var client //注塑车间消息订阅初始化变量
+let client //注塑车间消息订阅初始化变量
 export default class TScadaInjectionWorkshop extends Component {
 
     constructor( props ) {
@@ -21,6 +20,7 @@ export default class TScadaInjectionWorkshop extends Component {
         this.state = {
             //单台机台数据状态
             aEquipList: [],
+            stateCount:[],
             onLine: '-',
             warning: '-',
             allQuery: '-',
@@ -227,85 +227,67 @@ export default class TScadaInjectionWorkshop extends Component {
 
     componentDidMount() {
         //mqtt消息连接建立
-        client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
+        client = mqtt.connect( 'ws://192.168.200.3:9011' );
         client.on( 'connect', function () {
             //订阅消息
-            client.subscribe( 'topstarltd/iec/app/#' )
+            client.subscribe("0101/086325608001/201712290001/kanban/03/B");
         } )
         let renderaEquip = [] //零时渲染变量
         /**
         当接收到推送的机台消息, 触发一下函数
         */
-        client.on( 'message', function ( topic, payload ) {
+        client.on( 'message', ( topic, payload )=> {
             // 接收到mqtt消息推送数据
             let mqttData = JSON.parse( payload )
-            let g = 0
-            let w = 0
-            console.log( '接收到MQTT信息', mqttData )
+            console.log( '接收到MQTT_03B信息', mqttData )
             // 判断消息包内有数据的情况下,把数据更新至组件.
 
-            if ( mqttData && Array.isArray( mqttData.dataList ) ) {
+            if ( mqttData && Array.isArray( mqttData.data ) ) {
                 renderaEquip = self.state.aEquipList.map( function ( item, i ) {
                     //判断接受消息是哪一台机器
-                    mqttData.dataList.forEach( ( mqttItem, index ) => {
-                        if ( item.ID == mqttItem.machine_id ) {
+                    mqttData.data.forEach( ( mqttItem, index ) => {
+                        if ( item.UUID == mqttItem.workstation ) {
                             item.key = i
-                            item.Status = mqttItem.data.run_status
-                            item.prod_count = mqttItem.data.prod_count //产量
-                            item.prod_rate = mqttItem.data.prod_rate //产能
-                            item.rej_count = mqttItem.data.rej_count //不良数
-                            item.rej_rate = mqttItem.data.rej_rate //不良率
-                            item.task_finish = mqttItem.task.task_finish //完成比例
-                            item.task_progress = mqttItem.task.task_progress //完成进度
-                            item.task_no = mqttItem.task.task_no //工单号
-                            item.task_name = mqttItem.task.task_name //产品名称
-                            item.Badge = mqttItem.run_status == '1' ?
-                                'success' //运行
-                                :
-                                mqttItem.data.run_status == '0' ?
-                                'default' //待机
-                                :
-                                'warning', //告警
-                                /** 根据状态值确定样式 **/
-                                item.style = mqttItem.data.run_status == '1' ?
-                                'top-equip-nomal' //运行
-                                :
-                                mqttItem.data.run_status == '0' ?
-                                'top-equip-light' //待机
-                                :
-                                'top-equip-warning' //告警
+                            item.Status = mqttItem.run_status
+                            item.prod_count = mqttItem.finished //产量
+                            item.prod_rate = mqttItem.capacity //产能
+                            item.plan = mqttItem.plan //计划
+                            item.product=mqttItem.product
                             return item
                         } else {
                             return item
                         }
-
                     } )
                     return item;
-                } )
-                console.log( 'renderaEquip', renderaEquip )
-                renderaEquip.forEach( function ( item, i ) {
-                    if ( item.Status == '1' ) {
-                        g = g + 1
-                    } else if ( item.Status == '2' ) {
-                        w = w + 1
-                    }
                 } )
                 self.setState( {
                     loading: false, //加载完毕取消蒙城
                     aEquipList: renderaEquip,
-                    allQuery: renderaEquip.length,
-                    onLine: g,
-                    warning: w,
-                    offLine: renderaEquip.length - w - g
                 } )
-                /**
-            	将数据缓存在本地,
-            	当页面切换的时候如果本地缓存内有机台数据
-            	先从本地渲染页面数据,
-            **/
-                // const storeList = JSON.stringify(renderaEquip)
-                // _storage.setItem("aMEquipList", storeList)
             }
+            if(mqttData&&mqttData.statics){
+                let Mstatics=mqttData.statics;
+                let MstateCount=[
+                    {
+                        x:'报警',
+                        y:Mstatics.failure
+                    },
+                    {
+                        x:'离线',
+                        y:Mstatics.offline
+                    },
+                    {
+                        x:'运行',
+                        y:Mstatics.running
+                    },
+                    {
+                        x:'待机',
+                        y:Mstatics.stopped
+                    }
+                ];
+                this.setState({stateCount:MstateCount});
+            }
+
         } )
 
     }
@@ -317,8 +299,6 @@ export default class TScadaInjectionWorkshop extends Component {
     render() {
         const Dailychart = this.dailychart1;
         const Barchart = this.barChart;
-
-        console.log( '工作中心列表:', this.state.aEquipList );
         const ListHeader = (
             <Row gutter={16} style={{fontSize:16}}>
               <Col className="gutter-row" span={3}>
@@ -359,15 +339,15 @@ export default class TScadaInjectionWorkshop extends Component {
                             renderItem={item => {
                                 let stateObj={};
                                 if(item.task_progress &&item.task_progress >= 100)
-                                stateObj={text:"已完成",color:'blue'};
-                                    // stateObj.text="已完成";
-                                    // stateObj.text="已完成";
-                                else if(item.Status &&item.Status== 1)
-                                stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
-                                else if(item.Status &&item.Status== 2)
-                                stateObj={text:"报警",color:'#ffc069'};
-                                else
-                                stateObj={text:"待机",color:'#bfbfbf'};
+                                    stateObj={text:"已完成",color:'blue'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== 1)
+                                    stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
+                                else if(item.hasOwnProperty('Status') &&item.Status== 2)
+                                    stateObj={text:"报警中",color:'#ffc069'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== 0)
+                                    stateObj={text:"待机中",color:'#4184de'};
+                                else if(item.hasOwnProperty('Status')&&item.Status== -1)
+                                    stateObj={text:"离线中",color:'#bfbfbf'};
 
                                 return(
                                         <List.Item>
@@ -387,30 +367,26 @@ export default class TScadaInjectionWorkshop extends Component {
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
                                                         <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div>
-                                                        <div>产品:{item.task_name?item.task_name:'-'}</div>
+                                                    <div>产品:{item.product?item.product:'-'}</div>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                            <span>{item.prod_count?item.prod_count:'-'}</span>
+                                                        <span>{item.hasOwnProperty('prod_count')?item.prod_count:'-'}</span>
                                                     </div>
                                                 </Col>
-                                                {/* <Col className="gutter-row" span={3}>
-                                                <div className="gutter-box">产量:
-                                                <span>{item.task_no?item.task_no:'-'}</span>
-                                                </div>
-                                                </Col> */}
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <span>{item.prod_rate?item.prod_rate:'-'}</span>
+                                                        <span>{item.hasOwnProperty('prod_rate')?item.prod_rate:'-'}</span>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
+                                                        <span>{item.prod_count||0}/{item.plan||0}</span>
                                                         <Progress
                                                             // type="dashboard"
                                                             // width={25}
-                                                            percent={parseInt(item.task_progress || 15)}
+                                                            percent={parseFloat(((item.prod_count/item.plan )*100|| 0).toFixed(2))}
                                                             strokeWidth={15}/>
                                                     </div>
                                                 </Col>
@@ -418,17 +394,6 @@ export default class TScadaInjectionWorkshop extends Component {
                                                     <Tag
                                                         color={`${stateObj.color}`}
                                                         style={{marginTop:30, fontSize: 'larger'}}>{stateObj.text}</Tag>
-                                                    {
-                                                        // let stateObj={};
-                                                        // parseInt(item.task_progress || 0) >= 100
-                                                        // ? stateObj={text："已完成",color:'blue'}
-                                                        // : item.Status == '1'
-                                                        // ? <Tag color="rgba(82, 196, 26, 0.84)" style={{marginRight: '0', fontSize: 'larger'}}>生产中</Tag>
-                                                        // : item.Status == '2' ? <Tag color="#ffc069" style={{marginRight: '0', fontSize: 'larger'}}>告警</Tag>
-                                                        //     : <Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>
-
-                                                        // (<Tag color="#bfbfbf" style={{marginLeft:8, fontSize: 'larger'}}>待机</Tag>)
-                                                    }
                                                     &nbsp;&nbsp;
                                                 </Col>
                                             </Row>
@@ -442,7 +407,16 @@ export default class TScadaInjectionWorkshop extends Component {
                   <Col className="gutter-row" span={6}>
                     <div className="gutter-box">
                         <Card title="状态统计">
-                            <Dailychart />
+                            {/* <Dailychart /> */}
+                            <Pie
+                              hasLegend
+                              title="销售额"
+                              subTitle="设备状态"
+                              total={"总共"+ this.state.stateCount.reduce((pre, now) => now.y + pre, 0)+"台"}
+                              data={this.state.stateCount}
+                              valueFormat={val =>('&nbsp;&nbsp'+val+'台')}
+                              height={294}
+                            />
                         </Card>
                         <Card title="时间统计"  style={{marginTop:20}}>
                             <Barchart />

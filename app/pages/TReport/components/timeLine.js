@@ -189,7 +189,8 @@ export default class statusOverview extends Component {
                 <div className="timeLineItem"  key={index}>
                     <span className="LineLabel">
                         {
-                            lineLabelList.length?lineLabelList[index].Name:''
+                            // lineLabelList.length?lineLabelList[index].Name:''
+                            lineLabelList.length?lineLabelList[index].ID:''
                         }
                     </span>
                     <div className="stateTime">
