@@ -54,6 +54,7 @@ export default class CreateModal extends Component {
             <div>
                 <div style={{margin:'20px 0'}}>
                     <Button
+                        disabled={this.props.disabled}
                         onClick={this.toggleShow}
                         icon="plus" type="primary">添加</Button>
                 </div>

@@ -1,9 +1,9 @@
 module.exports = {
-  data: {
+  obj: {
     totalCount: 100,
     currentPage: 1,
     pageSize: 10,
-    'list|10': [
+    'objectlist|10': [
       {
         'id|+1': 1,
         address: '东胜区纺织街道23号1幢',
@@ -18,5 +18,4 @@ module.exports = {
   msg: '',
   errorCode: '',
   status: 1,
-
 }

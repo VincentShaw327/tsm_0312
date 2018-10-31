@@ -6,7 +6,7 @@
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
 import { Row, Col, Divider } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/tableConfig';
+// import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData, urlBase } from '../../utils/TAjax';
 import Mock from 'mockjs';
 
@@ -194,7 +194,7 @@ export default class App extends Component {
                 callback( option );
             }
         };
-        Dailychart = FeatureSetConfig( graph_conf )
+        // Dailychart = FeatureSetConfig( graph_conf )
         const graph_conf2 = {
             type: 'graphList', // tableList graphList simpleObject complexObject
             EchartStyle: {
@@ -283,7 +283,7 @@ export default class App extends Component {
                 callback( option );
             }
         };
-        this.Chart2 = FeatureSetConfig( graph_conf2 )
+        // this.Chart2 = FeatureSetConfig( graph_conf2 )
     }
 
     render() {

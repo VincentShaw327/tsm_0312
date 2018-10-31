@@ -4,8 +4,8 @@ import { handleActions } from 'redux-actions'
 const tabList = JSON.parse(sessionStorage.getItem('tabList'));
 
 const initialState = {
-  list: tabList ? tabList.list : [],
-  activeKey: tabList ? tabList.activeKey : '',
+  list: tabList ? tabList.list : [{ title: '首页', key: 'THome', closable: false },],
+  activeKey: tabList ? tabList.activeKey : 'THome',
 }
 
 const tabListResult = handleActions({
@@ -37,6 +37,14 @@ const tabListResult = handleActions({
       activeKey = list[delIndex] ? list[delIndex].key :
         (list[delIndex - 1] ? list[delIndex - 1].key : '');
     }
+    sessionStorage.setItem('tabList', JSON.stringify({ list, activeKey, loading: false }));
+    return { list, activeKey, loading: false }
+  },
+  'clear tab list'(state, action) {
+    let list = [];
+    let activeKey = 'THome';
+    list = state.list.filter( pane => pane.key == 'THome' );
+
     sessionStorage.setItem('tabList', JSON.stringify({ list, activeKey, loading: false }));
     return { list, activeKey, loading: false }
   },

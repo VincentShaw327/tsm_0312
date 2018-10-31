@@ -5,18 +5,22 @@
  **/
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react';
+import { connect } from 'react-redux'
 import { Button, Radio, Row, Col, Divider, List, Timeline, Menu, Card,
-    DatePicker,Select } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/tableConfig';
-import { TPostData, urlBase } from '../../utils/TAjax';
+    DatePicker,Select ,message} from 'antd';
+    import { TPostData, urlBase } from 'utils/TAjax';
+    import PageHeaderLayout from '../../base/PageHeaderLayout';
 import StatusOverview from './components/statusOverview';
 import TimeLine from './components/timeLine';
 import Mock from 'mockjs';
 import ReactEcharts from 'echarts-for-react';
 
-let Feature
-
-
+@connect( ( state, props ) => {
+    return {
+        workcenter: state.workcenter,
+        Breadcrumb:state.Breadcrumb,
+    }
+}, )
 export default class App extends Component {
 
     constructor( props ) {
@@ -84,7 +88,7 @@ export default class App extends Component {
                 Ui_list.forEach( ( item, index ) => {
                     list.push( {
                         key: index,
-                        ID: item.ID,
+                        ID: item.ID+index,
                         value: item.UUID,
                         Name: item.Name,
                     } )
@@ -111,6 +115,7 @@ export default class App extends Component {
     }
 
     render() {
+        const {Breadcrumb}=this.props;
         // console.log( "工作中心列表是:",this.state.workCenterList );
         const defaultSelectedWS=(()=>{
             let wsList=this.state.workshopList,
@@ -292,85 +297,87 @@ export default class App extends Component {
 
 
         return (
-            <div>
-                <Card>
-                    <Row gutter={16}>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
-                                <Select defaultValue={defaultSelectedWS} style={{ width: "60%" }} onChange={this.handleChange}>
-                                    <Option value="-1" key="all">全部</Option>
-                                    {
-                                        this.state.workshopList.map((item,index)=>{
-                                                return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
-                                        })
-                                    }
-                                </Select>
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
-                                <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
-                                    <Option value="-1" key="all">全部</Option>
-                                    {
-                                        this.state.workCenterList.map((item,index)=>{
-                                                return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
-                                        })
-                                    }
-                                </Select>
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
-                                <DatePicker style={{ width: "60%" }} />
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box">
-                                <Button type="primary" icon="search">查询</Button>
-                            </div>
-                        </Col>
-                    </Row>
-                </Card>
-                <div style={{margin:'20px 0'}}>
-                    <Radio.Group value={toggleView}  onChange={this.handleToggle}>
-                        <Radio.Button value="timeLine">时间轴</Radio.Button>
-                        <Radio.Button value="overView">状态统计</Radio.Button>
-                    </Radio.Group>
-                </div>
-                {
-                    this.state.cardContent=="timeLine"?
-                    <TimeLine lineLabelList={this.state.workCenterList} />:
-                    <StatusOverview workCenterList={this.state.workCenterList} />
-                }
-                {/* <Row gutter={16}>
-                  <Col span={4}>
-                      <Menu
-                          onClick={this.handleMenuClick.bind(this)}
-                          style={{ width: '100%' }}
-                          // defaultSelectedKeys={[this.state.workshopList[0].UUID]}
-                          // defaultOpenKeys={[this.state.workCenterList[0].UUID]}
-                          mode="inline"
-                          >
-                              {
-                                  this.state.workshopList.map((item,index)=>{
-                                      return(<Menu.Item key={item.UUID}>{item.Name}</Menu.Item>)
-                                  })
-                              }
-                         </Menu>
-                  </Col>
-                  <Col className="gutter-row" span={19}>
-                    <div className="gutter-box">
-                        <Card title={titleContent}>
-                            {
-                                this.state.cardContent=="timeLine"?
-                                <TimeLine workCenterList={this.state.workCenterList} />:
-                                <StatusOverview workCenterList={this.state.workCenterList} />
-                            }
-                        </Card>
+            <PageHeaderLayout title="损失时间报表" wrapperClassName="pageContent" BreadcrumbList={Breadcrumb.BCList}>
+                <div className="cardContent">
+                    <Card>
+                        <Row gutter={16}>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
+                                    <Select defaultValue={defaultSelectedWS} style={{ width: "60%" }} onChange={this.handleChange}>
+                                        <Option value="-1" key="all">全部</Option>
+                                        {
+                                            this.state.workshopList.map((item,index)=>{
+                                                    return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                            })
+                                        }
+                                    </Select>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
+                                    <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
+                                        <Option value="-1" key="all">全部</Option>
+                                        {
+                                            this.state.workCenterList.map((item,index)=>{
+                                                    return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                            })
+                                        }
+                                    </Select>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
+                                    <DatePicker style={{ width: "60%" }} />
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box">
+                                    <Button type="primary" icon="search">查询</Button>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Card>
+                    <div style={{margin:'20px 0'}}>
+                        <Radio.Group value={toggleView}  onChange={this.handleToggle}>
+                            <Radio.Button value="timeLine">时间轴</Radio.Button>
+                            <Radio.Button value="overView">状态统计</Radio.Button>
+                        </Radio.Group>
                     </div>
-                  </Col>
-                </Row> */}
-            </div>
+                    {
+                        this.state.cardContent=="timeLine"?
+                        <TimeLine lineLabelList={this.state.workCenterList} />:
+                        <StatusOverview workCenterList={this.state.workCenterList} />
+                    }
+                    {/* <Row gutter={16}>
+                      <Col span={4}>
+                          <Menu
+                              onClick={this.handleMenuClick.bind(this)}
+                              style={{ width: '100%' }}
+                              // defaultSelectedKeys={[this.state.workshopList[0].UUID]}
+                              // defaultOpenKeys={[this.state.workCenterList[0].UUID]}
+                              mode="inline"
+                              >
+                                  {
+                                      this.state.workshopList.map((item,index)=>{
+                                          return(<Menu.Item key={item.UUID}>{item.Name}</Menu.Item>)
+                                      })
+                                  }
+                             </Menu>
+                      </Col>
+                      <Col className="gutter-row" span={19}>
+                        <div className="gutter-box">
+                            <Card title={titleContent}>
+                                {
+                                    this.state.cardContent=="timeLine"?
+                                    <TimeLine workCenterList={this.state.workCenterList} />:
+                                    <StatusOverview workCenterList={this.state.workCenterList} />
+                                }
+                            </Card>
+                        </div>
+                      </Col>
+                    </Row> */}
+                </div>
+            </PageHeaderLayout>
         )
     }
 }

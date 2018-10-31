@@ -34,6 +34,49 @@ export const createAjaxAction = (api, startAction, endAction) => (data, cb, reje
         endAction && dispatch(endAction({ req: newData, res: resp }))
       })
       .then(() => {
+          // console.log('respon',respon)
+        switch (respon.err) {
+        case 0:
+          cb && cb(respon)
+          break
+        case 1:
+          if (typeof (reject) === 'function') {
+            reject(respon)
+          } else {
+            message.error(respon.msg)
+          }
+          break
+        default:
+          console.log('status的返回值不是0或1')
+          logOut()
+        }
+      })
+      .catch(catchError) // eslint-disable-line no-use-before-define
+  }
+
+export const fakeAjaxAction = (api, startAction, endAction) => (data, cb, reject) =>
+  (dispatch) => {
+    let respon
+    let newData = data
+    startAction && dispatch(startAction())
+    // 每个请求带上token
+    const token = sessionStorage.getItem('token')
+    if (token) {
+      if (!newData) {
+        newData = {}
+      }
+      newData.token = token || null
+    }
+    newData = isArray(newData) ? newData : [newData]
+
+    /*api(...newData)
+      .then(checkStatus) // eslint-disable-line no-use-before-define
+      .then(response => response.json())
+      .then((resp) => {
+        respon = resp
+        endAction && dispatch(endAction({ req: newData, res: resp }))
+      })
+      .then(() => {
         switch (respon.status) {
         case 1:
           cb && cb(respon)
@@ -50,7 +93,20 @@ export const createAjaxAction = (api, startAction, endAction) => (data, cb, reje
           logOut()
         }
       })
-      .catch(catchError) // eslint-disable-line no-use-before-define
+      .catch(catchError) */
+
+    let list,obj={};
+    obj.objectlist=[];
+    obj.err=0;
+    obj.msg='OK';
+    for (var i = 0; i < 20; i++) {
+        obj.objectlist.push({
+            UUID:i+1
+        })
+    }
+    endAction && dispatch(endAction({ req: newData, res: obj }));
+    cb&&cb(obj);
+
   }
 
 /* export const createAjax = (url, param, callback) => {
@@ -69,21 +125,21 @@ export const createAjaxAction = (api, startAction, endAction) => (data, cb, reje
     .catch(catchError) // eslint-disable-line no-use-before-define
 } */
 
-/* export const hasResponseError = (data, errorHandler) => {
+ export const hasResponseError = (data, errorHandler) => {
   // 101  表示非法获取数据 跳转到登陆页面
   if (data && data.status === '-1') {
     logOut()
     return true
   }
-  // if (data && data.errorCode == '102') {
-  //   logOut()
-  //   return true
-  // }
+  if (data && data.errorCode == '102') {
+    logOut()
+    return true
+  }
   // 如果是401  表示其他错误
-  // if (data && data.errorCode == '401') {
-  // message.error(data.msg)
-  // return true
-  // }
+  if (data && data.errorCode == '401') {
+  message.error(data.msg)
+  return true
+  }
   if (typeof data !== 'object') {
     try {
       // eslint-disable-next-line no-param-reassign
@@ -94,14 +150,15 @@ export const createAjaxAction = (api, startAction, endAction) => (data, cb, reje
     }
   }
   if (!data.status && errorHandler === undefined) {
-    return true
+    // return true
+    return false
   }
   if (!data.status && data.httpError && errorHandler !== undefined) {
     return typeof errorHandler === 'function' ? errorHandler(data.httpError) : errorHandler
   }
 
   return false
-}; */
+};
 
 /* export const createApiCustomAjax = (api, startAction, endAction) => (data, apiParam, cb) =>
   (dispatch) => {

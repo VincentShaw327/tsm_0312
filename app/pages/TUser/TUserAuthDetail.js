@@ -6,6 +6,7 @@
 import React, { Component } from 'react';
 import { Table, Button, Icon, Row, Col, message, Divider } from 'antd';
 import { TPostData } from '../../utils/TAjax';
+import PageHeaderLayout from '../../base/PageHeaderLayout';
 
 export default class TUserAuthDetail extends Component {
 
@@ -173,34 +174,17 @@ export default class TUserAuthDetail extends Component {
             }
         ];
 
+        const bcList = [{
+            title:"首页",
+            href: '/',
+            }, {
+            title: '生产资料',
+            href: '/',
+            }, {
+            title: '物料类别',
+        }];
         return (
-            <div>
-                <div style={{
-                        color:"#757879",
-                        // border: 'solid 1px #80808029',
-                        marginTop:12,
-                        fontSize:20}}>
-                    <Row type="flex" justify="space-around" align="middle">
-                        <Col span={8}>
-                            <span>
-                                名称:
-                                <span style={{color:"#070808"}}>{detailMessage.Name}</span>
-                            </span>
-                        </Col>
-                        <Col span={8}>
-                            <span>
-                                编号:
-                                <span style={{color:"#070808"}}>{detailMessage.ID}</span>
-                            </span>
-                        </Col>
-                        <Col span={8}>
-                            <span>
-                                描述:
-                                <span style={{color:"#070808"}}>{detailMessage.Note}</span>
-                            </span>
-                        </Col>
-                    </Row>
-                </div>
+            <PageHeaderLayout title="物料类别" wrapperClassName="pageContent" BreadcrumbList={bcList}>
                 <Divider>权限管理</Divider>
                 <div>
                     <Row >
@@ -226,7 +210,7 @@ export default class TUserAuthDetail extends Component {
                         <Col span={1}></Col>
                     </Row>
                 </div>
-            </div>
+            </PageHeaderLayout>
         )
     }
 }

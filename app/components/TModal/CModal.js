@@ -49,7 +49,7 @@ export default class CModal extends Component {
 
     render() {
         const self = this;
-        const { handleType }=this.props;
+        const { handleType,title="新建对象" }=this.props;
         const FormItem = this.props.FormItem;
         const updateItem = this.props.updateItem;
         // 详情见antd form 文档
@@ -63,7 +63,7 @@ export default class CModal extends Component {
         return (
             <div>
             <Modal
-                title="新建对象"
+                title={title}
                 visible={this.props.isShow}
                 onOk={this.handleCreate.bind(this)}
                 onCancel={this.hideModal.bind(this)}>
@@ -71,9 +71,11 @@ export default class CModal extends Component {
                         {
                             FormItem.map(function(item,index){
                                 // let itemValue=Object.keys(updateItem);
-                                if(updateItem&&handleType!='schedul')
-                                    item.defaultValue = updateItem[item.name]||'';
-                              // return self.dealConfigUType(item, defaultValue);
+
+                                // if(updateItem&&handleType!='schedul')
+                                    // item.defaultValue = updateItem[item.name]||'';
+
+                                    // return self.dealConfigUType(item, defaultValue);
                               return <CFormItem key={index} getFieldDecorator={getFieldDecorator} formItemLayout={formItemLayout} item={item} recordItem={updateItem}/>
                             })
                         }

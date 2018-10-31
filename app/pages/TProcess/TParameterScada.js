@@ -5,7 +5,7 @@
  **/
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
-import FeatureSetConfig from '../../components/TCommon/tableConfig';
+// import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData,urlBase } from '../../utils/TAjax';
 import { Divider } from 'antd';
 import Mock from 'mockjs';
@@ -189,7 +189,7 @@ export default class App extends Component {
             },
 
         };
-        Feature = FeatureSetConfig( conf )
+        // Feature = FeatureSetConfig( conf )
 
         const graph_conf = {
             type: 'graphList', // tableList graphList simpleObject complexObject
@@ -306,7 +306,7 @@ export default class App extends Component {
             }
         };
 
-        Dailychart = FeatureSetConfig( graph_conf )
+        // Dailychart = FeatureSetConfig( graph_conf )
     }
 
     render() {

@@ -21,6 +21,7 @@ import {
 import {TPostData, urlBase} from '../../utils/TAjax';
 import { CModal } from '../../components/TModal';
 import TerminalDetail from './TerminalDetail';
+import PageHeaderLayout from '../../base/PageHeaderLayout';
 
 const EditableCell = ({editable, value, onChange}) => (<div>
     {
@@ -280,8 +281,8 @@ export default class TDA_Terminal extends Component {
         ];
 
         const TDA_TerminalDetail=(
-            <div>
-                <div>
+            <div className="cardContent">
+                {/* <div>
                     <Breadcrumb style={{display:"inline-block"}}>
                         <Breadcrumb.Item>
                             <a onClick={this.toggleRender.bind(this)} href="#">工作中心</a>
@@ -291,13 +292,13 @@ export default class TDA_Terminal extends Component {
                     <span onClick={this.toggleRender.bind(this)} className="backup-button">
                         <Icon type="rollback" />
                     </span>
-                </div>
+                </div> */}
                 <TerminalDetail detailMessage={detailMessage} UUID={detailID}/>
             </div>
         );
 
         const TerminalList=(
-            <div>
+            <div className="cardContent">
                 <Button type="primary" icon="plus" onClick={this.toggleCModalShow.bind(this)}>添加</Button>
                 <Divider/>
                 <Table
@@ -315,7 +316,77 @@ export default class TDA_Terminal extends Component {
             </div>
         );
 
-        return showDetal?TDA_TerminalDetail:TerminalList;
+        const bcList = [{
+          title:"首页",
+          href: '/',
+          }, {
+          title: '系统设置',
+          href: '/',
+          }, {
+          title: '终端管理',
+          }, {
+          title:showDetal?"终端详情":"",
+          }];
+
+        const HeadAction=(
+                // <span onClick={this.toggleRender.bind(this)} className="backup-button">
+                //     <Icon type="rollback" />返回
+                // </span>
+                <Button onClick={this.toggleRender.bind(this)} type="primary" icon="rollback">返回</Button>
+            );
+
+        const HeadContent=(
+            <div style={{marginTop:25,height:100}}>
+                <Row  type="flex" justify="start" align="middle">
+                    <Col span={6}>
+                        <div style={{
+                                fontSize:16,
+                                display:'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-evenly',
+                                height: 100}}>
+                            <p>编号：<span>{detailMessage.ID}</span></p>
+                            <p>IMEI：<span>{detailMessage.IMEI}</span></p>
+                        </div>
+                    </Col>
+                    <Col span={6}>
+                        <div style={{
+                                fontSize:16,
+                                display:'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-evenly',
+                                height: 100}}>
+                            <p>序列号：<span>{detailMessage.SN}</span></p>
+                            <p>SimCard号：<span>{detailMessage.SimCardNo}</span></p>
+                        </div>
+                    </Col>
+                    <Col span={6}>
+                        <div style={{
+                                fontSize:16,
+                                display:'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-evenly',
+                                height: 100}}>
+                                <p>出厂日期：<span>{detailMessage.BornDateTime_UTC}</span></p>
+                                <p>激活日期：<span>{detailMessage.ActiveDateTimeB_UTC}</span></p>
+                        </div>
+                    </Col>
+                </Row>
+            </div>
+        );
+
+        // return showDetal?TDA_TerminalDetail:TerminalList;
+        return(
+            <PageHeaderLayout
+                title={showDetal?"终端详情":"终端管理"}
+                action={showDetal?HeadAction:''}
+                content={showDetal?HeadContent:''}
+                wrapperClassName="pageContent"
+                BreadcrumbList={bcList}>
+                    {/* <TWorkCenter/> */}
+                    {showDetal?TDA_TerminalDetail:TerminalList}
+            </PageHeaderLayout>
+        );
 
     }
 }

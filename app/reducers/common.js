@@ -52,3 +52,28 @@ export const navResult = handleActions({
     return { data: res, loading: false }
   },
 }, navData())
+
+
+// 获取路由
+const List = JSON.parse(sessionStorage.getItem('BreadcrumbList'));
+const BreadcrumbList = {
+    BCList:List?List:
+        [
+            {
+                title: "首页",
+                // href: '/',
+            },
+        ],
+};
+
+export const Breadcrumb = handleActions({
+  'update breadcrumb list'(state, action) {
+      console.log('BreadcrumbList',state,action)
+    state.BCList.splice(1,1,action.payload)
+    // state.BCList.push(action.payload)
+    sessionStorage.setItem('BreadcrumbList', JSON.stringify(state.BCList));
+
+    return { ...state }
+  },
+
+}, BreadcrumbList)

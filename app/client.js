@@ -1,14 +1,19 @@
-import 'babel-polyfill'
-import React from 'react'
-import ReactDOM from 'react-dom'
+import 'babel-polyfill';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { LocaleProvider } from 'antd';
 import zhCN from 'antd/lib/locale-provider/zh_CN';
-import { Router, Route, IndexRoute } from 'react-router'
-import hashHistory from './history'
-import App1 from './base/TIndexPage'
-import './index.less'
+import { Router, Route } from 'react-router';
+import { Provider } from 'react-redux'
+import hashHistory from './history';
+import App1 from './base/TIndexPage';
+// import Routes from './routes'
+import Routes from './Routes/routes'
+import './index.less';
+import configure from './store/configureStore'
 
-console.log("React========",React);
+const store = configure({ config: global.gconfig })
+
 // 登录*/
 const Login = ( location, cb ) => {
     require.ensure( [], ( require ) => {
@@ -35,15 +40,7 @@ function isLogin( nextState, replaceState ) {
 
 
 
-
-// 工作中心
-const TWorkCenterDetail = ( location, cb ) => {
-    require.ensure( [], ( require ) => {
-        cb( null, require( './pages/TFactory/TWorkCenterDetail' )
-            .default )
-    }, 'TWorkCenterDetail' )
-}
-//BOM详情
+// BOM详情
 const TBomDetail = ( location, cb ) => {
     require.ensure( [], ( require ) => {
         cb( null, require( './pages/TBom/TBomDetail' )
@@ -51,14 +48,14 @@ const TBomDetail = ( location, cb ) => {
     }, 'TBomDetail' )
 }
 
-//用户详情
+// 用户详情
 const TUserDetails = ( location, cb ) => {
     require.ensure( [], ( require ) => {
         cb( null, require( './pages/TUser/TUserDetails' )
             .default )
     }, 'TUserDetails' )
 }
-//权限详情
+// 权限详情
 const TUserAuthDetail = ( location, cb ) => {
     require.ensure( [], ( require ) => {
         cb( null, require( './pages/TUser/TUserAuthDetail' )
@@ -66,23 +63,13 @@ const TUserAuthDetail = ( location, cb ) => {
     }, 'TUserAuthDetail' )
 }
 // onEnter={isLogin}
-const routes = (
-    <LocaleProvider locale={zhCN}>
-        <Router history={hashHistory}>
-            <Route path="/" component={App1}  >
-                <Route path="/TWorkCenterDetail" getComponent={TWorkCenterDetail} />
-                <Route path="/TBomDetail" getComponent={TBomDetail} />
-                <Route path="/TUserDetails" getComponent={TUserDetails} />
-                <Route path="/TUserAuthDetail" getComponent={TUserAuthDetail} />
-            </Route>
-            <Route path="/login" getComponent={Login} />
-            {/* <Route path="/register" getComponent={Register} /> */}
-            </Router>
-    </LocaleProvider>
-)
 
 
+// console.log('Routes',Routes())
 ReactDOM.render(
-    routes,
+    <Provider store={store}>
+        <Routes />
+    </Provider>,
+    // routes,
     document.getElementById( 'root' ),
 )

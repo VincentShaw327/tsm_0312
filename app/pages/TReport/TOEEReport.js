@@ -6,7 +6,7 @@
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
 import { Row, Col, Divider } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/tableConfig';
+// import FeatureSetConfig from '../../components/TCommon/tableConfig';
 import { TPostData, urlBase } from '../../utils/TAjax';
 import Mock from 'mockjs';
 
@@ -334,9 +334,9 @@ export default class App extends Component {
                     nPageSize: 10
                 } )
             }
-            
+
         };
-        Feature = FeatureSetConfig( conf )
+        // Feature = FeatureSetConfig( conf )
 
         const graph_conf = {
             type: 'graphList', // tableList graphList simpleObject complexObject
@@ -518,7 +518,7 @@ export default class App extends Component {
             }
         };
 
-        Dailychart = FeatureSetConfig( graph_conf )
+        // Dailychart = FeatureSetConfig( graph_conf )
     }
 
     render() {
@@ -529,10 +529,10 @@ export default class App extends Component {
                     <Panel key="1" header="OEE统计图表" style={{borderRadius: '4px',border: '0',overflow: 'hidden',fontSize: '12px'}}>
                     </Panel>
                 </Collapse> */}
-                <Dailychart/>
+                {/* <Dailychart/> */}
                 <Divider>历史数据</Divider>
                 <div style={{height: '320px',overflowX: 'auto'}}>
-                    <Feature/>
+                    {/* <Feature/> */}
                 </div>
             </div>
         )

@@ -5,368 +5,85 @@
  **/
 import React, { Component } from 'react';
 import { hashHistory, Link } from 'react-router';
-import { Button, Icon, Popover,message,Breadcrumb,Table,
-    Card,Row,Col,Select,Input,Popconfirm  } from 'antd';
-import FeatureSetConfig from '../../components/TCommon/tableConfig';
-import { TPostData } from '../../utils/TAjax';
-import { CModal } from '../../components/TModal';
+import { Button, Icon, Popover,message,Breadcrumb,Table,Card,Row,Col,Select,Input,Popconfirm  } from 'antd';
+import { TPostData,urlBase } from '../../utils/TAjax';
+import SimpleTable from 'components/TTable/SimpleTable';
+import { CreateModal,UpdateModal } from 'components/TModal';
+import {SimpleQForm,StandardQForm } from 'components/TForm';
 import TBomDetail from './TBomDetail';
 const Option = Select.Option;
-
-let seft
-let creatKeyWord;
+import PageHeaderLayout from '../../base/PageHeaderLayout';
 
 export default class TBomList extends Component {
     constructor( props ) {
         super( props )
         this.state = {
+            tableDataList:[],
+            total:0,
+            current:1,
+            pageSize:10,
+            loading:true,
+
             ProModelList:[],
             BomList:[],
             showDetal:false,
             CModalShow:false,
             UModalShow:false,
-            loading:false,
             detailMessage:{},
             updateFromItem:{},
             detailID:0,
-            ProModelID:-1
+            ProModelUUID:-1
         }
         this.url= '/api/TBom/bom'
     }
 
     componentWillMount() {
-        // console.log("componentWillMount");
+        this.getTableList();
         this.getProModelList();
-        this.getBOMList();
-        const Config = {
-            url: '/api/TBom/bom',
-            columns: [
-                {
-                    title: '序号',
-                    dataIndex: 'key',
-                    type: 'string'
-                },
-                {
-                    title: "名称",
-                    dataIndex: "Name",
-                    type: "string"
-                },
-                {
-                    title: "编号",
-                    dataIndex: "ID",
-                    type: "string"
-                },
-                {
-                    title: "版本",
-                    dataIndex: "Version",
-                    type: "string"
-                },
-                {
-                    title: "产品型号",
-                    dataIndex: "ProductModelName",
-                    type: "string"
-                },
-                {
-                    title: "产品序列号",
-                    dataIndex: "ProductModelSN",
-                    type: "string"
-                },
-                /*{
-                    title: "描述",
-                    dataIndex: "Desc",
-                    type: "string"
-                },*/
-                {
-                    title: "备注",
-                    dataIndex: "Note",
-                    type: "string"
-                },
-                /*{
-                    title: "修改时间",
-                    dataIndex: "UpdateDateTime",
-                    type: "string",
-                    type: 'sort',
-                    sorter: ( a, b ) => {
-                        return CpTime( a, b )
-                    }
-                },*/
-                {
-                    title: "操作",
-                    dataIndex: "Status",
-                    type: "operate", // 操作的类型必须为 operate
-                    btns: [
-                        {
-                            text: '修改',
-                            type: 'edit',
-                            icon:'edit'
-                        }, {
-                            text: '删除',
-                            type: 'delete',
-                            icon:'delete',
-                            havePopconfirm: true,
-                            popText: '确定要删除此记录吗?'
-                        },
-                        {
-                            //详情页进行的跳转.
-                            render: ( text, item ) => {
-                                return (
-                                    <a href="javascript:void 0;" onClick={this.toggleRender.bind(this,item)}>
-                                        {/* <Link to={path}><Icon type="profile" /></Link> */}
-                                        <Icon type="profile" />
-                                    </a>
-                                )
-                            }
-                        }
-                    ]
-                }
-            ],
-
-            UType: [
-                {
-                    name: 'Name',
-                    label: '名称',
-                    type: 'string',
-                    rules: [{ required: true, message: '请输入BOM名称' }],
-                    placeholder: '请输入名称'
-                },
-                {
-                    name: 'ID',
-                    label: '编号',
-                    type: 'string',
-                    rules: [{ required: true, message: '请输入编号' }],
-                    placeholder: '请输入编号'
-                },
-                {
-                    name: 'Version',
-                    label: '版本',
-                    type: 'string',
-                    rules: [{ required: true, message: '请输入版本' }],
-                    placeholder: '请输入版本'
-                },
-                {
-                    name: 'Desc',
-                    label: '描述',
-                    type: 'string',
-                    placeholder: '请输入描述'
-                },
-                {
-                    name: 'Note',
-                    label: '备注',
-                    type: 'string',
-                    placeholder: '请输入备注'
-                }
-            ],
-
-            CType: [
-                {
-                    name: 'Name',
-                    label: '名称',
-                    type: 'string',
-                    rules: [{ required: true, message: '请输入设备名称' }],
-                    placeholder: '请输入名称'
-                },
-                {
-                    name: 'ID',
-                    label: '编号',
-                    type: 'string',
-                    rules: [{ required: true, message: '请输入编号' }],
-                    placeholder: '请输入编号'
-                },
-                {
-                    name: "ProductModelUUID",
-                    label: "产品型号",
-                    type: "select",
-                    rules: [{ required: true, message: '请选择型号' }],
-                    options: this.state.ProModelList
-                }
-            ],
-
-            RType: [
-                {
-                    name: 'KeyWord',
-                    label: '搜索内容',
-                    type: 'string',
-                    placeholder: '请输入搜索内容'
-                },
-                {
-                   name: 'ModelUUID',
-                   label: '产品型号',
-                   type: 'select',
-                   hasAllButtom: true,
-                   defaultValue: '-1',
-                   width: 150,
-                   options:this.state.ProModelList
-                   // options:ProModelList
-               },
-            ],
-            // 初始化页面的数据 回调函数传入 items 列表
-            pageData: function ( num, callback ) {
-                var dat = {
-                    PageIndex: 0,
-                    PageSize: -1,
-                    ProductModelUUID: -1,
-                    KeyWord: ""
-                }
-                TPostData( this.url, "ListActive", dat,  ( res )=> {
-                    console.log("查询BOM列表：",res);
-                    var list = [];
-                    var Ui_list = res.obj.objectlist || [];
-                    var totalcount = res.obj.totalcount;
-                    creatKeyWord = res.obj.objectlist.length;
-                    Ui_list.forEach( function ( item, index ) {
-                        list.push( {
-                            key: index,
-                            UUID: item.UUID,
-                            ProductModelUUID: item.ProductModelUUID,
-                            Name: item.Name,
-                            ID: item.ID,
-                            Version: item.Version,
-                            ProductModelID: item.ProductModelID,
-                            ProductModelSN: item.ProductModelSN,
-                            ProductModelName: item.ProductModelName,
-                            Desc: item.Desc,
-                            Note: item.Note,
-                            UpdateDateTime: item.UpdateDateTime,
-                            Status: item.Status,
-                        } )
-                    } )
-                    /*const pagination = {
-                        ...this.state.pagination
-                    }*/
-                    // pagination.total = totalcount;
-                    callback( list, {
-                        // total: pagination.total,
-                        nPageSize: 10
-                    } )
-                }, function ( error ) {
-                    message.info( error );
-                } )
-            },
-
-            Create: function ( data, callback ) {
-                creatKeyWord++;
-                let dat = {
-                    key: creatKeyWord,
-                    ID: data.ID,
-                    Name: data.Name,
-                    ProductModelUUID: data.ProductModelUUID
-                }
-                TPostData( this.url, "Add", dat, function ( res ) {
-                    //这块请求更新数据 成功回调
-                    callback( dat );
-                } )
-            },
-            //数据更新：提交回调
-            Update: function ( data, callback ) {
-                let dat = {
-                    UUID: data.UUID,
-                    ID: data.ID,
-                    Name: data.Name,
-                    Version: data.Version,
-                    Desc: data.Desc,
-                    Note: data.Note
-                }
-
-                TPostData( this.url, "Update", dat, function ( res ) {
-                    //这块请求更新数据 成功回调
-                    callback( data )
-                } )
-            },
-            //删除记录：提交回调
-            Delete: function ( data, callback ) {
-                var dat = {
-                    UUID: data.UUID,
-                }
-                TPostData( this.url, "Inactive", dat, function ( res ) {
-                    callback( data )
-                } )
-            },
-
-            Retrieve: function ( data, callback ) {
-                var dat = {
-                    PageIndex: 0,
-                    PageSize: -1,
-                    ProductModelUUID: data.ModelUUID,
-                    KeyWord: data.KeyWord
-                }
-                TPostData( this.url, "ListActive", dat,  ( res )=> {
-                    var list = [];
-                    var Ui_list = res.obj.objectlist || [];
-                    var totalcount = res.obj.totalcount;
-                    creatKeyWord = res.obj.objectlist.length;
-                    Ui_list.forEach( function ( item, index ) {
-                        list.push( {
-                            key: index,
-                            UUID: item.UUID,
-                            ProductModelUUID: item.ProductModelUUID,
-                            Name: item.Name,
-                            ID: item.ID,
-                            Version: item.Version,
-                            ProductModelID: item.ProductModelID,
-                            ProductModelSN: item.ProductModelSN,
-                            ProductModelName: item.ProductModelName,
-                            Desc: item.Desc,
-                            Note: item.Note,
-                            UpdateDateTime: item.UpdateDateTime,
-                            Status: item.Status,
-                        } )
-                    } )
-                    /*const pagination = {
-                        ...this.state.pagination
-                    }*/
-                    // pagination.total = totalcount;
-                    callback( list, {
-                        // total: pagination.total,
-                        nPageSize: 10
-                    } )
-                }, function ( error ) {
-                    message.info( error );
-                } )
-            }
-
-        };
-        // this.feature = FeatureSetConfig( Config );
     }
 
-    getBOMList(){
-        this.setState({loading:true});
+    getTableList(){
+        const {current,pageSize,ProModelUUID,keyWord}=this.state;
+
         var dat = {
-            PageIndex: 0,
-            PageSize: -1,
-            ProductModelUUID: this.state.ProModelID,
-            KeyWord: this.keyWordInput?this.keyWordInput.input.value:''
+            PageIndex : current-1,       //分页：页序号，不分页时设为0
+            PageSize:pageSize,
+            ProductModelUUID:ProModelUUID,
+            KeyWord: keyWord
         }
         TPostData( '/api/TBom/bom', "ListActive", dat,
             ( res )=> {
                 console.log("查询BOM列表：",res);
-                var list = [];
-                var Ui_list = res.obj.objectlist || [];
-                var totalcount = res.obj.totalcount;
-                creatKeyWord = res.obj.objectlist.length;
-                Ui_list.forEach( ( item, index )=> {
-                    list.push( {
-                        key: index,
-                        UUID: item.UUID,
-                        ProductModelUUID: item.ProductModelUUID,
-                        Name: item.Name,
-                        ID: item.ID,
-                        Version: item.Version,
-                        ProductModelID: item.ProductModelID,
-                        ProductModelSN: item.ProductModelSN,
-                        ProductModelName: item.ProductModelName,
-                        Desc: item.Desc,
-                        Note: item.Note,
-                        UpdateDateTime: item.UpdateDateTime,
-                        Status: item.Status,
-                    } )
-                }
+                let list = [],
+                    Ui_list = res.obj.objectlist || [],
+                    totalcount = res.obj.totalcount;
+
+                Ui_list.forEach(
+                    ( item, index )=> {
+                        list.push( {
+                            key: index,
+                            UUID: item.UUID,
+                            ProductModelUUID: item.ProductModelUUID,
+                            Name: item.Name,
+                            ID: item.ID,
+                            Version: item.Version,
+                            ProductModelID: item.ProductModelID,
+                            ProductModelSN: item.ProductModelSN,
+                            ProductModelName: item.ProductModelName,
+                            Desc: item.Desc,
+                            Note: item.Note,
+                            UpdateDateTime: item.UpdateDateTime,
+                            Status: item.Status,
+                        } )
+                    }
                 )
-                this.setState({BomList:list,loading:false});
+                this.setState({ tableDataList: list, total: totalcount, loading: false });
             },
             ( error )=> {
                 message.info( error );
             }
         )
+
     }
 
     getProModelList(){
@@ -392,28 +109,6 @@ export default class TBomList extends Component {
         )
     }
 
-    toggleRender(record){
-        // console.log("toggleRender",record);
-        this.setState({
-            showDetal:!this.state.showDetal,
-            detailID:record.UUID,
-            detailMessage:record
-        })
-    }
-
-    toggleCModalShow(){
-        this.setState({CModalShow:!this.state.CModalShow});
-    }
-
-    toggleUModalShow(record){
-        // console.log("更新前",record);
-        this.setState({UModalShow:!this.state.UModalShow,updateFromItem:record});
-    }
-
-    handleProChange(ele) {
-        this.setState({ProModelID:ele});
-    }
-
     handleCreat(data){
         // console.log('data',data);
         let dat = {
@@ -424,10 +119,27 @@ export default class TBomList extends Component {
         TPostData( this.url, "Add", dat,
             ( res )=> {
                 message.success("创建BOM成功！");
-                this.getBOMList();
+                this.getTableList();
             } ,
             ( res )=> {
                 message.error("创建BOM失败！");
+            }
+        )
+    }
+
+    handleDelete=(data)=>{
+        var dat = {
+            UUID: data.UUID,
+        }
+        // console.log("看看data",data);
+        TPostData( this.url, "Inactive", dat,
+            ( res )=> {
+                message.success("删除成功！");
+                this.getTableList();
+            },
+            ( err )=> {
+                message.error("删除失败！");
+                console.log('err',err);
             }
         )
     }
@@ -447,7 +159,7 @@ export default class TBomList extends Component {
         TPostData( this.url, "Update", dat,
             ( res )=> {
                 message.success("编辑BOM成功！");
-                this.getBOMList();
+                this.getTableList();
             },
             ( res )=> {
                 message.error("编辑BOM失败！");
@@ -455,26 +167,44 @@ export default class TBomList extends Component {
         )
     }
 
-    delete(data){
-        var dat = {
-            UUID: data.UUID,
-        }
-        TPostData( this.url, "Inactive", dat,
-            ( res )=> {
-                message.success('BOM删除成功！');
-                this.getBOMList();
-            } ,
-            ( res )=> {
-                message.error('BOM删除失败！');
-            }
-        )
+    handleQuery=(data)=>{
+        const {keyWord,ProModelUUID}=data;
+        this.setState({keyWord,ProModelUUID},()=>{
+            this.getTableList();
+        });
+    }
+
+    handleTableChange=(pagination)=>{
+        // console.log('pagination',pagination);
+        const {current,pageSize}=pagination;
+        this.setState({current,pageSize},()=>{
+
+            this.getTableList();
+        });
+    }
+
+    toggleRender(record){
+        // console.log("toggleRender",record);
+        this.setState({
+            showDetal:!this.state.showDetal,
+            detailID:record.UUID,
+            detailMessage:record
+        })
+    }
+
+    toggleUModalShow=(record)=>{
+        this.setState({UModalShow:!this.state.UModalShow,updateFromItem:record});
     }
 
     render() {
-        // let Feature = this.feature;
-        const {showDetal,detailID,detailMessage}=this.state;
         const {detail}=this.props;
-        const columns= [
+        const {tableDataList,ProModelList,loading,current,total,pageSize,updateFromItem,UModalShow,showDetal,detailID,detailMessage}=this.state;
+        let Data={
+            list:tableDataList,
+            pagination:{total,current,pageSize}
+        };
+
+        const Tcolumns= [
             {
                 title: '序号',
                 dataIndex: 'key',
@@ -520,7 +250,7 @@ export default class TBomList extends Component {
                         <div className="editable-row-operations">
                             <a onClick={() => this.toggleUModalShow(record)}>编辑</a>
                             <span className="ant-divider"></span>
-                            <Popconfirm title="确定要删除?" onConfirm={() => this.delete(record)}>
+                            <Popconfirm title="确定要删除?" onConfirm={() => this.handleDelete(record)}>
                                     <a>删除</a>
                             </Popconfirm>
                             <span className="ant-divider"></span>
@@ -589,85 +319,108 @@ export default class TBomList extends Component {
                 placeholder: '请输入备注'
             }
         ];
+        //查询的数据项
+        const RFormItem= [
+            {
+                name: 'keyWord',
+                label: '搜索内容',
+                type: 'string',
+                placeholder: '请输入搜索内容'
+            },{
+                name: 'ProModelUUID',
+                label: '产品型号',
+                type: 'select',
+                hasAllButtom: true,
+                defaultValue: '-1',
+                width: 150,
+                options:ProModelList
+            }
+        ];
 
+        const BomDetail=(<TBomDetail UUID={detailID} detailMessage={detailMessage}/>);
 
-        const BomDetail=(
-            <div>
-                <div>
-                    <Breadcrumb style={{display:"inline-block"}}>
-                        <Breadcrumb.Item>
-                            <a onClick={this.toggleRender.bind(this)} href="#">BOM管理</a>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>BOM单详情</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <span onClick={this.toggleRender.bind(this)} className="backup-button">
-                        <Icon type="rollback" />
-                    </span>
-                </div>
-                <TBomDetail UUID={detailID} detailMessage={detailMessage}/>
-            </div>
-        );
         const BomListTable=(
-            <div>
-                <Card >
-                    <Row gutter={16}>
-                        <Col className="gutter-row" span={8}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>搜索内容:</span>
-                                <Input style={{ width: "60%" }}
-                                    ref={(input) => { this.keyWordInput = input; }}
-                                    placeholder="请输入搜索内容" />
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={8}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>产品:</span>
-                                <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleProChange.bind(this)}>
-                                    <Option value="-1" key="all">全部</Option>
-                                    {
-                                        this.state.ProModelList.map((item,index)=>{
-                                                return (<Option value={item.value} key={index}>{item.text}</Option>)
-                                        })
-                                    }
-                                </Select>
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={8}>
-                            <div className="gutter-box">
-                                <Button onClick={this.getBOMList.bind(this)} type="primary" icon="search">查询</Button>
-                            </div>
-                        </Col>
-                    </Row>
-                </Card>
-                <div style={{margin:"20px 0"}}>
-                    <Button
-                        onClick={this.toggleCModalShow.bind(this)}
-                        icon="plus" type="primary">添加</Button>
-                </div>
-                <Table
-                  // rowSelection={this.state.isSelection?rowSelection:null}
-                  // expandedRowRender={this.renderSubTable.bind(this)}
-                  dataSource={this.state.BomList}
-                  columns={columns}
-                  loading={this.state.loading}
-                  // bordered={bordered}
-                  size="middle"
-                  // scroll={scroll}
-                />
-                <CModal
+            <div className="cardContent">
+                <SimpleQForm
+                    FormItem={RFormItem}
+                    submit={this.handleQuery}
+                    />
+                <CreateModal
                     FormItem={CFormItem}
                     submit={this.handleCreat.bind(this)}
-                    isShow={this.state.CModalShow}
-                    hideForm={this.toggleCModalShow.bind(this)}
                 />
-                <CModal
+                <SimpleTable
+                    loading={loading}
+                    data={Data}
+                    columns={Tcolumns}
+                    isHaveSelect={false}
+                    onChange={this.handleTableChange}
+                />
+                <UpdateModal
                     FormItem={UFormItem}
-                    updateItem={this.state.updateFromItem}
+                    updateItem={updateFromItem}
                     submit={this.handleUpdate.bind(this)}
-                    isShow={this.state.UModalShow}
-                    hideForm={this.toggleUModalShow.bind(this)}
+                    showModal={UModalShow}
+                    hideModal={this.toggleUModalShow}
                 />
             </div>
-
         )
-        return showDetal?BomDetail:BomListTable;
+
+        const bcList = [{
+          title:"首页",
+          href: '/',
+          }, {
+          title: '车间管理',
+          href: '/',
+          }, {
+          title: '工作中心',
+          }];
+
+        const HeadAction=(
+                <Button onClick={this.toggleRender.bind(this)} type="primary" icon="rollback">返回</Button>
+            );
+
+        const HeadContent=(
+            <div style={{marginTop:15,height:80, border:'solid 0px #bbbbbb',borderRadius:6,paddingLeft:8}}>
+                <Row  type="flex" justify="start" align="middle">
+                    <Col span={8}>
+                        <div style={{
+                                fontSize:16,
+                                display:'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-evenly',
+                                height: 80}}>
+                            <p>名称：<span>{detailMessage.Name}</span></p>
+                            <p>编号：<span>{detailMessage.ID}</span></p>
+                            <p>版本：<span>{detailMessage.Version}</span></p>
+                        </div>
+                    </Col>
+                    <Col span={6}>
+                        <div style={{
+                                fontSize:16,
+                                display:'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-evenly',
+                                height: 80}}>
+                            <p>产品型号：{detailMessage.ProductModelName}</p>
+                            <p>产品序列号：{detailMessage.ProductModelSN}</p>
+                            <p>备注：{detailMessage.Note}</p>
+                        </div>
+                    </Col>
+                </Row>
+            </div>
+        );
+
+        return(
+            <PageHeaderLayout
+                title={showDetal?"BOM列表":"BOM详情"}
+                action={showDetal?HeadAction:''}
+                content={showDetal?HeadContent:''}
+                wrapperClassName="pageContent"
+                BreadcrumbList={bcList}
+                >
+                    {showDetal?BomDetail:BomListTable}
+            </PageHeaderLayout>
+        );
     }
 }

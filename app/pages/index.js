@@ -11,6 +11,7 @@ import { TProductModel} from './TProduct';
 import { TBomList} from './TBom';
 import {TParameterList,TModifyRecord,TParameterScada,TParameterAnalysis}from './TProcess';
 import {TLossTimeReport,TOEEReport,TProductionReport,TOEEAnalysis,TStateTimeOverview}from './TReport';
+import { MaintainPlan} from './TMaintain';
 import { TDA_Terminal} from './TSetting';
 
 export {
@@ -50,5 +51,6 @@ export {
     TProductionReport,
     TOEEAnalysis,
     TTechnicalSupport,
+    MaintainPlan,
     TDA_Terminal
 }

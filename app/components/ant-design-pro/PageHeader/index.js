@@ -4,6 +4,8 @@ import pathToRegexp from 'path-to-regexp';
 import { Breadcrumb, Tabs } from 'antd';
 import classNames from 'classnames';
 import styles from './index.less';
+// var styles = require("less-loader!style-loader!css-loader!./index.less");
+
 import { urlToList } from '../utils/pathTools';
 
 const { TabPane } = Tabs;
@@ -180,19 +182,21 @@ export default class PageHeader extends PureComponent {
     }
 
     return (
-      <div className={clsString}>
+      //{clsString}
+      <div className="pageHeader">
         {breadcrumb}
-        <div className={styles.detail}>
+        {/* {styles.detail} */}
+        <div className="detail">
           {logo && <div className={styles.logo}>{logo}</div>}
-          <div className={styles.main}>
-            <div className={styles.row}>
-              {title && <h1 className={styles.title}>{title}</h1>}
-              {action && <div className={styles.action}>{action}</div>}
+          <div className="main">
+            <div className="row">
+              {title && <h1 className="title">{title}</h1>}
+              {action && <div className="action">{action}</div>}
             </div>
-            <div className={styles.row}>
-              {content && <div className={styles.content}>{content}</div>}
+            <div className="row">
+              {content && <div className="content">{content}</div>}
               {extraContent && (
-                <div className={styles.extraContent}>{extraContent}</div>
+                <div className="extraContent">{extraContent}</div>
               )}
             </div>
           </div>

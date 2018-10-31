@@ -4,112 +4,12 @@
  *添加人:shaw
  **/
 import React, { Component } from 'react';
-import {Icon,Input,Row,Col,Divider,Modal,Radio ,Table,Form,Button,
-    Popconfirm,message,Select  } from 'antd';
-// import FeatureSetConfig from '../../components/TCommon/tableConfig';
-import Tiltle from '../../components/TCommon/Tiltle/Tiltle';
-import { _topfOrderBy } from '../../components/TCommon/utils/dataHandle/arrayHandle';
-import { TPostData } from '../../utils/TAjax';
-import { CModal } from '../../components/TModal';
+import {Icon,Input,Row,Col,Divider,Modal,Radio ,Table,Form,Button,Popconfirm,message,Select  } from 'antd';
+import { TPostData } from 'utils/TAjax';
+import { CModal } from 'components/TModal';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
-
-/*class TModal extends Component {
-    constructor( props ) {
-        super( props )
-        this.state = {
-            CModalShow:false,
-            UModalShow:false,
-            Modalshow:false,
-            EModalshow:false,
-            isBaseMtrl:true,
-            selectedItem:'0',
-            MtrlTypeValue:'0',
-            MtrlModelValue:'',
-            ProModelValue:'',
-            UsedNumberValue:0,
-            UnitValue:''
-        }
-        this.url='/api/TBom/bom';
-    }
-
-    render(){
-
-        return(
-            <Modal
-                title="新建对象"
-                visible={this.state.Modalshow}
-                onOk={this.addBomItem}
-                onCancel={this.toggleCModalShow}>
-                    <Form layout="horizontal">
-                        <FormItem
-                            label="物料类型"
-                            key="MtrlType"
-                            {...formItemLayout}>
-                            {
-                                getFieldDecorator("MtrlType", {rules:[{required: true,message: '请选择物料类型'}], initialValue: MtrlTypeValue })(
-                                <RadioGroup onChange={this.toggleMtrlType}>
-                                    <Radio key="0" value={0}>基础物料</Radio>
-                                    <Radio key="1" value={1}>半成品物料</Radio>
-                                </RadioGroup>
-                            )}
-                        </FormItem>
-                        <FormItem
-                            label="物料型号"
-                            key="MtrlModel"
-                            {...formItemLayout}>
-                            {
-                                getFieldDecorator("MtrlModelUUID", {rules:!isBaseMtrl?[]:[{required: true,message: '请选择物料型号'}], initialValue: MtrlModelValue })(
-                                <Select disabled={!isBaseMtrl}>
-                                    {
-                                        MtrModelList.map(function(item, i,arr){
-                                            return <Option key={i} value={item.value}>{item.text || item.value}</Option>
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </FormItem>
-                        <FormItem
-                            label="产品型号"
-                            key="ProModel"
-                            {...formItemLayout}>
-                            {
-                                getFieldDecorator("ProModelUUID", {rules:isBaseMtrl?[]:[{required: true,message: '请选择产品型号'}], initialValue: ProModelValue })(
-                                <Select disabled={isBaseMtrl}>
-                                    {
-                                        ProductModelList.map(function(item, i,arr){
-                                            return <Option key={i} value={item.value}>{item.text || item.value}</Option>
-                                        })
-                                    }
-                                </Select>
-                            )}
-                        </FormItem>
-                        <FormItem
-                            label="使用量"
-                            key="UserNumber"
-                            {...formItemLayout}>
-                            {
-                                getFieldDecorator("UsedNumber", {rules:[{required: true,message: '请输入使用量'}], initialValue: UsedNumberValue })
-                                (<Input placeholder={"请输入使用量"} />)
-                            }
-                        </FormItem>
-                        <FormItem
-                            label="单位"
-                            key="Unit"
-                            {...formItemLayout}>
-                            {
-                                getFieldDecorator("Unit", {rules:[{required: true,message: '请输入单位'}], initialValue: UnitValue })
-                                (<Input placeholder={"请输入物料单位"} />)
-                            }
-                        </FormItem>
-                    </Form>
-            </Modal>
-        )
-    }
-}
-TModal = Form.create()(TModal)
-*/
 
 export default class TBomDetail extends Component {
 
@@ -621,8 +521,8 @@ export default class TBomDetail extends Component {
         };
 
         return (
-            <div>
-                <div style={{marginTop:25,height:150, border:'solid 0px #bbbbbb',borderRadius:6,paddingLeft:8}}>
+            <div className="cardContent">
+                {/* <div style={{marginTop:25,height:150, border:'solid 0px #bbbbbb',borderRadius:6,paddingLeft:8}}>
                     <Row  type="flex" justify="start" align="middle">
                         <Col span={8}>
                             <div style={{
@@ -649,7 +549,7 @@ export default class TBomDetail extends Component {
                             </div>
                         </Col>
                     </Row>
-                </div>
+                </div> */}
                 <div style={{margin:"20px 0"}}>
                     <Button
                         type="primary"

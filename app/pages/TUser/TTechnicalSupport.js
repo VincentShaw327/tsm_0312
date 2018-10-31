@@ -8,6 +8,7 @@ import {Card,Row,Col,Divider,Tag,List,Form} from 'antd';
 const FormItem = Form.Item;
 import { TPostData } from '../../utils/TAjax';
 import devicePic from '../../images/assets/AM1.jpg';
+import PageHeaderLayout from '../../base/PageHeaderLayout';
 
 export default class TTechnicalSupport extends Component {
     constructor( props ) {
@@ -32,35 +33,50 @@ export default class TTechnicalSupport extends Component {
             },
           };
 
+        const bcList = [{
+              title:"首页",
+              href: '/',
+              }, {
+              title: '生产资料',
+              href: '/',
+              }, {
+              title: '物料类别',
+          }];
         return(
-            <div>
-                <Form >
-                    <FormItem
-                        {...formItemLayout}
-                        label="版权"
-                        >
-                        深圳市拓联智能信息技术有限公司
-                    </FormItem>
-                    <FormItem
-                        {...formItemLayout}
-                        label="地址"
-                        >
-                        深圳市宝安西乡坪洲资信达大厦502
-                    </FormItem>
-                    <FormItem
-                        {...formItemLayout}
-                        label="邮箱"
-                        >
-                        213456546@gmail.com
-                    </FormItem>
-                    <FormItem
-                        {...formItemLayout}
-                        label="电话"
-                        >
-                        213456546
-                    </FormItem>
-                </Form>
-            </div>
+            <PageHeaderLayout title="物料类别" wrapperClassName="pageContent" BreadcrumbList={bcList}>
+                <div className="cardContent">
+                    <Form>
+                        <FormItem
+                            {...formItemLayout}
+                            label="版权"
+                            >
+                            广东拓斯达科技股份有限公司/深圳市拓联智能信息技术有限公司
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="邮箱"
+                            >
+                            sales@top-link.me
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="固定电话"
+                            >
+                            (+86)0755-27217974
+                        </FormItem>
+                        <FormItem
+                            {...formItemLayout}
+                            label="地址"
+                            >
+                            <div>
+                                深圳市宝安区西乡街道宝源路1053号资信达大厦502室
+                            </div>
+                            <img src={"../../images/20170512173616_54939.png"} />
+                        </FormItem>
+                    </Form>
+                </div>
+            </PageHeaderLayout>
+
         )
     }
 }

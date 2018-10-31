@@ -1,7 +1,8 @@
-import React, {Component} from 'react'
-import {bindActionCreators} from 'redux'
-import {connect} from 'react-redux'
-import {hashHistory, Link} from 'react-router'
+import React, {Component} from 'react';
+import {bindActionCreators} from 'redux';
+import MD5 from 'components/TCommon/md5';
+import {connect} from 'react-redux';
+import {hashHistory, Link} from 'react-router';
 import {
     Spin,
     message,
@@ -12,13 +13,15 @@ import {
     Row,
     Col
 } from 'antd'
-import {fetchLogin, userInfo} from 'actions/common'
-import styles from './login.less'
+import {fetchLogin, userInfo} from 'actions/common';
+import styles from './login.less';
+import { TPostData,urlBase } from 'utils/TAjax';
 const FormItem = Form.Item
 
 @Form.create({
     onFieldsChange(props, items) {}
 })
+
 
 export default class Login extends Component {
     // 初始化页面常量 绑定事件方法
@@ -33,38 +36,71 @@ export default class Login extends Component {
         this.noop = this.noop.bind(this)
     }
 
+    setLevel=(username)=>{
+        let UserLevel;
+        switch (username) {
+            case 'dev':
+                UserLevel='develop';
+                break;
+            case 'admin':
+                UserLevel='administor';
+                break;
+            case 'punch':
+                UserLevel='pw_manager';
+                break;
+            case 'inject':
+                UserLevel='iw_manager';
+                break;
+            case 'autosmt2':
+                UserLevel='aw_manager2';
+                break;
+            case 'autosmt3':
+                UserLevel='aw_manager3';
+                break;
+            default:
+                UserLevel='visit';
+        }
+        return UserLevel;
+    }
+
     handleSubmit(e) {
         e.preventDefault()
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                // this.state.loading = true
-                // console.log(values)
-                // this.setState({loading: true})
-                Object.keys(values).map(key => values[key] = (values[key] && values[key].trim()))
-                this.props.dispatch(fetchLogin(values, (res) => {
-                    console.log(res)
-                    message.success(res.msg)
-                    if (res.status === 1) {
-                        // const query = this.props.form.getFieldsValue()
-                        // global.gconfig.staff = res.data.user
-                        // sessionStorage.setItem('staff', JSON.stringify({ ...res.data.user }))
-                        // sessionStorage.setItem('token', res.data.token)
-                        // sessionStorage.setItem('isLeftNavMini', false)
-                        // hashHistory.push('/')
-                        this.props.dispatch(userInfo(values, (response) => {
-                            console.log(response)
-                            sessionStorage.setItem('token', response.data.token)
-                            hashHistory.push('/')
-                        }, (response) => {
-                            message.warning(response)
-                        }))
+
+                //字符去空
+                Object.keys(values).map(key => values[key] = (values[key] && values[key].trim()));
+                console.log('values2',values);
+                let password = MD5( values.password );
+                let dat = {
+                    LoginName: values.username,
+                    Password: password,
+                }
+                // console.log('denglu',dat);
+                TPostData('/api/TUser/account', "Login", dat,
+                    ( res )=> {
+                        // message.success("成功！");
+                        console.log('登陆成功',res);
+                        if(res.err==0){
+                            const userinfo={
+                                account:values.username,
+                                img:"img/avtar01.png",
+                                UserLevel:this.setLevel(values.username),
+                                PermissionList:['edit','add','delete',]
+                            }
+                            sessionStorage.setItem('userinfo', JSON.stringify(userinfo));
+                            // sessionStorage.setItem('userinfo', userinfo);
+                            hashHistory.push('/');
+                        }
+                        else{
+                            message.error("登陆失败,账户名或密码错误！");
+                        }
+                    } ,
+                    ( res )=> {
+                        message.error("登陆失败");
                     }
-                }, (res) => {
-                    message.warning(res.msg)
-                    this.setState({loading: false})
-                }))
-                sessionStorage.setItem('token', 'dupi')
-                hashHistory.push('/')
+                )
+
             }
         })
     }
@@ -76,6 +112,10 @@ export default class Login extends Component {
 
     checkName = (rule, value, callback) => {
         // const { validateFields } = this.props.form
+        // console.log('checkName rule',callback);
+        // console.log('checkName value',callback);
+        // console.log('checkName callback',callback);
+
         if (value) {
             // validateFields([''])
         }

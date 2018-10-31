@@ -1,19 +1,39 @@
+import moment from 'moment';
 import React, { Component } from 'react';
 import { message, Menu, Icon, Row, Col, Card, Table, Divider,
-     DatePicker, Button, Select } from 'antd';
+    Form, DatePicker, Button, Select,Spin } from 'antd';
 import { TPostData } from '../../utils/TAjax';
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
+const RangePicker = DatePicker.RangePicker;
+const FormItem = Form.Item;
+const Option = Select.Option;
+import SimpleTable from 'components/TTable/SimpleTable';
+import TableExport from 'tableexport';
+import './index.less';
+import PageHeaderLayout from 'base/PageHeaderLayout';
+
+let sess_info=sessionStorage.getItem('userinfo');
 
 export default class TProductionReport extends Component {
     // 初始化页面常量 绑定事件方法
     constructor( props, context ) {
         super( props )
         this.state = {
+            productionReport:[],
             workshopList: [],
             dispatchingList: [],
             workCenterList: [],
-            ProModelList: []
+            ProModelList: [],
+            WSUUID:'1',
+            WCUUID:'-1',
+            hasAddBtn:false,
+            RDate:moment().format('YYYY.MM.DD'),
+            RSDate:moment((new Date().getTime()) - (1000 * 60 * 60 * 24*30)).format("YYYY.MM.DD"),
+            REDate:moment(new Date().getTime()).format("YYYY.MM.DD"),
+            loading:true,
+            // authInfo:this.props.userInfo,
+            authInfo:JSON.parse(sess_info),
         }
         this.url = '/api/TFactory/workshop';
         // this.workshopList =[];
@@ -21,14 +41,113 @@ export default class TProductionReport extends Component {
     }
 
     componentWillMount() {
-        this.getWorkCenterList();
         this.getWorkshopList();
-        this.getDispatchingList();
-        this.getProModelList();
+        this.getWorkCenterList();
+        // this.getDispatchingList();
+        // this.getProModelList();
+        // this.getProReport();
+        this.setDefaultWS();
     }
 
     componentDidMount() {
-        // this.setState()
+        // let csvDom=document.getElementById("productionTable")
+        // .getElementsByClassName("ant-table-body")[0];
+        // let btnWrap=document.getElementById("exportProductRep");
+        // const btn=TableExport(csvDom.children[0]);
+        // let children= btn.selectors[0].children[0];
+        // let childNodes=children.getElementsByTagName('button');
+        // childNodes[0].innerHTML="xlsx";
+        // childNodes[1].innerHTML="csv";
+        // childNodes[2].innerHTML="txt";
+        // // console.log("btn",children);
+        // // console.log("childNodes",childNodes);
+        // btnWrap.appendChild(children);
+    }
+
+    getProReport(){
+        const {WSUUID,WCUUID,RSDate,REDate}=this.state;
+
+        const dat ={
+            WorkshopUUID : WSUUID,
+            WorkstationUUID : WCUUID,
+            ProductUUID : -1,
+            StartDay : RSDate,
+            EndDay : REDate,
+            Type : 0  // 0 - 按计划时间查询    1 - 按生产时间查询
+        }
+        console.log('ProductionOrder',dat)
+        // TPostData('/api/TReport/production_report/orderReport', "GetProductionOrderReport", dat,
+        TPostData('/api/TReport/production_report', "GetProductionOrderReport", dat,
+            ( res ) => {
+                console.log( "查询到生产报表", res );
+                let data_list = res.obj.objectlist || [],
+                    pro_report = [];
+
+                if(res.err==0){
+                    data_list.forEach( ( item, index ) => {
+                        pro_report.push( {
+                            key: index,
+                            ProductOrderUUID :item.ProductOrderUUID ,
+                            WorkstationUUID :item.WorkstationUUID ,
+                            MoldUUID :item.MoldUUID ,
+                            PlanNumber :item.PlanNumber ,
+                            FinishNumber :item.FinishNumber ,
+                            RejectNumber :item.RejectNumber ,
+                            ProductOrderID :item.ProductOrderID ,
+                            ProductModelUUID :item.ProductModelUUID ,
+                            ProductModelName :item.ProductModelName ,
+                            ProductModelID :item.ProductModelID ,
+                            ProductModelStandard :item.ProductModelStandard ,
+                            WorkshopUUID :item.WorkshopUUID ,
+                            WorkshopID :item.WorkshopID ,
+                            WorkshopName :item.WorkshopName ,
+                            WorkstationTypeUUID :item.WorkstationTypeUUID ,
+                            WorkstationID :item.WorkstationID ,
+                            WorkstationName :item.WorkstationName ,
+                            MoldID :item.MoldID ,
+                            MoldName :item.MoldName ,
+                            MoldLabel :item.MoldLabel ,
+                            MoldCavity :item.MoldCavity ,
+                            WorkOrderUUID :item.WorkOrderUUID ,
+                            WorkOrderID :item.WorkOrderID ,
+                            WorkOrderDesc :item.WorkOrderDesc ,
+                            WorkOrderStatus :item.WorkOrderStatus ,
+                            PlanStartDateTime :item.PlanStartDateTime ,
+                            PlanFinishDateTime :item.PlanFinishDateTime ,
+                            StartDateTime :item.StartDateTime ,
+                            FinishDateTime :item.FinishDateTime ,
+                            UpdateDateTime :item.UpdateDateTime ,
+                            PRI : 0
+                        } )
+                    } )
+                    this.setState( { productionReport: pro_report,loading:false } );
+                    if(this.state.hasAddBtn==false){
+                        let tableDom=document.getElementById("productionTable")
+                        .getElementsByClassName("ant-table-body")[0];
+                        let btnWrap=document.getElementById("exportProductRep");
+                        const btn=TableExport(tableDom.children[0]);
+                        let children= btn.selectors[0].children[0];
+                        let childNodes=children.getElementsByTagName('button');
+                        childNodes[0].innerHTML="xlsx";
+                        childNodes[1].innerHTML="csv";
+                        childNodes[2].innerHTML="txt";
+                        const ishasChild=btnWrap.hasChildNodes();
+                        if(ishasChild)btnWrap.innerHTML='';
+                        btnWrap.appendChild(children);
+                    }
+                    this.setState({hasAddBtn:true});
+                }
+                else{
+                    message.error("服务端数据错误！");
+                    this.setState({loading:false});
+                }
+
+            },
+            ( error ) => {
+                message.info( error );
+            }
+        )
+
     }
 
     getProModelList() {
@@ -81,7 +200,7 @@ export default class TProductionReport extends Component {
                 data_list.forEach( ( item, index ) => {
                     list.push( {
                         key: index,
-                        UUID: item.UUID,
+                        UUID: item.UUID.toString(),
                         Name: item.Name,
                         Number: item.ID
                     } )
@@ -99,7 +218,7 @@ export default class TProductionReport extends Component {
         var dat = {
             'PageIndex': 0,
             'PageSize': -1,
-            WorkshopUUID: 1,
+            WorkshopUUID: this.state.WSUUID,
             'TypeUUID': -1
         }
         TPostData( '/api/TProcess/workcenter', "ListActive", dat,
@@ -108,14 +227,15 @@ export default class TProductionReport extends Component {
                 var Ui_list = res.obj.objectlist || [];
                 console.log( '查询到工作中心列表', Ui_list );
                 Ui_list.forEach( ( item, index ) => {
-                    /*list.push( {
+                    list.push( {
                         key: index,
                         ID: item.ID,
-                        UUID: item.UUID,
+                        value: item.UUID.toString(),
                         Name: item.Name,
-                    } )*/
-                    list.push( { Name: item.Name, UUID: item.UUID } );
-                } )
+                    } )
+                    // list.push( {key:index, Name: item.Name, UUID: item.UUID.toString() } );
+                } );
+                list.sort((a,b)=>(a.value-b.value));
                 this.setState( { workCenterList: list } )
             },
             ( error ) => {
@@ -181,12 +301,106 @@ export default class TProductionReport extends Component {
         } )
     }
 
-    render() {
+    GetRandomInt(max,min){
+        return parseInt(Math.random() * (max - min) + min);
+    }
 
+    handleFormReset = () => {
+        this.props.form.resetFields();
+        // this.props.submit();
+        // this.handleSearch();
+    }
+
+    handleSearch = (e) => {
+        this.props.form.validateFields((errors, values) => {
+            console.log("表单查询值",values);
+            e.preventDefault();
+            if (!!errors) {
+                console.log('Errors in form!!!');
+                message.error('查询失败');
+                return;
+            } else {
+                // this.props.submit(values);
+                const {WSUUID,WCUUID,RDate}=values;
+                let RSDate,REDate;
+                if(RDate&&RDate!=undefined){
+                    RSDate=RDate[0].format('YYYY-MM-DD'); //排程开始时间
+                    REDate=RDate[1].format('YYYY-MM-DD');
+                    this.setState({RSDate,REDate});
+                }
+                this.setState({hasAddBtn:false,WSUUID,WCUUID},()=>{
+                    console.log('WSUUID,WCUUID,RDate',this.state.RDate);
+                    // this.getOEEReport();
+                    this.getProReport();
+                })
+            }
+        });
+    }
+
+    handleChange=(value)=>{
+        this.setState({WSUUID:value},()=>{
+            this.getWorkCenterList();
+        })
+    }
+
+
+    generate(){
+        let list=[],
+            periodStart='',
+            periodEnd='';
+        for (let i=0;i<24;i++) {
+            periodEnd=i+1;
+            periodStart=i<10?'0'+i:i;
+            periodEnd=periodEnd<10?'0'+periodEnd:periodEnd;
+            list.push(
+                {
+                    key:i,
+                    lotJobID:'Task001',
+                    ProductModelName:"RCA音视频端子",
+                    WorkstationName:"自动机001",
+                    PlanNumber:213000,
+                    FinishNumber:3457,
+                    RejectNumber:153,
+                    PlanStartDateTime:"2018/04/16",
+                    StartDateTime:"2018/04/26",
+                    PlanFinishDateTime:"2018/04/29",
+                    FinishDateTime:"-",
+                    status:this.GetRandomInt(1,11)
+                }
+            )
+        }
+        return list;
+    }
+
+    setDefaultWS=()=>{
+        let ULevel=this.state.authInfo.UserLevel,
+            DefaultUUID=-1;
+
+        switch (ULevel) {
+            case 'aw_manager3':
+                    DefaultUUID='1';
+                break;
+            case 'aw_manager2':
+                    DefaultUUID='2';
+                break;
+            case 'iw_manager':
+                    DefaultUUID='3';
+                break;
+            case 'pw_manager':
+                    DefaultUUID='4';
+                break;
+            default:
+                DefaultUUID='1';
+        }
+        this.setState({WSUUID:DefaultUUID},()=>this.getProReport());
+    }
+
+    render() {
+        const {productionReport,RDate,RSDate,REDate,WSUUID}=this.state;
         const columns = [
             {
                 title: '工单号',
-                dataIndex: 'lotJobID',
+                dataIndex: 'WorkOrderID',
                 key: 'lotJobID'
             }, {
                 title: '产品名称',
@@ -206,6 +420,7 @@ export default class TProductionReport extends Component {
                 title: '工作中心',
                 dataIndex: 'WorkstationName',
                 key: 'WorkstationName',
+                width:150,
             },
             /* {
                 title: '工作中心编码',
@@ -215,16 +430,18 @@ export default class TProductionReport extends Component {
             {
                 title: '计划产量',
                 dataIndex: 'PlanNumber',
+                width:120,
                 type: 'sort'
             }, {
                 title: '实际产量',
                 dataIndex: 'FinishNumber',
+                width:120,
                 type: 'sort'
-            }, {
+            }, /*{
                 title: '次品数量',
                 dataIndex: 'RejectNumber',
                 type: 'sort'
-            },
+            },*/
             /*{
               title: '计划交期',
               dataIndex: 'PlanDeliverDateTime',
@@ -250,6 +467,7 @@ export default class TProductionReport extends Component {
             }, {
                 title: '实际完成',
                 dataIndex: 'FinishDateTime',
+                // width:120,
                 type: 'string'
             },
             /* {
@@ -259,21 +477,22 @@ export default class TProductionReport extends Component {
             },*/
             {
                 title: '工单状态',
-                dataIndex: 'Status',
-                key: 'Status',
+                dataIndex: 'WorkOrderStatus',
+                key: 'status',
+                width:100,
                 render: (e1, record) => {
                     // console.log('任务状态',record);
                     let status='';
-                    status=e1==0?(<span>生产取消(0)</span>):
-                        e1==1?(<span>未派工(1)</span>):
-                        e1==2?(<span>已派工(2)</span>):
-                        e1==3?(<span>生产中(3)</span>):
-                        e1==4?(<span>生产挂起(4)</span>):
-                        e1==5?(<span>生产完成(5)</span>):
-                        e1==6?(<span>生产中(6)</span>):
-                        e1==9?(<span>生产挂起(9)</span>):
-                        e1==10?(<span>已完成(10)</span>):
-                        e1==11?(<span>暂停中(11)</span>):
+                    status=e1==0?(<span className="orderCancelled">已取消</span>):
+                        e1==1?(<span className="Unproduced">未生产</span>):
+                        e1==2?(<span className="Inproduction">生产中</span>):
+                        e1==3?(<span className="Pausing">已暂停</span>):
+                        e1==5?(<span className="Submited">已报工</span>):
+                        // e1==5?(<span>生产完成(5)</span>):
+                        // e1==6?(<span>生产中(6)</span>):
+                        // e1==9?(<span>生产挂起(9)</span>):
+                        // e1==10?(<span>已完成(10)</span>):
+                        // e1==11?(<span>暂停中(11)</span>):
                         <span>{e1}</span>
                     return  status;
                 }
@@ -285,25 +504,45 @@ export default class TProductionReport extends Component {
                 multipleType: "dispatch",
             }*/
         ];
-        // console.log("workshopList",this.state.workshopList);
+        const productData=this.generate();
+
+        const {form:{getFieldDecorator}}=this.props;
+        const formItemLayout1 = {
+          labelCol: {
+            xs: { span: 24 },
+            sm: { span: 5 },
+          },
+          wrapperCol: {
+            xs: { span: 24 },
+            sm: { span: 19},
+          },
+        };
+        const formItemLayout2 = {
+          labelCol: {
+            xs: { span: 24 },
+            sm: { span: 7 },
+          },
+          wrapperCol: {
+            xs: { span: 24 },
+            sm: { span: 16},
+          },
+        };
+
+        const bcList = [{
+            title:"首页",
+            href: '/',
+            }, {
+            title: '报表中心',
+            // href: '/',
+            }, {
+            title: '生产报表',
+        }];
+
         return (
-            <div>
-                {/* <Row gutter={16}>
-                  <Col className="gutter-row" span={4}>
-                    <Menu
-                          style={{ width: 256 }}
-                          defaultSelectedKeys={['1']}
-                          mode="inline"
-                          >
-                          {
-                              this.state.workshopList.map((item,index)=>{
-                                  return(<Menu.Item key={index}>{item.Name}</Menu.Item>)
-                              })
-                          }
-                    </Menu>
-                  </Col>
-                  <Col span={20}> */}
-                      <Card style={{marginBottom:20}}>
+            <PageHeaderLayout title="生产报表" wrapperClassName="pageContent" BreadcrumbList={bcList}>
+                <div className="cardContent">
+                    <Spin spinning={this.state.loading}>
+                      {/* <Card style={{marginBottom:20}}>
                           <Row gutter={16}>
                               <Col className="gutter-row" span={5}>
                                   <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
@@ -352,16 +591,92 @@ export default class TProductionReport extends Component {
                                   </div>
                               </Col>
                           </Row>
+                      </Card> */}
+                      <Card>
+                          <Form onSubmit={this.handleSearch} layout="inline">
+                              <Row gutter={16}>
+                                  <Col className="gutter-row" span={6}>
+                                      <div className="gutter-box">
+                                          <FormItem {...formItemLayout1} label="车间" key="oeews">
+                                            {getFieldDecorator("WSUUID", {initialValue:WSUUID})(
+                                                <Select style={{width:150}} onChange={this.handleChange}>
+                                                    {/* <Option value="-1" key="all">全部</Option> */}
+                                                    {
+                                                        this.state.workshopList.map((item,index)=>{
+                                                          return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                                        })
+                                                    }
+                                                </Select>
+                                            )}
+                                          </FormItem>
+                                      </div>
+                                  </Col>
+                                  <Col className="gutter-row" span={6}>
+                                      <div className="gutter-box">
+                                          <FormItem {...formItemLayout2} label="工作中心" key="oeewc">
+                                            {getFieldDecorator("WCUUID", {initialValue:'-1'})(
+                                                <Select style={{width:160}}>
+                                                    <Option value="-1" key="all">全部</Option>
+                                                    {
+                                                        this.
+                                                          state.
+                                                          workCenterList.
+                                                          map((item,index)=>(<Option value={item.value} key={index}>{item.Name}</Option>))
+                                                    }
+                                                </Select>
+                                            )}
+                                          </FormItem>
+                                      </div>
+                                  </Col>
+                                  <Col className="gutter-row" span={8}>
+                                      <div className="gutter-box">
+                                          <FormItem {...formItemLayout2} label="日期" key="oeedate">
+                                            {getFieldDecorator("RDate",{
+                                                initialValue:[moment(RSDate),moment(REDate)],
+                                                rules:[{required:true,message:'日期不能为空'}]
+                                            })(
+                                                <RangePicker style={{width:'100%'}}  format="YYYY/MM/DD" />
+                                            )}
+                                          </FormItem>
+                                      </div>
+                                  </Col>
+                                  <Col className="gutter-row" span={4}>
+                                      <div className="gutter-box">
+                                          <Button type="primary"  htmlType="submit">查询</Button>
+                                          <Button style={{
+                                                  marginLeft: 8
+                                              }} onClick={this.handleFormReset}>重置</Button>
+                                      </div>
+                                  </Col>
+                              </Row>
+                          </Form>
                       </Card>
-                      <Table
-                          columns={columns}
-                          dataSource={this.state.dispatchingList}
-                          bordered={true}
-                          size="small"
-                      />
-                  {/* </Col>
-                </Row> */}
-            </div>
+
+                      <div  style={{margin:'20px 0',overflow:'hidden'}}>
+                          <Form className="ProReMenu" style={{float:'right'}} layout="inline">
+                              <FormItem  label="导出">
+                                  <div
+                                      className="exportMenuWrap"
+                                      id="exportProductRep"
+                                      style={{display:'flex'}}/>
+                              </FormItem>
+                          </Form>
+                      </div>
+                      <div id="productionTable">
+                          <Table
+                              columns={columns}
+                              dataSource={productionReport}
+                              // dataSource={productData}
+                              // dataSource={this.state.dispatchingList}
+                              bordered={true}
+                              size="small"
+                              scroll={{x:1300}}
+                          />
+                      </div>
+                    </Spin>
+                </div>
+            </PageHeaderLayout>
         )
     }
 }
+TProductionReport = Form.create()(TProductionReport);

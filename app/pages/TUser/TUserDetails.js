@@ -8,6 +8,7 @@ import React, { Component } from 'react';
 import { Table, Button, Icon, Row, Col, message, Divider ,Tag  } from 'antd';
 import { TPostData,urlBase } from '../../utils/TAjax';
 import avatarPic from '../../images/men01.jpg';
+import PageHeaderLayout from '../../base/PageHeaderLayout';
 
 export default class TUserDetails extends Component {
     constructor( props ) {
@@ -178,77 +179,50 @@ export default class TUserDetails extends Component {
             }
         ];
 
+        const bcList = [{
+            title:"首页",
+            href: '/',
+            }, {
+            title: '生产资料',
+            href: '/',
+            }, {
+            title: '物料类别',
+        }];
         return (
-            <div>
-                <div style={{marginTop:25,height:180}}>
-                        {/* <img height='50' src={urlBase+detailMessage.Image}/>avatarPic */}
+            <PageHeaderLayout title="物料类别" wrapperClassName="pageContent" BreadcrumbList={bcList}>
+                <div>
+                    <h1>用户权限组管理</h1>
+                    <Divider />
                     <Row>
-                        <Col span={5}>
-                            <div style={{
-                                    fontSize:16,
-                                    display:'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-evenly',
-                                    height: 180}}>
-                                <img width={'80%'} src={urlBase+detailMessage.Image}/>
+                        <Col span={11}>
+                            <div style={{border: 'solid 0px #80808099'}}>
+                                <span style={{padding:6,fontSize:16}}>用户拥有的权限组</span>
+                                <Table
+                                    size='middle'
+                                    dataSource={this.state.userGroupList}
+                                    columns={columns}
+                                    bordered={true}
+                                />
                             </div>
                         </Col>
-                        <Col span={6}>
-                            <div style={{
-                                    fontSize:16,
-                                    display:'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-evenly',
-                                    height: 180}}>
-                                <p>用户名：<span>{detailMessage.Name}</span></p>
-                                <p>手机号：<span>{detailMessage.Mobile}</span></p>
-                                <p>电话：<span>{detailMessage.Phone}</span></p>
-                            </div>
+                        <Col span={1} style={{textAlign:'center'}}>
+                            <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
                         </Col>
-                        <Col>
-                            <div style={{
-                                    fontSize:16,
-                                    display:'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-evenly',
-                                    height: 180}}>
-                                <p>职称：车间主任</p>
-                                <p>账户启用时间：{detailMessage.ActiveDateTime}</p>
-                                <p>备注：{detailMessage.Note}</p>
+                        <Col span={12}>
+                            <div style={{border: 'solid 0px #80808029'}}>
+                                {/* <Button type="primary" >所有可选权限组</Button> */}
+                                <span style={{padding:6,fontSize:16}}>所有可选权限组</span>
+                                <Table
+                                    size='middle'
+                                    dataSource={this.state.groupList}
+                                    columns={groupColumns}
+                                    bordered={true}
+                                />
                             </div>
                         </Col>
                     </Row>
                 </div>
-                <Divider />
-                <Row>
-                    <Col span={11}>
-                        <div style={{border: 'solid 0px #80808099'}}>
-                            <span style={{padding:6,fontSize:16}}>用户拥有的权限组</span>
-                            <Table
-                                size='middle'
-                                dataSource={this.state.userGroupList}
-                                columns={columns}
-                                bordered={true}
-                            />
-                        </div>
-                    </Col>
-                    <Col span={1} style={{textAlign:'center'}}>
-                        <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
-                    </Col>
-                    <Col span={12}>
-                        <div style={{border: 'solid 0px #80808029'}}>
-                            {/* <Button type="primary" >所有可选权限组</Button> */}
-                            <span style={{padding:6,fontSize:16}}>所有可选权限组</span>
-                            <Table
-                                size='middle'
-                                dataSource={this.state.groupList}
-                                columns={groupColumns}
-                                bordered={true}
-                            />
-                        </div>
-                    </Col>
-                </Row>
-            </div>
+            </PageHeaderLayout>
         )
     }
 }

@@ -14,6 +14,7 @@ http.createServer((req, res) => {
     res.end(null)
   }
   if (req.method === 'POST') {
+      console.log("访问头",req,res)
     let postData = ''
     req.addListener('data', (dataBuffer) => postData += dataBuffer)
     req.addListener('end', () => {

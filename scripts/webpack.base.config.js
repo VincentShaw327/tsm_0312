@@ -8,23 +8,6 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 function resolve(relatedPath) {
   return path.join(__dirname, relatedPath)
 }
-/***************/
-// const pkgPath = path.join(__dirname, '../package.json');
-// const pkg = existsSync(pkgPath) ? require(pkgPath) : {};
-/*const pkg=require('../package.json')
-// import pkg from '../package.json'
-let theme = {};
-if (pkg.theme && typeof(pkg.theme) === 'string') {
-  let cfgPath = pkg.theme;
-  // relative path
-  if (cfgPath.charAt(0) === '.') {
-    cfgPath = resolve(args.cwd, cfgPath);
-  }
-  const getThemeConfig = require(cfgPath);
-  theme = getThemeConfig();
-} else if (pkg.theme && typeof(pkg.theme) === 'object') {
-  theme = pkg.theme;
-}*/
 const theme = require('../theme')
 /****************/
 const webpackConfigBase = {
@@ -47,6 +30,7 @@ const webpackConfigBase = {
       controllers: path.join(__dirname, '/../app/controllers'),
       style: path.join(__dirname, '/../app/style'),
       images: path.join(__dirname, '/../app/images'),
+      base: path.join(__dirname, '/../app/base'),
     },
   },
   resolveLoader: {
@@ -59,20 +43,12 @@ const webpackConfigBase = {
         exclude: /node_modules/,
         loader: 'babel',
       },
-/*      {
-          test: /\.jsx?$/,
-          exclude: /(node_modules|bower_components)/,
-          loader: 'babel',
-          query: {
-            presets: ['react', 'es2015']
-          }
-      },*/
       {
         test: /\.css/,
         loader: ExtractTextPlugin.extract({
           fallback: 'style',
           use: [
-            { loader: 'css', options: { sourceMap: true } }
+            { loader: 'css', options: {sourceMap: true,modules:false } }
           ]
         }),
       },
@@ -81,17 +57,37 @@ const webpackConfigBase = {
         loader: ExtractTextPlugin.extract({
           fallback: 'style',
           use: [
-            { loader: 'css', options: { sourceMap: true } },
-            { loader: 'less', options: { sourceMap: true } }
+              { loader: 'css', options: {sourceMap: true,modules:false } },
+              { loader: 'less', options: { sourceMap: true } },
           ]
         }),
       },
       /*{
-        test: /\.module\.less$/,
-        loader: ExtractTextPlugin.extract(
-            'css?sourceMap&modules&localIdentName=[local]___[hash:base64:5]!!' +
-            'postcss!' +`less-loader?{"sourceMap":true,"modifyVars":${JSON.stringify(theme)}}`
-        ),
+            test: /\.less$/,
+            use: [
+              'style-loader',
+                { loader: 'css-loader', options: { importLoaders: 1 } },
+              'less-loader'
+            ]
+      },*/
+      /*{
+          test: /\.less$/,
+          use: [
+            {
+                loader: "style-loader" // creates style nodes from JS strings
+            },
+            {
+                loader: "css-loader" ,options: {sourceMap: true,modules:true }// translates CSS into CommonJS
+            },
+            {
+                loader: "less-loader",options: { sourceMap: true } // compiles Less to CSS
+            },
+         ]
+      },*/
+      /*{
+        // test: /\.less$/,
+        test: /.less$/,
+        loader: "style-loader!css-loader!less-loader?modules"
       },*/
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -110,6 +106,8 @@ const webpackConfigBase = {
         }
       },
     ],
+
+    // noParse: /index.less/
   },
   plugins: [
     // 提取css

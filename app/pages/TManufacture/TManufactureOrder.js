@@ -6,7 +6,8 @@ const Option = Select.Option;
 const ButtonGroup = Button.Group;
 const FormItem = Form.Item;
 import { TPostData, urlBase } from '../../utils/TAjax';
-import { CModal } from '../../components/TModal';
+import { CModal } from 'components/TModal';
+import {SimpleQForm,StandardQForm } from 'components/TForm';
 import styles from './common.less';
 import TableExport from 'tableexport';
 
@@ -20,6 +21,7 @@ export default class TstateTimeOverview extends React.Component {
             ProModelList: [],
             ProModelSList:[],
             lotListData:[],
+            workshopList:[],
             updateFromItem:{},
             loading:true,
             CModalShow:false,
@@ -29,6 +31,7 @@ export default class TstateTimeOverview extends React.Component {
             scroll:false,
             orderState:'-1',
             ProModelID:'-1',
+            WorkshopID:'-1',
             keyWord:'',
             bordered:false,
             size:"small",
@@ -45,6 +48,7 @@ export default class TstateTimeOverview extends React.Component {
         this.getProductOrder();
         this.getSubTableData();
         this.getProModelList();
+        this.getWorkshopList();
     }
 
     componentDidMount() {
@@ -70,6 +74,8 @@ export default class TstateTimeOverview extends React.Component {
             PageIndex: 0,
             PageSize: -1,
             ProductModelUUID:ProModelID, //产品型号UUID
+            WorkshopUUID: -1,            // 车间UUID
+            WorkstationTypeUUID: -1, //工作中心类型UUID
             Status: orderState, //生产订单状态
             KeyWord: this.keyWordInput?this.keyWordInput.input.value:''
         }
@@ -116,8 +122,8 @@ export default class TstateTimeOverview extends React.Component {
                     childNodes[0].innerHTML="xlsx";
                     childNodes[1].innerHTML="csv";
                     childNodes[2].innerHTML="txt";
-                    console.log("btn",children);
-                    console.log("childNodes",childNodes);
+                    // console.log("btn",children);
+                    // console.log("childNodes",childNodes);
                     btnWrap.appendChild(children);
                 }
                 this.setState({hasAddBtn:true});
@@ -165,16 +171,42 @@ export default class TstateTimeOverview extends React.Component {
         )
     }
 
+    getWorkshopList() {
+        const dat = {
+            PageIndex : 0,       //分页：页序号，不分页时设为0
+            PageSize : -1,   //分页：每页记录数，不分页时设为-1
+            FactoryUUID: -1,    //所属工厂UUID，不作为查询条件时取值设为-1
+            TypeUUID: -1,  //类型UUID，不作为查询条件时取值设为-1
+            KeyWord : ""
+        }
+        TPostData( '/api/TFactory/workshop', "ListActive", dat,
+            ( res )=>{
+                var list = [];
+                console.log( "查询到chejian列表", res );
+                var data_list = res.obj.objectlist || [];
+                data_list.forEach(( item, index )=> {
+                    list.push({key: index,value:item.UUID.toString(), text: item.Name} )
+                } )
+                this.setState({workshopList:list});
+            },
+            ( error )=> {
+                message.info( error );
+            }
+        )
+    }
+
     getSubTableData (){
 
         var dat = {
-            PageIndex: 0,
-            PageSize: -1,
-            Status:-1,
-            // ProductOrderUUID: record.UUID, //生产订单UUID
-            ProductOrderUUID:-1, //生产订单UUID
-            ProductModelUUID: -1, //产品UUID
-            KeyWord: "" //模糊查询条件
+            PageIndex: 0,                       // 分页参数
+            PageSize: -1,                       // 分页参数
+            ProductOrderUUID: -1,       // 生产订单UUID
+            OrderModelUUID: -1,         // 生产订单产品型号UUID(*)
+            LotModelUUID:-1,            // 生产任务单产品型号UUID
+            WorkshopUUID: -1,           // 车间UUID
+            WorkstationTypeUUID: -1,    // 工作中心类型UUID(*)
+            Status: -1,                 // 生产任务单状态
+            KeyWord: ""                 // 模糊查询
         }
 
         TPostData( this.url, "ListLot", dat,
@@ -444,6 +476,10 @@ export default class TstateTimeOverview extends React.Component {
         this.setState({ProModelID:ele});
     }
 
+    handleWSChange(ele) {
+        this.setState({WorkshopID:ele});
+    }
+
     handleStatusChange(ele) {
         this.setState({orderState:ele});
     }
@@ -458,10 +494,10 @@ export default class TstateTimeOverview extends React.Component {
     handleExport(){
         let csvDom=document.getElementsByClassName("ant-table-body")[0];
         let btnWrap=document.getElementById("exportOrderMenu");
-        console.log('csvDom',csvDom.children);
+        // console.log('csvDom',csvDom.children);
         // console.log('csvDom',csvDom.getElementsByTagName("table"));
         const btn=TableExport(csvDom.children[0]);
-        console.log("btn",btn.selectors[0].children[0]);
+        // console.log("btn",btn.selectors[0].children[0]);
         btnWrap.appendChild(btn.selectors[0].children[0]);
     }
 
@@ -756,6 +792,69 @@ export default class TstateTimeOverview extends React.Component {
             }
         ];
 
+        //查询的数据项
+        const RFormItem= [
+            {
+                name: 'KeyWord',
+                label: '搜索内容',
+                type: 'string',
+                placeholder: '请输入搜索内容'
+            },{
+                name: 'WorkshopUUID',
+                label: '车间',
+                type: 'select',
+                defaultValue: '-1',
+                hasAllButtom: true,
+                width: 180,
+                options:workshopList
+            },{
+                name: 'ProUUID',
+                label: '产品',
+                type: 'select',
+                defaultValue: '-1',
+                hasAllButtom: true,
+                width: 200,
+                options: ProModelList
+            },{
+                name: 'OrderStatus',
+                label: '订单状态',
+                type: 'select',
+                defaultValue: '-1',
+                hasAllButtom: true,
+                width: 200,
+                options:[
+                    {
+                        value:-1,
+                        text:'全部'
+                    },
+                    {
+                        value:0,
+                        text:'已取消'
+                    },
+                    {
+                        value:1,
+                        text:'未就绪'
+                    },
+                    {
+                        value:2,
+                        text:'未执行'
+                    },
+                    {
+                        value:3,
+                        text:'暂停中'
+                    },
+                    {
+                        value:4,
+                        text:'执行中'
+                    },
+                    {
+                        value:5,
+                        text:'已完成'
+                    }
+                ]
+            }
+        ];
+
         const props = {
           name: 'file',
           action: '//jsonplaceholder.typicode.com/posts/',
@@ -775,17 +874,17 @@ export default class TstateTimeOverview extends React.Component {
         };
 
             return (
-                <div>
-                    <Card >
-                        <Row gutter={16}>
-                            <Col className="gutter-row" span={6}>
+                <div className="cardContent">
+                    {/* <Card >
+                        <Row gutter={8}>
+                            <Col className="gutter-row" span={5}>
                                 <div className="gutter-box"><span style={{ width: "40%" }}>搜索内容:</span>
                                     <Input style={{ width: "60%" }}
                                         ref={(input) => { this.keyWordInput = input; }}
                                         placeholder="请输入搜索内容" />
                                 </div>
                             </Col>
-                            <Col className="gutter-row" span={6}>
+                            <Col className="gutter-row" span={5}>
                                 <div className="gutter-box"><span style={{ width: "40%" }}>产品:</span>
                                     <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleProChange.bind(this)}>
                                         <Option value="-1" key="all">全部</Option>
@@ -797,7 +896,19 @@ export default class TstateTimeOverview extends React.Component {
                                     </Select>
                                 </div>
                             </Col>
-                            <Col className="gutter-row" span={6}>
+                            <Col className="gutter-row" span={5}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
+                                    <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleWSChange.bind(this)}>
+                                        <Option value="-1" key="all">全部</Option>
+                                        {
+                                            this.state.workshopList.map((item,index)=>{
+                                                    return (<Option value={item.UUID} key={item.key}>{item.text}</Option>)
+                                            })
+                                        }
+                                    </Select>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={5}>
                                 <div className="gutter-box"><span style={{ width: "40%" }}>订单状态:</span>
                                     <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleStatusChange.bind(this)}>
                                         <Option value="-1" key="all">全部</Option>
@@ -810,13 +921,17 @@ export default class TstateTimeOverview extends React.Component {
                                     </Select>
                                 </div>
                             </Col>
-                            <Col className="gutter-row" span={6}>
+                            <Col className="gutter-row" span={4}>
                                 <div className="gutter-box">
                                     <Button onClick={this.getProductOrder.bind(this)} type="primary" icon="search">查询</Button>
                                 </div>
                             </Col>
                         </Row>
-                    </Card>
+                    </Card> */}
+                    <StandardQForm
+                        FormItem={RFormItem}
+                        // submit={this.handleQuery}
+                        />
                     <div style={{marginTop:20}}>
                             <ButtonGroup style={{verticalAlign:'bottom'}}>
                                 <Button

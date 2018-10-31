@@ -28,27 +28,33 @@ export default class SimpleQForm extends Component {
 
     handleFormReset = () => {
         this.props.form.resetFields();
+        // this.props.submit();
+        this.handleSearch();
     }
 
-    handleSearch = () => {
+    handleSearch = (e) => {
         this.props.form.validateFields((errors, values) => {
             let subValue = {};
+            console.log('handleSearch',e);
+            e?e.preventDefault():'';
+            // e.preventDefault();
             if (!!errors) {
                 console.log('Errors in form!!!');
                 message.error('添加失败');
-                return;
+                return false;
             } else {
                 this.props.submit(values);
+                return false;
             }
         });
     }
 
     render() {
-        const {FormItem, form: {getFieldDecorator}} = this.props;
+        const {isBordered=true,FormItem, form: {getFieldDecorator}} = this.props;
 
         return (
             <div>
-                <Card>
+                <Card bordered={isBordered}>
                     <Form onSubmit={this.handleSearch} layout="inline">
                         <Row gutter={{
                                 md: 8,

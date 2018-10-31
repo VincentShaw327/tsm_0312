@@ -4,17 +4,25 @@
  **/
 /******引入ant或其他第三方依赖文件*******************/
 import React, { Component } from 'react'
-import {Card,Row,Col,Progress,Divider,Tag,Spin,Alert,List,message} from 'antd';
-import FeatureSetConfig from '../../components/TCommon/tableConfig';
-import { TPostData,urlBase } from '../../utils/TAjax';
-import {  yuan,Pie} from '../../components/ant-design-pro/Charts';
-// var mqtt = require( 'mqtt' );
+import { connect } from 'react-redux'
+import {Card,Row,Col,Progress,Divider,Tag,Spin,Alert,List,message,Button} from 'antd';
+import { fetchWorkcenterList } from 'actions/process'
+import { TPostData,urlBase } from 'utils/TAjax';
+import {  yuan,Pie} from 'components/ant-design-pro/Charts';
 import mqtt from 'mqtt';
+import PageHeaderLayout from '../../base/PageHeaderLayout';
+import DevDesc from './components/DevDesc';
 
-let self
 
 var client //注塑车间消息订阅初始化变量
 
+@connect( ( state, props ) => {
+    console.log('workcenter',state);
+    return {
+        Breadcrumb:state.Breadcrumb,
+        workcenter: state.workcenter,
+    }
+}, )
 export default class TScadaWorkShop_Auto extends Component {
 
     constructor( props ) {
@@ -26,321 +34,72 @@ export default class TScadaWorkShop_Auto extends Component {
             onLine: '-',
             warning: '-',
             allQuery: '-',
-            loading: true
+            loading: true,
+            showDetal:false
         }
-        self = this;
     }
     //查询工作中心
     componentWillMount() {
-
-        // 获取相应车间的工作中心
-        let aEquipList = [];
-        let dat = {
-            PageIndex: 0,
-            PageSize: -1,
-            WorkshopUUID:1,  //所属车间UUID，不作为查询条件时取值设为-1
-            TypeUUID: -1,   //类型UUID，不作为查询条件时取值设为-1
-            KeyWord : ""
-        };
-        TPostData( '/api/TProcess/workcenter', "ListActive", dat,
-            ( res )=> {
-                console.log("工作中心列表===",res);
-                var Ui_list = res.obj.objectlist || [];
-                var totalcount = res.obj.objectlist.length;
-                Ui_list.forEach(( item, index )=> {
-                    aEquipList.push( {
-                        key: index,
-                        ID: item.ID,
-                        UUID: item.UUID,
-                        WorkshopUUID: item.WorkshopUUID,
-                        Name: item.Name,
-                        Image:item.Image,
-                        style: 'top-equip-light'
-                    } )
-                } );
-                this.setState( {
-                    aEquipList: aEquipList,
-                    loading: false
-                } )
-            },
-            ( error )=>{
-                message.info( error );
-            }
-        )
-
-        const graph_conf1 = {
-            type: 'graphList',
-             // tableList graphList simpleObject complexObject
-            EchartStyle: {
-                width: '100%',
-                height: '250px'
-            },
-            // 初始化展现的数据，使用callback 回传列表数据
-            // 需要手动添加唯一id key
-            // callback 组件数据的回调函数(接受列表数据参数)
-            initData: function ( callback ) {
-                // 参考echarts 参数
-                var option = {
-                    /*title : {
-                        text: '状态统计分布',
-                        subtext: '纯属虚构',
-                        x:'right'
-                    },*/
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: "{a} <br/>{b} : {c} ({d}%)"
-                    },
-                    legend: {
-                        orient: 'vertical',
-                        left: 'left',
-                        data: [ '停机中', '运行中', '报警中' ]
-                    },
-                    series: [
-                        {
-                            name: '访问来源',
-                            type: 'pie',
-                            radius: '55%',
-                            center: [ '50%', '60%' ],
-                            data: [
-                                { value: 3, name: '停机中' },
-                                { value: 6, name: '运行中' },
-                                { value: 1, name: '报警中' },
-                            ],
-                            itemStyle: {
-                                emphasis: {
-                                    shadowBlur: 10,
-                                    shadowOffsetX: 0,
-                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                                }
-                            }
-                        }
-                    ]
-                };
-                callback( option );
+        // this.getWorkCenterList();
+        let req={
+            op:'ListActive',
+            reqdata:{
+                PageIndex: 0,
+                PageSize: -1,
+                WorkshopUUID:1,  //所属车间UUID，不作为查询条件时取值设为-1
+                TypeUUID: -1,   //类型UUID，不作为查询条件时取值设为-1
+                KeyWord : ""
             }
         };
+        this.props.dispatch( fetchWorkcenterList( req, ( respose ) => {
+            console.log('respose===',respose)
+            let list=[];
+            respose.obj.objectlist.forEach((item,index)=>{
+                list.push({
+                    key: index,
+                    ID: item.ID,
+                    UUID: item.UUID,
+                    WorkshopUUID: item.WorkshopUUID,
+                    Name: item.Name,
+                    Image:item.Image,
+                });
+            });
+            let InitstateCount=[
+                {
+                    x:'报警',
+                    y:0
+                },
+                {
+                    x:'离线',
+                    y:respose.obj.objectlist.length
+                },
+                {
+                    x:'运行',
+                    y:0
+                },
+                {
+                    x:'待机',
+                    y:0
+                },
+                {
+                    x:'调机',
+                    y:0
+                }
+            ];
+            list.sort((a,b)=>(a.UUID-b.UUID));
+            this.setState({
+                aEquipList:list,
+                // aEquipList:respose.obj.objectlist,
+                stateCount:InitstateCount
+            })
+        } ) )
 
-        const graph_conf2 = {
-            type: 'graphList',
-            EchartStyle: {
-                width: '100%',
-                height: '250px'
-            },
-            // 初始化展现的数据，使用callback 回传列表数据
-            // 需要手动添加唯一id key
-            // callback 组件数据的回调函数(接受列表数据参数)
-            initData: function ( callback ) {
-                // 参考echarts 参数
-                // app.title = '堆叠条形图';
-                const option = {
-                    tooltip: {
-                        trigger: 'axis',
-                        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-                            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-                        }
-                    },
-                    legend: {
-                        data: [ '停机', '故障', '调机', '保养', '运行' ]
-                    },
-                    grid: {
-                        left: '3%',
-                        right: '4%',
-                        bottom: '3%',
-                        containLabel: true
-                    },
-                    xAxis: {
-                        type: 'value'
-                    },
-                    yAxis: {
-                        type: 'category',
-                        data: [ '1#', '2#', '3#', '4#', '5#', '6#', '7#' ]
-                    },
-                    series: [
-                        {
-                            name: '停机',
-                            type: 'bar',
-                            stack: '总量',
-                            /*label: {
-                                normal: {
-                                    show: true,
-                                    position: 'insideRight'
-                                }
-                            },*/
-                            data: [ 320, 302, 301, 334, 390, 330, 320 ]
-                        },
-                        {
-                            name: '故障',
-                            type: 'bar',
-                            stack: '总量',
-                            /*label: {
-                                normal: {
-                                    show: true,
-                                    position: 'insideRight'
-                                }
-                            },*/
-                            data: [ 120, 132, 101, 134, 90, 230, 210 ]
-                        },
-                        {
-                            name: '调机',
-                            type: 'bar',
-                            stack: '总量',
-                            /*label: {
-                                normal: {
-                                    show: true,
-                                    position: 'insideRight'
-                                }
-                            },*/
-                            data: [ 220, 182, 191, 234, 290, 330, 310 ]
-                        },
-                        {
-                            name: '保养',
-                            type: 'bar',
-                            stack: '总量',
-                            /*label: {
-                                normal: {
-                                    show: true,
-                                    position: 'insideRight'
-                                }
-                            },*/
-                            data: [ 150, 212, 201, 154, 190, 330, 410 ]
-                        },
-                        {
-                            name: '运行',
-                            type: 'bar',
-                            stack: '总量',
-                            /*label: {
-                                normal: {
-                                    show: true,
-                                    position: 'insideRight'
-                                }
-                            },*/
-                            data: [ 820, 832, 901, 934, 1290, 1330, 1320 ]
-                        }
-                    ]
-                };
-                callback( option );
-            }
-        };
-
-        this.dailychart1 = FeatureSetConfig( graph_conf1 );
-
-        this.barChart = FeatureSetConfig( graph_conf2 );
     }
 
     componentDidMount() {
-        /*{
-            data: [
-                {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: "",
-                    run_status:-1,
-                    title:"HDMI全自动机001",
-                    workstation:10
-                }, {
-                    capacity: 46,
-                    finished: 3741,
-                    order_status: "success",
-                    plan: 211000,
-                    product: "11号接插件"
-                }, {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: ""
-                }, {
-                    capacity: 19,
-                    finished: 1177,
-                    order_status: "success",
-                    plan: 213000,
-                    product: "13号接插件"
-                }, {
-                    capacity: 37,
-                    finished: 3366,
-                    order_status: "success",
-                    plan: 214000,
-                    product: "14号接插件"
-                }, {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: ""
-                }, {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: ""
-                }, {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: ""
-                }, {
-                    capacity: 36,
-                    finished: 3678,
-                    order_status: "success",
-                    plan: 218000,
-                    product: "18号接插件"
-                }, {
-                    capacity: 29,
-                    finished: 3043,
-                    order_status: "success",
-                    plan: 219000,
-                    product: "19号接插件"
-                }, {
-                    capacity: 53,
-                    finished: 2859,
-                    order_status: "success",
-                    plan: 220000,
-                    product: "20号接插件"
-                }, {
-                    capacity: 37,
-                    finished: 3229,
-                    order_status: "success",
-                    plan: 221000,
-                    product: "21号接插件"
-                }, {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: ""
-                }, {
-                    capacity: 0,
-                    finished: 1194,
-                    order_status: "success",
-                    plan: 223000,
-                    product: "23号接插件"
-                }, {
-                    capacity: 0,
-                    finished: 1,
-                    order_status: "success",
-                    plan: 1,
-                    product: ""
-                }, {
-                    capacity: 26,
-                    finished: 1925,
-                    order_status: "success",
-                    plan: 225000,
-                    product: "25号接插件"
-                }
-            ],
-            statics: {
-                failure: 0,
-                offline: 7,
-                running: 7 ,
-                stopped: 2
-            }
-        }*/
-
         //mqtt消息连接建立
-        client = mqtt.connect( 'ws://192.168.200.3:9011' );
+        // client = mqtt.connect( 'mqtt://122.239.140.82:29011' );
+        client = mqtt.connect( 'ws://192.168.1.250:9011' );
         // client = mqtt.connect( 'mqtt://192.168.200.3:9011' );
         client.on( 'connect', function () {
             //订阅消息
@@ -365,6 +124,8 @@ export default class TScadaWorkShop_Auto extends Component {
                             item.prod_rate = mqttItem.capacity //产能
                             item.plan = mqttItem.plan //计划
                             item.product=mqttItem.product
+                            item.finished_order=mqttItem.finished_order
+                            item.orderid=mqttItem.orderid==''?'-':mqttItem.orderid
                             // item.rej_count = mqttItem.data.rej_count //不良数
                             // item.rej_rate = mqttItem.data.rej_rate //不良率
                             // item.task_finish = mqttItem.task.task_finish //完成比例
@@ -408,6 +169,10 @@ export default class TScadaWorkShop_Auto extends Component {
                     {
                         x:'待机',
                         y:Mstatics.stopped
+                    },
+                    {
+                        x:'调机',
+                        y:Mstatics.debug
                     }
                 ];
                 this.setState({stateCount:MstateCount});
@@ -421,24 +186,106 @@ export default class TScadaWorkShop_Auto extends Component {
         // });
     }
 
+    getWorkCenterList(){
+        // 获取相应车间的工作中心
+        let aEquipList = [];
+        let dat = {
+            PageIndex: 0,
+            PageSize: -1,
+            WorkshopUUID:1,  //所属车间UUID，不作为查询条件时取值设为-1
+            TypeUUID: -1,   //类型UUID，不作为查询条件时取值设为-1
+            KeyWord : ""
+        };
+
+        TPostData( '/api/TProcess/workcenter', "ListActive", dat,
+            ( res )=> {
+                console.log("工作中心列表===",res);
+                var Ui_list = res.obj.objectlist || [];
+                var totalcount = res.obj.objectlist.length;
+                if(res.err==0){
+                    Ui_list.forEach(( item, index )=> {
+                        aEquipList.push( {
+                            key: index,
+                            ID: item.ID,
+                            UUID: item.UUID,
+                            WorkshopUUID: item.WorkshopUUID,
+                            Name: item.Name,
+                            Image:item.Image,
+                            style: 'top-equip-light'
+                        } )
+                    } );
+                    //初始化设备状态图标
+                    let InitstateCount=[
+                        {
+                            x:'报警',
+                            y:0
+                        },
+                        {
+                            x:'离线',
+                            y:aEquipList.length
+                        },
+                        {
+                            x:'运行',
+                            y:0
+                        },
+                        {
+                            x:'待机',
+                            y:0
+                        }
+                    ];
+
+                    aEquipList.sort((a,b)=>(a.UUID-b.UUID));
+
+                    this.setState( {
+                        aEquipList: aEquipList,
+                        stateCount:InitstateCount,
+                        loading: false
+                    } )
+
+                }
+                else{
+                    message.error("服务器数据错误！");
+                    this.setState({loading:false});
+                }
+
+            },
+            ( error )=>{
+                message.error( error );
+                this.setState({loading:false});
+            }
+        )
+
+    }
+
     componentWillUnmount() {
         client.end()
     }
 
+    toggleRender(record){
+        this.setState({
+            showDetal:!this.state.showDetal,
+            detailID:record.UUID,
+            detailMessage:record
+        })
+    }
+
     render() {
-        // console.log( '工作中心列表:', this.state.aEquipList );
-        const Dailychart = this.dailychart1;
-        const Barchart = this.barChart;
+        const {showDetal,detailID,detailMessage,aEquipList}=this.state;
+        const {workcenter}=this.props;
         const ListHeader = (
             <Row gutter={16} style={{fontSize:16}}>
               <Col className="gutter-row" span={3}>
                 <div className="gutter-box">图片</div>
               </Col>
               <Col className="gutter-row" span={5}>
-                <div className="gutter-box">工作中心</div>
+                <div className="gutter-box">工作中心/编号</div>
               </Col>
+              {/* <Col className="gutter-row" span={4}>
+                <div className="gutter-box">工单号<span style={{fontSize:10}}></span></div>
+              </Col> */}
               <Col className="gutter-row" span={3}>
-                <div className="gutter-box">生产信息</div>
+                {/* <div className="gutter-box">生产信息</div> */}
+                <div className="gutter-box">产品</div>
               </Col>
               <Col className="gutter-row" span={3}>
                 <div className="gutter-box">产量<span style={{fontSize:10}}>(pcs)</span></div>
@@ -455,64 +302,71 @@ export default class TScadaWorkShop_Auto extends Component {
             </Row>
         );
 
-        const salesPieData = [
-          {
-            x: '家用电器',
-            y: 4544,
-          },
-          {
-            x: '食用酒水',
-            y: 3321,
-          },
-          {
-            x: '个护健康',
-            y: 3113,
-          },
-          {
-            x: '服饰箱包',
-            y: 2341,
-          },
-          {
-            x: '母婴产品',
-            y: 1231,
-          },
-          {
-            x: '其他',
-            y: 1231,
-          },
-        ];
+        const bcList1 = [{
+          title:"首页",
+          href: '/',
+          }, {
+          title: '车间监控',
+          href: '/',
+          }, {
+          title: '自动化装配车间一',
+          }];
 
-        return (
+        const HeadContent=(
+              <div style={{height:100}}>
+                  <Row  type="flex" justify="start" align="middle">
+                      <Col span={5}>
+                          <Progress type="circle" percent={100} />
+                      </Col>
+                      <Col span={6}>
+                          <Progress type="circle" percent={100} />
+                      </Col>
+                      <Col span={6}></Col>
+                      <Col span={6}></Col>
+                  </Row>
+              </div>
+          );
+
+        const DevMonitorList=(
             <div style={{marginTop:15}}>
                 <Row gutter={16}>
                   <Col className="gutter-row" span={18}>
-                    <div className="gutter-box">
+                    <div className="gutter-box" style={{background: '#fff'}}>
                         <List
                             // style={{width:'75%'}}
                             header={ListHeader}
                             // footer={<div>Footer</div>}
-                            loading={this.state.loading}
+                            // loading={this.state.loading}
+                            loading={workcenter.loading}
                             bordered
                             dataSource={this.state.aEquipList}
                             renderItem={item => {
-                                let stateObj={};
-                                if(item.task_progress &&item.task_progress >= 100)
-                                stateObj={text:"已完成",color:'blue'};
+                                let stateObj={},
+                                    Percent=parseFloat(((item.prod_count/item.plan )*100|| 0).toFixed(2));
+                                Percent=Percent>100?100:Percent;
+                                // if(item.task_progress &&item.task_progress >= 100)
+                                if(item.plan!=0&&item.prod_count>=item.plan)
+                                    stateObj={text:"已完成",color:'blue'};
                                 else if(item.hasOwnProperty('Status')&&item.Status== 1)
-                                stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
+                                    stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
                                 else if(item.hasOwnProperty('Status') &&item.Status== 2)
-                                stateObj={text:"报警中",color:'#ffc069'};
+                                    stateObj={text:"报警中",color:'#d52c21'};
+                                else if(item.hasOwnProperty('Status') &&item.Status== 3)
+                                    stateObj={text:"调机中",color:'#0ab490'};
                                 else if(item.hasOwnProperty('Status')&&item.Status== 0)
-                                stateObj={text:"待机中",color:'#4184de'};
-                                else if(item.hasOwnProperty('Status')&&item.Status== -1)
-                                stateObj={text:"离线中",color:'#bfbfbf'};
+                                    stateObj={text:"待机中",color:'#4184de'};
+                                // else if(item.hasOwnProperty('Status')&&item.Status== -1)
+                                else
+                                    stateObj={text:"离线中",color:'#8a8686'};
 
                                 return(
                                         <List.Item>
                                             <Row gutter={16} type="flex" justify="space-around" align="middle" style={{border:'solid 0px',width:'100%'}}>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <img src={urlBase+item.Image} style={{width:"100%"}} />
+                                                        <a href="javascript:void 0;" onClick={this.toggleRender.bind(this,item)}>
+                                                            <img src={urlBase+item.Image} style={{width:"100%"}} />
+                                                        </a>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={5}>
@@ -521,15 +375,21 @@ export default class TScadaWorkShop_Auto extends Component {
                                                         <p>{item.ID}</p>
                                                     </div>
                                                 </Col>
+                                                {/* <Col className="gutter-row" span={4}>
+                                                    <div className="gutter-box">
+                                                        <span>{item.hasOwnProperty('orderid')?item.orderid:'-'}</span>
+                                                    </div>
+                                                </Col> */}
                                                 <Col className="gutter-row" span={4}>
                                                     <div className="gutter-box">
-                                                        <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div>
-                                                        <div>产品:{item.product?item.product:'-'}</div>
+                                                        {/* <div style={{color:'#1b8ff6',fontSize:20}}>{item.task_no?item.task_no:'P20180207'}</div> */}
+                                                        <div>{item.product?item.product:'-'}</div>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={3}>
                                                     <div className="gutter-box">
-                                                        <span>{item.hasOwnProperty('prod_count')?item.prod_count:'-'}</span>
+                                                        {/* <span>{item.hasOwnProperty('prod_count')?item.prod_count:'-'}</span> */}
+                                                        <span>{item.hasOwnProperty('finished_order')?item.finished_order:'-'}</span>
                                                     </div>
                                                 </Col>
                                                 <Col className="gutter-row" span={3}>
@@ -543,7 +403,8 @@ export default class TScadaWorkShop_Auto extends Component {
                                                         <Progress
                                                             // type="dashboard"
                                                             // width={25}
-                                                            percent={parseFloat(((item.prod_count/item.plan )*100|| 0).toFixed(2))}
+                                                            // percent={parseFloat(((item.prod_count/item.plan )*100|| 0).toFixed(2))}
+                                                            percent={Percent}
                                                             strokeWidth={15}/>
                                                     </div>
                                                 </Col>
@@ -569,6 +430,7 @@ export default class TScadaWorkShop_Auto extends Component {
                               hasLegend
                               title="销售额"
                               subTitle="设备状态"
+                              colors={ ['#d52c21', '#caced4','#42d930','#4184de',]}
                               // total={yuan(salesPieData.reduce((pre, now) => now.y + pre, 0))}
                               total={"总共"+ this.state.stateCount.reduce((pre, now) => now.y + pre, 0)+"台"}
                               // total={()=>{
@@ -581,13 +443,35 @@ export default class TScadaWorkShop_Auto extends Component {
                               height={294}
                             />
                         </Card>
-                        <Card title="时间统计"  style={{marginTop:20}}>
+                        {/* <Card title="时间统计"  style={{marginTop:20}}>
                             <Barchart />
-                        </Card>
+                        </Card> */}
                     </div>
                   </Col>
                 </Row>
             </div>
+        );
+
+        const DevMonitorDesc=(
+            <div className="cardContent">
+                <DevDesc UUID={detailID} DetailMes={detailMessage} mqttData={aEquipList} />
+            </div>
+        );
+
+        const HeadAction=(
+                <Button onClick={this.toggleRender.bind(this)} type="primary" icon="rollback">返回</Button>
+            );
+
+        console.log('auto1_state:',this.state)
+        return (
+            <PageHeaderLayout
+                title="自动化装配车间一"
+                wrapperClassName="pageContent"
+                // content={HeadContent}
+                action={showDetal?HeadAction:''}
+                BreadcrumbList={bcList1}>
+                {showDetal?DevMonitorDesc:DevMonitorList}
+            </PageHeaderLayout>
         )
     }
 }

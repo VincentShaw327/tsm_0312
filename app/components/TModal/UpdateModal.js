@@ -47,7 +47,8 @@ export default class UpdateModal extends Component {
             handleType,
             FormItem,
             updateItem,
-            form:{getFieldDecorator}
+            form:{getFieldDecorator},
+            title="更新对象"
         }=this.props;
         const formItemLayout = {
             labelCol: { span: 6 },
@@ -56,7 +57,7 @@ export default class UpdateModal extends Component {
         return (
             <div>
             <Modal
-                title="新建对象"
+                title={title}
                 visible={this.props.showModal}
                 onOk={this.handleUpdate}
                 onCancel={this.resetItem}>

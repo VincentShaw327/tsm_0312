@@ -160,8 +160,8 @@ export default class TerminalDetail extends Component {
         ];
         return (
             <div>
-                <div style={{marginTop:25,height:180}}>
-                    {/* <p>基本详情</p> */}
+                {/* <p>基本详情</p> */}
+                {/* <div style={{marginTop:25,height:180}}>
                     <Row  type="flex" justify="start" align="middle">
                         <Col span={6}>
                             <div style={{
@@ -197,7 +197,7 @@ export default class TerminalDetail extends Component {
                             </div>
                         </Col>
                     </Row>
-                </div>
+                </div> */}
                 <div>
                     <Row>
                         <Col span={12}>

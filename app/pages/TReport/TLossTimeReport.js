@@ -1,10 +1,21 @@
 import React, { Component } from 'react';
-import { Button, Table,Radio,Icon ,Row, Col, Divider, List, Timeline, Menu, Card, DatePicker, Select,Switch } from 'antd';
+import { connect } from 'react-redux'
+import { Button, Table,Radio,Icon ,Row, Col, Divider,Form,
+    List, Timeline, Menu, Card, DatePicker, Select,Switch } from 'antd';
 import { TPostData, urlBase } from '../../utils/TAjax';
 import ReactEcharts from 'echarts-for-react';
+import PageHeaderLayout from '../../base/PageHeaderLayout';
 import TimelineDataTable from './components/TimelineDataTable';
 import TimeLineChart from './components/timeLineChart';
+const FormItem = Form.Item;
 
+
+@connect( ( state, props ) => {
+    return {
+        workcenter: state.workcenter,
+        Breadcrumb:state.Breadcrumb,
+    }
+}, )
 export default class TStateTimeOverview extends Component {
 
     constructor( props ) {
@@ -123,6 +134,7 @@ export default class TStateTimeOverview extends Component {
     }
 
     render() {
+        const {Breadcrumb}=this.props;
 
         const columns = [
             {
@@ -183,95 +195,91 @@ export default class TStateTimeOverview extends Component {
         })();
 
         return (
-            <div>
-                <Card>
-                    <Row gutter={16}>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
-                                <Select defaultValue={defaultSelectedWS} style={{ width: "60%" }} onChange={this.handleChange}>
-                                    <Option value="-1" key="all">全部</Option>
-                                    {
-                                        this.state.workshopList.map((item,index)=>{
-                                                return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
-                                        })
-                                    }
-                                </Select>
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
-                                <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
-                                    <Option value="-1" key="all">全部</Option>
-                                    {
-                                        this.state.workCenterList.map((item,index)=>{
-                                                return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
-                                        })
-                                    }
-                                </Select>
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
-                                <DatePicker style={{ width: "60%" }} />
-                            </div>
-                        </Col>
-                        <Col className="gutter-row" span={6}>
-                            <div className="gutter-box">
-                                <Button type="primary" icon="search">查询</Button>
-                            </div>
-                        </Col>
-                    </Row>
-                </Card>
-                {/* <div style={{border:'solid 1px'}}>
-                    <ReactEcharts
-                        option={optionData}
-                        style={{height:250}}
-                        className='react_for_echarts' />
-                </div> */}
-                {/* <Card></Card> */}
-                <div style={{marginTop:20}}>
-                    <Radio.Group value={toggleView} onChange={this.handleToggle.bind(this)}>
-                        <Radio.Button value="timelineTable">数据表</Radio.Button>
-                        <Radio.Button value="timelineChart">曲线趋势</Radio.Button>
-                    </Radio.Group>
-                    <Switch style={{marginLeft:35}} checkedChildren="白班" unCheckedChildren="晚班" />
+            <PageHeaderLayout title="损失时间报表" wrapperClassName="pageContent" BreadcrumbList={Breadcrumb.BCList}>
+                <div className="cardContent">
+                    <Card>
+                        <Row gutter={16}>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>车间:</span>
+                                    <Select defaultValue={defaultSelectedWS} style={{ width: "60%" }} onChange={this.handleChange}>
+                                        <Option value="-1" key="all">全部</Option>
+                                        {
+                                            this.state.workshopList.map((item,index)=>{
+                                                    return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                            })
+                                        }
+                                    </Select>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>工作中心:</span>
+                                    <Select defaultValue="-1" style={{ width: "60%" }} onChange={this.handleChange}>
+                                        <Option value="-1" key="all">全部</Option>
+                                        {
+                                            this.state.workCenterList.map((item,index)=>{
+                                                    return (<Option value={item.UUID} key={index}>{item.Name}</Option>)
+                                            })
+                                        }
+                                    </Select>
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box"><span style={{ width: "40%" }}>日期:</span>
+                                    <DatePicker style={{ width: "60%" }} />
+                                </div>
+                            </Col>
+                            <Col className="gutter-row" span={6}>
+                                <div className="gutter-box">
+                                    <Button type="primary" icon="search">查询</Button>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Card>
+
+                    <div style={{marginTop:20}}>
+                        <Radio.Group value={toggleView} onChange={this.handleToggle.bind(this)}>
+                            <Radio.Button value="timelineTable">数据表</Radio.Button>
+                            <Radio.Button value="timelineChart">曲线趋势</Radio.Button>
+                        </Radio.Group>
+                        <Switch style={{marginLeft:35}} checkedChildren="白班" unCheckedChildren="晚班" />
+                    </div>
+                    <div style={{marginTop:30}}>
+                        {
+                            this.state.toggleView=="timelineTable"?
+                            <TimelineDataTable />:
+                            <TimeLineChart />
+                        }
+                        {/* <Row gutter={16}>
+                            <Col span={16}>
+                                <Table
+                                    columns={columns}
+                                    dataSource={productData}
+                                    bordered={true}
+                                    size="small"
+                                />
+                            </Col>
+                            <Col span={8}>
+                                <Card>
+                                    <Timeline>
+                                      <Timeline.Item color="green">创建服务现场 2015-09-01</Timeline.Item>
+                                      <Timeline.Item color="green">创建服务现场 2015-09-01</Timeline.Item>
+                                      <Timeline.Item color="red">
+                                        <p>初步排除网络异常1</p>
+                                        <p>初步排除网络异常2</p>
+                                        <p>初步排除网络异常3 2015-09-01</p>
+                                      </Timeline.Item>
+                                      <Timeline.Item>
+                                        <p>技术测试异常1</p>
+                                        <p>技术测试异常2</p>
+                                        <p>技术测试异常3 2015-09-01</p>
+                                      </Timeline.Item>
+                                    </Timeline>
+                                </Card>
+                            </Col>
+                        </Row> */}
+                    </div>
                 </div>
-                <div style={{marginTop:30}}>
-                    {
-                        this.state.toggleView=="timelineTable"?
-                        <TimelineDataTable />:
-                        <TimeLineChart />
-                    }
-                    {/* <Row gutter={16}>
-                        <Col span={16}>
-                            <Table
-                                columns={columns}
-                                dataSource={productData}
-                                bordered={true}
-                                size="small"
-                            />
-                        </Col>
-                        <Col span={8}>
-                            <Card>
-                                <Timeline>
-                                  <Timeline.Item color="green">创建服务现场 2015-09-01</Timeline.Item>
-                                  <Timeline.Item color="green">创建服务现场 2015-09-01</Timeline.Item>
-                                  <Timeline.Item color="red">
-                                    <p>初步排除网络异常1</p>
-                                    <p>初步排除网络异常2</p>
-                                    <p>初步排除网络异常3 2015-09-01</p>
-                                  </Timeline.Item>
-                                  <Timeline.Item>
-                                    <p>技术测试异常1</p>
-                                    <p>技术测试异常2</p>
-                                    <p>技术测试异常3 2015-09-01</p>
-                                  </Timeline.Item>
-                                </Timeline>
-                            </Card>
-                        </Col>
-                    </Row> */}
-                </div>
-            </div>
+            </PageHeaderLayout>
         )
     }
 }

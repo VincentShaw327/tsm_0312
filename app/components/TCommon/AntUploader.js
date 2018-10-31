@@ -33,7 +33,7 @@ export default class Uploader extends Component{
         this.state = {
             loading: false,
             imageUrl:'',
-            defaultUrl:this.props.defaultUrl
+            // defaultUrl:this.props.defaultUrl
         }
     }
     componentWillReceiveProps(){
@@ -47,14 +47,14 @@ export default class Uploader extends Component{
           return;
         }
         if (info.file.status === 'done') {
-          getBase64(info.file.originFileObj, imageUrl => {
-              // console.log("imageUrl",imageUrl);
-              this.setState({
-                imageUrl,
-                loading: false,
-              })
-          }
-        );
+              getBase64(info.file.originFileObj, imageUrl => {
+                  // console.log("imageUrl",imageUrl);
+                  this.setState({
+                    imageUrl,
+                    loading: false,
+                  })
+              }
+            );
         }
         //修改后台接口后的更改
         let response=info.file.response;
@@ -70,7 +70,7 @@ export default class Uploader extends Component{
     render(){
         // console.log('defaultUrl',this.props.defaultUrl);
 
-        const defaultUrl=this.props.defaultUrl;
+        let defaultUrl=this.props.defaultUrl;
         const uploadButton = (
           <div>
             <Icon type={this.state.loading ? 'loading' : 'plus'} />
@@ -78,8 +78,6 @@ export default class Uploader extends Component{
           </div>
         );
         const imageUrl = this.state.imageUrl;
-        // console.log('defaultUrl',imageUrl=='');
-
         let Url = this.props.actionUrl;
         return (
             <Upload
@@ -90,9 +88,10 @@ export default class Uploader extends Component{
                 action={urlBase+Url}
                 beforeUpload={beforeUpload}
                 onChange={this.handleChange}
+                onPreview={()=>console.log('预览')}
             >
                 {
-                    imageUrl ? <img height="200" src={imageUrl} alt="" />:
+                    imageUrl!=''?<img height="200" src={imageUrl} alt="" />:
                     defaultUrl?<img height="200" src={urlBase+defaultUrl} alt="" /> :
                     uploadButton
                 }

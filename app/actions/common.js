@@ -17,4 +17,4 @@ import {
 export const fetchLogin = createAjaxAction(common.login)
 export const fetchRegister = createAjaxAction(common.register)
 export const userInfo = createAjaxAction(common.userInfo)
-
+export const updateBreadcrumbList = createAction('update breadcrumb list');

@@ -34,6 +34,10 @@ import Trend from './ant-design-pro/Trend';
 import CountDown from './ant-design-pro/CountDown';
 import Ellipsis from './ant-design-pro/Ellipsis';
 import DescriptionList from './ant-design-pro/DescriptionList';
+import FUpload from './TUploader/FileUploader';
+// import FileUpload from './TUploader';
+import PageHeaderLayout from '../base/PageHeaderLayout';
+
 const { Description } = DescriptionList;
 
 export default class TTechnicalSupport extends Component {
@@ -370,34 +374,56 @@ export default class TTechnicalSupport extends Component {
             },
         ];
 
+        const bcList11 = [{
+          title:"首页",
+          href: '/',
+          }, {
+          title: '车间管理',
+          href: '/',
+          }, {
+          title: '工作中心',
+          }];
+
         return(
             <div>
-
-              <Tabs defaultActiveKey="1" >
-                  <TabPane tab="选项卡一" key="1">
-                      <List
-                      grid={{ gutter: 16, column: 4 }}
-                      dataSource={data}
-                      renderItem={item => (
-                        <List.Item>
-                          <Card title={item.title}>{item.content()}</Card>
-                        </List.Item>
-                      )}
-                    />
-                  </TabPane>
-                  <TabPane tab="选项卡二" key="2">
-                      <List
-                      grid={{ gutter: 16, column: 1 }}
-                      dataSource={data2}
-                      renderItem={item => (
-                        <List.Item>
-                          <Card title={item.title}>{item.content()}</Card>
-                        </List.Item>
-                      )}
-                      />
-                  </TabPane>
-                  <TabPane tab="选项卡三" key="3">选项卡三内容</TabPane>
-                </Tabs>
+                <PageHeaderLayout
+                    title={"DEMO"}
+                    // action={showDetal?HeadAction:''}
+                    // content={showDetal?HeadContent:''}
+                    // BreadcrumbList={bcList11}
+                    wrapperClassName="pageContent">
+                        <div className="cardContent">
+                            <Tabs defaultActiveKey="1" >
+                                <TabPane tab="选项卡一" key="1">
+                                    <List
+                                        grid={{ gutter: 16, column: 4 }}
+                                        dataSource={data}
+                                        renderItem={item => (
+                                            <List.Item>
+                                                <Card title={item.title}>{item.content()}</Card>
+                                            </List.Item>
+                                        )}
+                                    />
+                                </TabPane>
+                                <TabPane tab="选项卡二" key="2">
+                                    <List
+                                        grid={{ gutter: 16, column: 1 }}
+                                        dataSource={data2}
+                                        renderItem={item => (
+                                            <List.Item>
+                                                <Card title={item.title}>{item.content()}</Card>
+                                            </List.Item>
+                                        )}
+                                    />
+                                </TabPane>
+                                <TabPane tab="选项卡三" key="3">选项卡三内容
+                                    <div >
+                                        <FUpload />
+                                    </div>
+                                </TabPane>
+                            </Tabs>
+                        </div>
+                </PageHeaderLayout>
             </div>
         )
     }

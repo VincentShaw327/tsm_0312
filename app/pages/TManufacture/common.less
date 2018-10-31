@@ -5,6 +5,29 @@
     color: #fbfbfb;
     font-weight: bolder;
 }
+.orderCancelled,.Unproduced,.Inproduction,.Pausing,.Submited,.Completed{
+    padding: 6px;
+    border-radius: 5px;
+    // background-color: #4684d5;
+    color: #fbfbfb;
+    // font-weight: bolder;
+}
+.orderCancelled{
+    background-color: #a1a2a3;
+}
+.Unproduced{
+    background-color: #7b7b6a;
+}
+.Inproduction{
+    background-color: #2066dd;
+}
+.Pausing{
+    background-color: #da2d27;
+}
+.Submited{
+    background-color: #47afa5;
+}
+.Completed{background-color: #39af09;}
 .exportMenuWrap{
     .tableexport-caption{
         padding-top: 0;
@@ -13,12 +36,15 @@
         text-align: inherit;
         caption-side: inherit;
         .button-default{
-            // font-weight: bold;
-            font-size: 15px;
+            font-size: 16px;
             color: #fffefe;
             cursor: pointer;
-            line-height: 30px;
-            background-color: #6ca7ec;
+            line-height: 25px;
+            background-color: #4c90ff;
+            border: none;
+            margin: 1px;
+            border-radius: 4px;
+            width: 40px;
         }
         .button-default:hover{
             background-color: #0c70b8;

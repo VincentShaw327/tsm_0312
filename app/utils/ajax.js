@@ -28,17 +28,30 @@ import { prefix, suffix } from '../config'
 } */
 
 export function fetchJSON(url, params, target) {
+    console.log('请求的params',params)
+    let {op='list',reqdata={}}=params;
+    let reqObj={
+        op:op,
+        obj:JSON.stringify(reqdata)
+    }
   const data = {
     method: 'POST',
-    'Content-Type': 'application/json',
-    credentials: 'include',
-    body: JSON.stringify(params),
+    mode: 'cors',
+    // 'Content-Type': 'application/json;charset=utf-8',
+    // credentials: 'include',
+    // body: JSON.stringify(params),
+    body: JSON.stringify(reqObj),
+    headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+        // 'Accept-Type': 'application/json;charset=utf-8'
+    }
   }
   let newUrl
   if (target) {
     newUrl = `${target}${url}${suffix}`
   } else {
-    newUrl = `${prefix}${url}${suffix}`
+    // newUrl = `${prefix}${url}${suffix}`
+    newUrl = `${prefix}${url}`
   }
   return fetch(newUrl, data)
 }

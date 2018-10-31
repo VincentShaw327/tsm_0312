@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import {Table, Button, Radio, Row, Col, Divider,Timeline, Card } from 'antd';
+import {Table, Button,Form, Radio, Row, Col, Divider,Timeline, Card } from 'antd';
+const FormItem = Form.Item;
+import TableExport from 'tableexport';
 // import { TPostData, urlBase } from '../../utils/TAjax';
 
 export default class TimelineDataTable extends Component {
@@ -16,7 +18,18 @@ export default class TimelineDataTable extends Component {
     }
 
     componentDidMount() {
-
+        let csvDom=document.getElementById("timeLineTable")
+        .getElementsByClassName("ant-table-body")[0];
+        let btnWrap=document.getElementById("exportTLPro");
+        const btn=TableExport(csvDom.children[0]);
+        let children= btn.selectors[0].children[0];
+        let childNodes=children.getElementsByTagName('button');
+        childNodes[0].innerHTML="xlsx";
+        childNodes[1].innerHTML="csv";
+        childNodes[2].innerHTML="txt";
+        // console.log("btn",children);
+        // console.log("childNodes",childNodes);
+        btnWrap.appendChild(children);
     }
 
     generate(){
@@ -100,12 +113,24 @@ export default class TimelineDataTable extends Component {
             <div>
                 <Row gutter={16}>
                     <Col span={16}>
-                        <Table
-                            columns={columns}
-                            dataSource={productData}
-                            bordered={true}
-                            size="small"
-                        />
+                        <div id="timeLineTable">
+                            <Table
+                                columns={columns}
+                                dataSource={productData}
+                                bordered={true}
+                                size="small"
+                                title={()=>(
+                                    <Form layout="inline">
+                                        <FormItem label="导出">
+                                            <div
+                                                className="exportMenuWrap"
+                                                id="exportTLPro"
+                                                style={{display:'flex'}}/>
+                                        </FormItem>
+                                    </Form>
+                                    )}
+                            />
+                        </div>
                     </Col>
                     <Col span={8}>
                         <Card>
