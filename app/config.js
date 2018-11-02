@@ -195,7 +195,7 @@ export default (() => {
         url: '',
         key: 'TSystemSetting',
         children: [
-          {
+          /*{
             name:'用户列表', key: 'user_list',url:'user_list',
           },
           {
@@ -203,7 +203,7 @@ export default (() => {
           },
           {
             name:'权限组', key: 'auth_group_list',url:'auth_group_list',
-          },
+          },*/
           {
             name:'终端管理', key: 'data_terminal',url:'data_terminal',
           },

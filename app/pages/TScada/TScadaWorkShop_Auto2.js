@@ -95,11 +95,13 @@ export default class TScadaWorkShop_Auto2 extends Component {
     componentDidMount() {
         //mqtt消息连接建立
         // client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
-        client = mqtt.connect( 'ws://192.168.200.3:9011' );
+        client = mqtt.connect( 'ws://192.168.1.250:9011' );
+        // client = mqtt.connect( 'ws://192.168.200.3:9011' );
 
         client.on( 'connect', ()=> {
             //订阅消息
             client.subscribe("0101/086325608001/201712290001/kanban/02/B");
+            // client.subscribe("topstarltd/iec/app/#");
         } );
         let renderaEquip = [];
         client.on( 'message',( topic, payload )=> {
@@ -300,7 +302,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
                                 let stateObj={};
                                 // if(item.task_progress &&item.task_progress >= 100)
                                 if(item.plan!=0&&item.prod_count>=item.plan)
-                                    stateObj={text:"已完成",color:'blue'};
+                                    stateObj={text:"已完成",color:'#8f910c'};
                                 else if(item.hasOwnProperty('Status')&&item.Status== 1)
                                     stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
                                 else if(item.hasOwnProperty('Status') &&item.Status== 2)
@@ -382,15 +384,16 @@ export default class TScadaWorkShop_Auto2 extends Component {
                               hasLegend
                               title="销售额"
                               subTitle="设备状态"
+                              colors={ ['#d52c21', '#caced4','#42d930','#4184de','#8f910c']}
                               total={"总共"+ this.state.stateCount.reduce((pre, now) => now.y + pre, 0)+"台"}
                               data={this.state.stateCount}
                               valueFormat={val =>('&nbsp;&nbsp'+val+'台')}
                               height={294}
                             />
                         </Card>
-                        <Card title="时间统计"  style={{marginTop:20}}>
-                            {/* <Barchart /> */}
-                        </Card>
+                        {/* <Card title="时间统计"  style={{marginTop:20}}>
+                            <Barchart />
+                        </Card> */}
                     </div>
                   </Col>
                 </Row>
@@ -410,7 +413,7 @@ export default class TScadaWorkShop_Auto2 extends Component {
         return (
             <PageHeaderLayout
             title="自动化装配车间二"
-            wrapperClassName="pageContent" 
+            wrapperClassName="pageContent"
             action={showDetal?HeadAction:''}
             BreadcrumbList={Breadcrumb.BCList}>
                 {showDetal?DevMonitorDesc:DevMonitorList}

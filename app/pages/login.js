@@ -88,7 +88,10 @@ export default class Login extends Component {
                                 UserLevel:this.setLevel(values.username),
                                 PermissionList:['edit','add','delete',]
                             }
+                            // sessionStorage.removeItem('userinfo');
+                            // sessionStorage.clear();
                             sessionStorage.setItem('userinfo', JSON.stringify(userinfo));
+                            this.forceUpdate();
                             // sessionStorage.setItem('userinfo', userinfo);
                             hashHistory.push('/');
                         }

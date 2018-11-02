@@ -184,33 +184,31 @@ export default class TUserAuthDetail extends Component {
             title: '物料类别',
         }];
         return (
-            <PageHeaderLayout title="物料类别" wrapperClassName="pageContent" BreadcrumbList={bcList}>
+            <div>
                 <Divider>权限管理</Divider>
-                <div>
-                    <Row >
-                        <Col span={11} >
-                            <Button type="primary" >权限组拥有权限</Button>
-                            <Table
-                                size='middle'
-                                dataSource={groupAuthList}
-                                columns={columns}
-                                bordered={true} />
-                        </Col>
-                        <Col span={1} style={{textAlign:'center'}}>
-                            <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
-                        </Col>
-                        <Col span={12}>
-                            <Button type="primary" >所有可选权限</Button>
-                            <Table
-                                size='middle'
-                                dataSource={authList}
-                                columns={authColumns}
-                                bordered={true} />
-                        </Col>
-                        <Col span={1}></Col>
-                    </Row>
-                </div>
-            </PageHeaderLayout>
+                <Row >
+                    <Col span={11} >
+                        <Button type="primary" >权限组拥有权限</Button>
+                        <Table
+                            size='middle'
+                            dataSource={groupAuthList}
+                            columns={columns}
+                            bordered={true} />
+                    </Col>
+                    <Col span={1} style={{textAlign:'center'}}>
+                        <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
+                    </Col>
+                    <Col span={12}>
+                        <Button type="primary" >所有可选权限</Button>
+                        <Table
+                            size='middle'
+                            dataSource={authList}
+                            columns={authColumns}
+                            bordered={true} />
+                    </Col>
+                    <Col span={1}></Col>
+                </Row>
+            </div>
         )
     }
 }

@@ -189,40 +189,38 @@ export default class TUserDetails extends Component {
             title: '物料类别',
         }];
         return (
-            <PageHeaderLayout title="物料类别" wrapperClassName="pageContent" BreadcrumbList={bcList}>
-                <div>
-                    <h1>用户权限组管理</h1>
-                    <Divider />
-                    <Row>
-                        <Col span={11}>
-                            <div style={{border: 'solid 0px #80808099'}}>
-                                <span style={{padding:6,fontSize:16}}>用户拥有的权限组</span>
-                                <Table
-                                    size='middle'
-                                    dataSource={this.state.userGroupList}
-                                    columns={columns}
-                                    bordered={true}
-                                />
-                            </div>
-                        </Col>
-                        <Col span={1} style={{textAlign:'center'}}>
-                            <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
-                        </Col>
-                        <Col span={12}>
-                            <div style={{border: 'solid 0px #80808029'}}>
-                                {/* <Button type="primary" >所有可选权限组</Button> */}
-                                <span style={{padding:6,fontSize:16}}>所有可选权限组</span>
-                                <Table
-                                    size='middle'
-                                    dataSource={this.state.groupList}
-                                    columns={groupColumns}
-                                    bordered={true}
-                                />
-                            </div>
-                        </Col>
-                    </Row>
-                </div>
-            </PageHeaderLayout>
+            <div>
+                <h1>用户权限组管理</h1>
+                <Divider />
+                <Row>
+                    <Col span={11}>
+                        <div style={{border: 'solid 0px #80808099'}}>
+                            <span style={{padding:6,fontSize:16}}>用户拥有的权限组</span>
+                            <Table
+                                size='middle'
+                                dataSource={this.state.userGroupList}
+                                columns={columns}
+                                bordered={true}
+                            />
+                        </div>
+                    </Col>
+                    <Col span={1} style={{textAlign:'center'}}>
+                        <Icon type="swap" style={{fontSize:25,textAlign:'center',color:'#46affb'}} />
+                    </Col>
+                    <Col span={12}>
+                        <div style={{border: 'solid 0px #80808029'}}>
+                            {/* <Button type="primary" >所有可选权限组</Button> */}
+                            <span style={{padding:6,fontSize:16}}>所有可选权限组</span>
+                            <Table
+                                size='middle'
+                                dataSource={this.state.groupList}
+                                columns={groupColumns}
+                                bordered={true}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+            </div>
         )
     }
 }

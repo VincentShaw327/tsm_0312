@@ -99,6 +99,7 @@ export default class TScadaWorkShop_Auto extends Component {
     componentDidMount() {
         //mqtt消息连接建立
         // client = mqtt.connect( 'mqtt://122.239.140.82:29011' );
+        // client = mqtt.connect( 'mqtt://47.91.154.238:9011' );
         client = mqtt.connect( 'ws://192.168.1.250:9011' );
         // client = mqtt.connect( 'mqtt://192.168.200.3:9011' );
         client.on( 'connect', function () {
@@ -346,7 +347,7 @@ export default class TScadaWorkShop_Auto extends Component {
                                 Percent=Percent>100?100:Percent;
                                 // if(item.task_progress &&item.task_progress >= 100)
                                 if(item.plan!=0&&item.prod_count>=item.plan)
-                                    stateObj={text:"已完成",color:'blue'};
+                                    stateObj={text:"已完成",color:'#8f910c'};
                                 else if(item.hasOwnProperty('Status')&&item.Status== 1)
                                     stateObj={text:"生产中",color:'rgba(82, 196, 26, 0.84)'};
                                 else if(item.hasOwnProperty('Status') &&item.Status== 2)
@@ -430,7 +431,7 @@ export default class TScadaWorkShop_Auto extends Component {
                               hasLegend
                               title="销售额"
                               subTitle="设备状态"
-                              colors={ ['#d52c21', '#caced4','#42d930','#4184de',]}
+                              colors={ ['#d52c21', '#caced4','#42d930','#4184de','#8f910c']}
                               // total={yuan(salesPieData.reduce((pre, now) => now.y + pre, 0))}
                               total={"总共"+ this.state.stateCount.reduce((pre, now) => now.y + pre, 0)+"台"}
                               // total={()=>{

@@ -435,6 +435,8 @@ export default class TScadaInjectionWorkshop extends Component {
         const {DetailMes,mqttData}=this.props;
         let DataList=this.props.mqttData;
         let devRecord=DataList.filter((item)=>item.UUID==WCUUID);
+        devRecord=Array.isArray(devRecord)&&devRecord.length==1?devRecord[0]:{};
+        console.log('DataList',DataList,devRecord)
 
         console.log('detailMessage',DetailMes);
         let colorsValues = ['离线', '待机','运行','警告'];
@@ -650,7 +652,7 @@ export default class TScadaInjectionWorkshop extends Component {
                         </Col>
                         <Col span={3}></Col>
                         <Col span={12}>
-                            <p>订单号:</p>
+                            {/* <p>订单号:</p> */}
                             <p>产品编码:{devRecord.product?devRecord.product:'-'}</p>
                             <p>产量(pcs):{devRecord.prod_count?devRecord.prod_count:'-'}</p>
                             <p>产能(pcs/min):{devRecord.prod_rate?devRecord.prod_rate:'-'}</p>

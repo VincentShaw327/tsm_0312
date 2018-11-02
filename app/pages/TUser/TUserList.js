@@ -445,10 +445,10 @@ export default class TUserList extends Component {
           title:"首页",
           href: '/',
           }, {
-          title: '车间管理',
+          title: '系统设置',
           href: '/',
           }, {
-          title: '工作中心',
+          title: '用户列表',
           }];
 
         const HeadAction=(
@@ -503,7 +503,7 @@ export default class TUserList extends Component {
         // return  showDetal?UserDetail:UserListTable
         return(
             <PageHeaderLayout
-                title={showDetal?"工作中心详情":"工作中心"}
+                title={showDetal?"用户详情":"用户列表"}
                 action={showDetal?HeadAction:''}
                 content={showDetal?HeadContent:''}
                 wrapperClassName="pageContent"
